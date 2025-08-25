@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Tarea</title>
+    <!-- Estilos de DataTables -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
+    <style>
+        body { font-family: sans-serif; margin: 2em; line-height: 1.6; }
+        h1 { color: #333; }
+        form { margin-top: 1em; }
+        .form-section {
+            margin-bottom: 2em;
+            padding: 1em;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+        .form-section label {
+            display: block;
+            margin-bottom: 0.5em;
+            font-weight: bold;
+        }
+        .form-section input, .form-section textarea {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .btn-container {
+            margin-top: 1em;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+        }
+        .btn:hover { background-color: #0056b3; }
+        .materials-table-container {
+            margin-top: 2em;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1em;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <h1>Crear Tarea para Fase: {{ fase.nombre }}</h1>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-section">
+            <h2>Detalles de la Tarea</h2>
+            {{ form.as_p }}
+        </div>
+        
+        <div class="form-section materials-table-container">
+            <h2>Requerimientos de Materiales</h2>
+            <p>Introduce la cantidad requerida para cada material.</p>
+            <table id="materialsTable" class="display">
+                <thead>
+                    <tr>
+                        <th>Material</th>
+                        <th>Unidad</th>
+                        <th>Cantidad Requerida</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for material in materiales %}
+                        <tr>
+                            <td>{{ material.nombre }}</td>
+                            <td>{{ material.unidad }}</td>
+                            <td>
+                                <input type="number" 
+                                       step="0.01" 
+                                       name="material-quantity-{{ material.pk }}" 
+                                       min="0">
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="btn-container">
+            <button type="submit" class="btn">Guardar Tarea</button>
+            <a href="{% url 'obra-detail' pk=fase.obra.pk %}" class="btn">Cancelar</a>
+        </div>
+    </form>
+
+    <!-- Librería jQuery, necesaria para DataTables -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Librería principal de DataTables -->
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Inicializar DataTables en la tabla con el ID "materialsTable"
+            $('#materialsTable').DataTable({
+                "language": {
+                    "url": "https://cdn.datatables.net/plug-ins/1.11.5/i18n/es-ES.json"
+                },
+                "paging": true,
+                "searching": true,
+                "info": true
+            });
+        });
+    </script>
+</body>
+</html>

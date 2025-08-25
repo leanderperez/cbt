@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Obras</title>
+    <style>
+        body { font-family: sans-serif; margin: 2em; line-height: 1.6; }
+        h1 { color: #333; }
+        .btn-container { margin-bottom: 1em; }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+        .btn:hover { background-color: #0056b3; }
+        .obra-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1em;
+        }
+        .obra-table th, .obra-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        .obra-table th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <h1>Lista de Obras</h1>
+    <div class="btn-container">
+        <a href="{% url 'obra-create' %}" class="btn">Crear Nueva Obra</a>
+        <a href="{% url 'material-list' %}" class="btn">Gestionar Materiales</a>
+        <a href="{% url 'personal-list' %}" class="btn">Gestionar Personal</a>
+    </div>
+
+    <table class="obra-table">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Descripción</th>
+                <th>Presupuesto Inicial</th>
+                <th>Presupuesto Ejecutado</th>
+                <th>Avance Total</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for obra in obras %}
+            <tr>
+                <td>{{ obra.nombre }}</td>
+                <td>{{ obra.descripcion }}</td>
+                <td>${{ obra.presupuesto_inicial|floatformat:2 }}</td>
+                <td>${{ obra.get_presupuesto_ejecutado|floatformat:2 }}</td>
+                <td>{{ obra.porcentaje_avance|floatformat:2 }}%</td>
+                <td>
+                    <a href="{% url 'obra-detail' obra.pk %}">Ver Detalles</a> |
+                    <a href="{% url 'obra-update' obra.pk %}">Editar</a> |
+                    <a href="{% url 'obra-mediciones' obra.pk %}">Mediciones</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

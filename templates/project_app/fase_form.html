@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agregar Fase</title>
+    <style>
+        body { font-family: sans-serif; margin: 2em; line-height: 1.6; }
+        h1 { color: #333; }
+        .form-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 2em;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        form p { margin-bottom: 1em; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; }
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+        }
+        .btn:hover { background-color: #0056b3; }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h1>Agregar Nueva Fase</h1>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn">Guardar</button>
+            <a href="{% url 'obra-detail' pk=view.kwargs.pk %}" class="btn">Cancelar</a>
+        </form>
+    </div>
+</body>
+</html>

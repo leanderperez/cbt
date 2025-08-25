@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Personal</title>
+    <style>
+        body { font-family: sans-serif; margin: 2em; line-height: 1.6; }
+        h1 { color: #333; }
+        .btn-container { margin-bottom: 1em; }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+        .btn:hover { background-color: #0056b3; }
+        .personal-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1em;
+        }
+        .personal-table th, .personal-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        .personal-table th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <h1>Lista de Personal</h1>
+    <div class="btn-container">
+        <a href="{% url 'personal-create' %}" class="btn">Agregar Nuevo Personal</a>
+        <a href="{% url 'obra-list' %}" class="btn">Volver a Obras</a>
+    </div>
+
+    <table class="personal-table">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Cargo</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in personal %}
+            <tr>
+                <td>{{ p.nombre }}</td>
+                <td>{{ p.cargo }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

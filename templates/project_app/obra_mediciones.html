@@ -1,0 +1,141 @@
+{% load custom_filters %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mediciones de {{ obra.nombre }}</title>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
+    <style>
+        body { font-family: sans-serif; margin: 2em; line-height: 1.6; }
+        h1 { color: #333; }
+        .btn-container { margin-bottom: 1em; }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+        .btn:hover { background-color: #0056b3; }
+        .mediciones-table {
+            width: 0 auto;
+            border-collapse: collapse;
+            margin-top: 1em;
+        }
+        .mediciones-table th, .mediciones-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        .mediciones-table th { background-color: #f2f2f2; }
+        .mediciones-table td { background-color: #fff; }
+        .measurement-input { width: 80px; }
+        
+        /* Estilos específicos para DataTables */
+        .dataTables_wrapper .dataTables_filter { text-align: right; }
+        .dataTables_wrapper .dataTables_paginate { float: right; }
+        
+        /* Estilos para el título de la fase y tarea dentro de la tabla */
+        .phase-header { background-color: #e9ecef; font-weight: bold; }
+        .task-header { background-color: #f8f9fa; font-weight: bold; padding-left: 20px !important; }
+    </style>
+</head>
+<body>
+    <h1>Mediciones de Obra para: {{ obra.nombre }}</h1>
+    <div class="btn-container">
+        <a href="{% url 'obra-detail' obra.pk %}" class="btn">Volver a la Obra</a>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="id_fecha_medicion">Fecha de Medición:</label>
+            <input type="date" id="id_fecha_medicion" name="fecha_medicion" required>
+        </div>
+        <button type="submit" class="btn">Guardar Mediciones</button>
+        <table id="mediciones-table" class="display mediciones-table">
+            <thead>
+                <tr>
+                    <th colspan="2">Información y Avance</th>
+                    <th>Cantidad Requerida</th>
+                    {% for fecha in fechas_medicion %}
+                        <th class="text-center">{{ fecha|date:"d M Y" }}</th>
+                    {% endfor %}
+                    <th>Medición Actual</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Los datos se insertarán aquí dinámicamente con JavaScript -->
+            </tbody>
+        </table>
+    </form>
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
+    <script>
+    $(document).ready(function() {
+        const medicionesData = JSON.parse('{{ tabla_mediciones_json|safe }}');
+        const fechasMedicion = JSON.parse('{{ fechas_medicion_json|safe }}');
+        
+        let htmlContent = '';
+        let currentPhase = null;
+        let currentTask = null;
+        
+        medicionesData.forEach(item => {
+            // Check for new phase
+            if (item.fase_nombre !== currentPhase) {
+                htmlContent += `<tr class="phase-header"><td colspan="${5 + fechasMedicion.length}">Fase: ${item.fase_nombre}</td></tr>`;
+                currentPhase = item.fase_nombre;
+                currentTask = null; // Reset task when phase changes
+            }
+
+            // Check for new task
+            if (item.tarea_nombre !== currentTask) {
+                htmlContent += `<tr class="task-header"><td colspan="${5 + fechasMedicion.length}">Tarea: ${item.tarea_nombre}</td></tr>`;
+                currentTask = item.tarea_nombre;
+            }
+            
+            // Generate material rows
+            let medicionesHtml = '';
+            fechasMedicion.forEach(fecha => {
+                const medicion = item.mediciones[fecha] || '-';
+                medicionesHtml += `<td class="text-center">${medicion}</td>`;
+            });
+
+            htmlContent += `
+                <tr>
+                    <td colspan="2">${item.material_nombre} (${item.material_unidad})</td>
+                    <td>${item.cantidad_requerida}</td>
+                    ${medicionesHtml}
+                    <td>
+                        <input type="number" step="0.01"
+                               class="measurement-input"
+                               name="medicion-${item.tarea_pk}-${item.material_pk}"
+                               value=""
+                               placeholder="Cantidad">
+                    </td>
+                </tr>
+            `;
+        });
+        
+        $('#mediciones-table tbody').html(htmlContent);
+        
+        $('#mediciones-table').DataTable({
+            "paging": true,
+            "ordering": false,
+            "searching": true,
+            "info": true,
+            "columnDefs": [
+                { "orderable": false, "targets": [0, 1] } // Deshabilita el ordenamiento para las columnas que no lo necesitan
+            ]
+        });
+    });
+    </script>
+</body>
+</html>
+
+
+

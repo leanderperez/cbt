@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ obra.nombre }} - Detalles</title>
+    <style>
+        body { font-family: sans-serif; margin: 2em; line-height: 1.6; }
+        h1 { color: #333; }
+        h2 { color: #555; border-bottom: 2px solid #eee; padding-bottom: 5px; }
+        h3 { display: inline-block; }
+        .details-container, .task-container {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 2em;
+            margin-bottom: 2em;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .progress-bar {
+            background-color: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 0.5em;
+        }
+        .progress {
+            height: 20px;
+            background-color: #4CAF50;
+            text-align: center;
+            line-height: 20px;
+            color: white;
+            transition: width 0.5s ease-in-out;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1em;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th { background-color: #f2f2f2; }
+        .btn {
+            display: inline-block;
+            padding: 8px 16px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-right: 10px;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-green { background-color: #28a745; }
+        .btn-toggle-materials { background-color: #6c757d; }
+        .materials-form { display: none; margin-top: 1em; }
+    </style>
+</head>
+<body>
+    <a href="{% url 'obra-list' %}" class="btn">Volver a la Lista de Obras</a>
+    <div class="details-container">
+        <h1>Detalles de la Obra: {{ obra.nombre }}</h1>
+        <p><strong>Descripción:</strong> {{ obra.descripcion }}</p>
+        <p><strong>Dirección:</strong> {{ obra.direccion }}</p>
+        <p><strong>Ingeniero Encargado:</strong> {{ obra.ingeniero_encargado.get_full_name|default:obra.ingeniero_encargado.username }}</p>
+        <p><strong>Centro de Servicio:</strong> {{ obra.centro_servicio.nombre|default:"No Asignado" }}</p>
+        <p><strong>Fechas:</strong> Del {{ obra.fecha_inicio }} al {{ obra.fecha_fin_estimada }}</p>
+        <p><strong>Presupuesto Inicial:</strong> ${{ obra.presupuesto_inicial }}</p>
+        <p><strong>Presupuesto Ejecutado:</strong> ${{ obra.get_presupuesto_ejecutado|floatformat:2 }}</p>
+        <p><strong>Avance de Presupuesto:</strong> {{ obra.get_porcentaje_ejecutado|floatformat:2 }}%</p>
+        <p><strong>Avance General:</strong> {{ obra.porcentaje_avance|floatformat:2 }}%</p>
+        <div class="progress-bar">
+            <div class="progress" style="width:{{ obra.porcentaje_avance|floatformat:2 }}%;">
+                {{ obra.porcentaje_avance|floatformat:2 }}%
+            </div>
+        </div>
+        <a href="{% url 'obra-update' pk=obra.pk %}" class="btn">Editar Obra</a>
+    </div>
+
+    <h2>Fases y Tareas <a href="{% url 'fase-create' pk=obra.pk %}" class="btn btn-green">Agregar Fase</a> <a href="{% url 'obra-mediciones' pk=obra.pk %}" class="btn btn-green">Realizar/Ver Mediciones</a></h2>
+    {% for fase in obra.fase_set.all %}
+        <div class="details-container">
+            <h3>Fase: {{ fase.nombre }} <a href="{% url 'tarea-create' pk=fase.pk %}" class="btn btn-green">Agregar Tarea</a></h3>
+            <p><strong>Presupuesto Asignado:</strong> ${{ fase.presupuesto_asignado }}</p>
+            <p><strong>Costo de Mano de Obra (Fase):</strong> ${{ fase.costo_mano_de_obra|default:"0" }}</p>
+            <p><strong>Costo Ejecutado Total:</strong> ${{ fase.costo_ejecutado|floatformat:2 }}</p>
+            <p><strong>Avance:</strong> {{ fase.porcentaje_avance|floatformat:2 }}%</p>
+            
+            {% for tarea in fase.tarea_set.all %}
+            <div class="task-container">
+                <h4>Tarea: {{ tarea.nombre }}</h4>
+                <p><strong>Fecha Inicio:</strong> {{ tarea.fecha_inicio|date:"Y-m-d H:i" }}</p>
+                <p><strong>Fecha Fin Estimada:</strong> {{ tarea.fecha_fin_estimada|date:"Y-m-d H:i" }}</p>
+                <p><strong>Costo de Mano de Obra:</strong> ${{ tarea.costo_mano_de_obra|default:"0" }}</p>
+                <p><strong>Costo Ejecutado Total:</strong> ${{ tarea.costo_ejecutado|floatformat:2 }}</p>
+                <p><strong>Avance:</strong> {{ tarea.porcentaje_avance|floatformat:2 }}%</p>
+                <div class="progress-bar">
+                    <div class="progress" style="width:{{ tarea.porcentaje_avance|floatformat:2 }}%;">
+                        {{ tarea.porcentaje_avance|floatformat:2 }}%
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% empty %}
+        <p>No hay fases registradas para esta obra.</p>
+    {% endfor %}
+</body>
+</html>
