@@ -69,7 +69,6 @@ class FaseCreateView(CreateView):
     def get_success_url(self):
         return reverse_lazy('obra-detail', kwargs={'pk': self.object.obra.pk})
 
-# Vista de creación/actualización de Tarea con Datatable para materiales
 class TareaCreateView(CreateView):
     model = Tarea
     form_class = TareaForm
@@ -265,3 +264,10 @@ class PersonalListView(ListView):
     model = Personal
     template_name = 'project_app/personal_list.html'
     context_object_name = 'personal'
+
+
+# Custom Login View
+from django.contrib.auth.views import LoginView
+
+class CustomLoginView(LoginView):
+    template_name = 'project_app/login.html'
