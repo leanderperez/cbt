@@ -71,7 +71,7 @@
         <p><strong>Avance de Presupuesto:</strong> {{ obra.get_porcentaje_ejecutado|floatformat:2 }}%</p>
         <p><strong>Avance General:</strong> {{ obra.porcentaje_avance|floatformat:2 }}%</p>
         <div class="progress-bar">
-            <div class="progress" style="width:{{ obra.porcentaje_avance|floatformat:2 }}%;">
+            <div class="progress" style="width: {{ obra.porcentaje_avance|floatformat:2 }}%;">
                 {{ obra.porcentaje_avance|floatformat:2 }}%
             </div>
         </div>
