@@ -1,14 +1,10 @@
 <nav class="navbar navbar-expand-lg navbar-dark">
   <div class="container-fluid d-flex align-items-center justify-content-between">
-    <a class="navbar-brand" href="#">#GEEI</a>
+    <a class="navbar-brand" href="#">CBT</a>
     <ul class="navbar-nav flex-row flex-nowrap align-items-center" style="gap: 1.5rem;">
-      <li class="nav-item"><a class="nav-link" href="">Crear Reporte</a></li>
-      <li class="nav-item"><a class="nav-link" href="">Datatable</a></li>
-      <li class="nav-item"><a class="nav-link" href="">Dashboard</a></li>
-      <li class="nav-item"><a class="nav-link" href="">Pendientes</a></li>
-      <li class="nav-item"><a class="nav-link" href="">Crear Gráfico</a></li>
-      <li class="nav-item"><a class="nav-link" href="">Materiales</a></li>
-      <li class="nav-item"><a class="nav-link" href="">Solicitudes</a></li>
+      <li class="nav-item"><a class="nav-link" href="{% url 'obra-list' %}">Gestión de Obras</a></li>
+      <li class="nav-item"><a class="nav-link" href="{% url 'material-list' %}">Gestion de Materiales</a></li>
+      <li class="nav-item"><a class="nav-link" href="{% url 'personal-list' %}">Centros de Servicio</a></li>
       <li class="nav-item">
         <form id="logout-form" class="logout-form" action="{% url 'logout' %}" method="post" style="display: inline;">
           {% csrf_token %}

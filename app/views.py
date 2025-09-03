@@ -242,7 +242,7 @@ class MaterialListView(ListView):
                         try:
                             material_pk = int(key.split('-')[-1])
                             costo = float(value) if value else 0.0
-                            if costo >= 0:
+                            if costo > 0:
                                 Material.objects.filter(pk=material_pk).update(costo_unitario=costo)
                         except (ValueError, IndexError):
                             continue

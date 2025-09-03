@@ -1,54 +1,26 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lista de Materiales</title>
-    <!-- Estilos de DataTables -->
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
-    <style>
-        body { font-family: sans-serif; margin: 2em; line-height: 1.6; }
-        h1 { color: #333; }
-        .btn {
-            display: inline-block;
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            border: none;
-            cursor: pointer;
-            margin-top: 1em;
-            margin-bottom: 1em;
-        }
-        .btn:hover { background-color: #0056b3; }
-        .material-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        .material-table th, .material-table td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-        .material-table th { background-color: #f2f2f2; }
-        .cost-input { width: 80px; }
-    </style>
-</head>
-<body>
-    <h1>Lista de Materiales</h1>
+
+{% extends 'project_app/base.html' %}
+{% load static %}
+{% block title %}Lista de Obras{% endblock %}
+
+{% block content %}
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
+
     <a href="{% url 'material-create' %}" class="btn">Crear Nuevo Material</a>
-    <a href="{% url 'obra-list' %}" class="btn">Volver a Obras</a>
     
     <form method="post" action="{% url 'material-list' %}">
         {% csrf_token %}
+
         <table id="materialTable" class="material-table">
             <thead>
                 <tr>
                     <th>Nombre</th>
                     <th>Unidad</th>
                     <th>Descripción</th>
-                    <th>Costo</th>
+                    <th>Precio</th>
+                    <th>Nuevo Precio</th>
                 </tr>
             </thead>
             <tbody>
@@ -57,8 +29,9 @@
                     <td>{{ material.nombre }}</td>
                     <td>{{ material.unidad }}</td>
                     <td>{{ material.descripcion }}</td>
+                    <td>$ {{ material.costo_unitario|default_if_none:'0.00'|floatformat:'2' }}</td>
                     <td>
-                        <input type="number" step="0.01" name="cost-{{ material.pk }}" value="{{ material.costo_unitario|default_if_none:'0.00'|floatformat:'2' }}" class="cost-input">
+                        <input type="number" step="0.1" name="cost-{{ material.pk }}" class="cost-input">
                     </td>
                 </tr>
                 {% endfor %}
@@ -67,10 +40,7 @@
         <button type="submit" name="update_costs" class="btn">Guardar Costos</button>
     </form>
     
-    <!-- Librería jQuery, necesaria para DataTables -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <!-- Librería principal de DataTables -->
-    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
+
     <script>
         $(document).ready(function() {
             // Inicializar DataTables en la tabla con el ID "materialTable"
@@ -81,5 +51,4 @@
             });
         });
     </script>
-</body>
-</html>
+{% endblock %}
