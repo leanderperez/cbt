@@ -1,4 +1,5 @@
 from django.urls import path
+from django.contrib.auth.views import LogoutView
 from .views import (
     ObraListView, ObraCreateView, ObraUpdateView, ObraDetailView,
     FaseCreateView, TareaCreateView, TareaUpdateView, ObraMedicionesView,
@@ -27,4 +28,7 @@ urlpatterns = [
     # Rutas para Personal
     path('personal/', PersonalListView.as_view(), name='personal-list'),
     path('personal/new/', PersonalCreateView.as_view(), name='personal-create'),
+
+    # Ruta para cerrar sesión
+    path('logout/', LogoutView.as_view(next_page='login'), name='logout'),
 ]
