@@ -193,7 +193,6 @@ button{
 }
 
 /* ================= GLASSMORPHISM DATATABLE ================= */
-
 /* Fondo general de la tabla */
 table.dataTable,
 .obra-table {
@@ -227,25 +226,25 @@ table.dataTable tbody tr,
 /* Redondear solo las primeras y últimas celdas de cada fila */
 table.dataTable tbody tr td:first-child,
 .obra-table tbody tr td:first-child {
-    border-top-left-radius: 15px;
-    border-bottom-left-radius: 15px;
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
 }
 table.dataTable tbody tr td:last-child,
 .obra-table tbody tr td:last-child {
-    border-top-right-radius: 15px;
-    border-bottom-right-radius: 15px;
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
 }
 
 /* Encabezado: solo extremos superiores */
 table.dataTable thead tr th:first-child,
 .obra-table thead tr th:first-child {
-    border-top-left-radius: 15px;
-    border-bottom-left-radius: 15px;
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
 }
 table.dataTable thead tr th:last-child,
 .obra-table thead tr th:last-child {
-    border-top-right-radius: 15px;
-    border-bottom-right-radius: 15px;
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
 }
 
 /* Quitar bordes de celdas y encabezados */
@@ -256,7 +255,7 @@ table.dataTable td,
     border: none !important;
     background: transparent !important;
     color: #fff !important;
-    padding: 4px 12px !important;
+    padding: 3px 12px !important;
     vertical-align: middle;
 }
 
