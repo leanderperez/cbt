@@ -10,10 +10,10 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <div class="container-blob">
-        <div class="blob"></div>
-    </div>
     {% block navbar %}
+        <div class="container-blob">
+            <div class="blob"></div>
+        </div>
         {% include 'project_app/navbar.html' %}
     {% endblock %}
     {% block content %}
