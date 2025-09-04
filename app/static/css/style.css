@@ -415,8 +415,8 @@ table.dataTable thead th.sorting_desc:before,
 }
 
 .blob:hover {
-  width: 900px;
-  height: 900px;
+  width: 1000px;
+  height: 1000px;
   -webkit-filter: blur(30px);
           filter: blur(30px);
   box-shadow:
