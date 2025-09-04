@@ -1,44 +1,14 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lista de Personal</title>
-    <style>
-        body { font-family: sans-serif; margin: 2em; line-height: 1.6; }
-        h1 { color: #333; }
-        .btn-container { margin-bottom: 1em; }
-        .btn {
-            display: inline-block;
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            margin-right: 10px;
-        }
-        .btn:hover { background-color: #0056b3; }
-        .personal-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 1em;
-        }
-        .personal-table th, .personal-table td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-        .personal-table th { background-color: #f2f2f2; }
-    </style>
-</head>
-<body>
-    <h1>Lista de Personal</h1>
-    <div class="btn-container">
-        <a href="{% url 'personal-create' %}" class="btn">Agregar Nuevo Personal</a>
-        <a href="{% url 'obra-list' %}" class="btn">Volver a Obras</a>
-    </div>
+{% extends 'project_app/base.html' %}
+{% load static %}
+{% block title %}Lista de Obras{% endblock %}
 
-    <table class="personal-table">
+{% block content %}
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
+
+<div class="datatable-container">
+    <table id="obraTable" class="obra-table">
         <thead>
             <tr>
                 <th>Nombre</th>
@@ -54,5 +24,16 @@
             {% endfor %}
         </tbody>
     </table>
-</body>
-</html>
+</div>
+
+<script>
+    $(document).ready(function() {
+        $('#obraTable').DataTable({
+            "language": {
+                "url": "https://cdn.datatables.net/plug-ins/1.11.5/i18n/es-ES.json"
+            }
+        });
+    });
+</script>
+
+{% endblock %}

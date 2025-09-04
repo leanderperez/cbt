@@ -7,8 +7,11 @@
     box-sizing: border-box;
 }
 body{
-    background-color: #080710;
+    /* background-color: #080710;*/
+    background: #1f1f47;
+    overflow: hidden;
 }
+
 .background{
     width: 430px;
     height: 520px;
@@ -18,8 +21,8 @@ body{
     top: 50%;
 }
 .background .shape{
-    height: 200px;
-    width: 200px;
+    height: 300px;
+    width: 300px;
     position: absolute;
     border-radius: 50%;
 }
@@ -37,7 +40,7 @@ body{
         #ff512f,
         #f09819
     );
-    right: -30px;
+    right: -80px;
     bottom: -80px;
 }
 .form-login {
@@ -392,5 +395,57 @@ table.dataTable thead th.sorting_desc:before,
     font-weight: 300;
 }
 
+/* ================= ANIMATED BACKGROUND BLOB ================= */
+.container-blob {
+    overflow: clip;
+}
+.blob {
+  position: absolute;
+  width: 1000px;
+  height: 1000px;
+  background: linear-gradient(
+    180deg,
+    #1845ad 31.77%,
+    #23a2f6 100%
+  );
+  mix-blend-mode: color-dodge;
+  -webkit-animation: move 80s infinite alternate;
+          animation: move 80s infinite alternate;
+  transition: 1s cubic-bezier(0.07, 0.8, 0.16, 1);
+}
 
+.blob:hover {
+  width: 900px;
+  height: 900px;
+  -webkit-filter: blur(30px);
+          filter: blur(30px);
+  box-shadow:
+    inset 0 0 0 5px rgba(255,255,255, 0.6),
+    inset 100px 100px 0 0px #ff512f,
+    inset 200px 200px 0 0px #f09819,
+    inset 300px 300px 0 0px #2b86c5;
+}
 
+@-webkit-keyframes move {
+  from {
+    transform: translate(-50px, -50px) rotate(-90deg);
+    border-radius: 24% 76% 35% 65% / 27% 36% 64% 73%;
+  }
+
+  to {
+    transform: translate(780px, 100px) rotate(-10deg);
+    border-radius: 76% 24% 33% 67% / 68% 55% 45% 32%;
+  }
+}
+
+@keyframes move {
+  from {
+    transform: translate(-50px, -50px) rotate(-90deg);
+    border-radius: 24% 76% 35% 65% / 27% 36% 64% 73%;
+  }
+
+  to {
+    transform: translate(780px, 100px) rotate(-10deg);
+    border-radius: 76% 24% 33% 67% / 68% 55% 45% 32%;
+  }
+}
