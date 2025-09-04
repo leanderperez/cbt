@@ -6,10 +6,10 @@
     <div class="shape"></div>
     <div class="shape"></div>
 </div>
-<form method="post">
+<form class="form-login" method="post">
     <h3>Gestión de Proyectos CBT</h3>
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit">Entrar</button>
+    <button class="button-login" type="submit">Entrar</button>
 </form>
 {% endblock %}
