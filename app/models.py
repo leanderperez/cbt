@@ -4,7 +4,6 @@ from datetime import timedelta
 from decimal import Decimal
 from django.contrib.auth.models import User
 
-# Definición de modelos para el sistema de gestión de proyectos
 
 class Personal(models.Model):
     nombre = models.CharField(max_length=200, verbose_name="Nombre")

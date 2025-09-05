@@ -29,7 +29,6 @@ import json
 from decimal import Decimal
 
 
-
 class ObraListView(ListView):
     model = Obra
     template_name = 'project_app/obra_list.html'
