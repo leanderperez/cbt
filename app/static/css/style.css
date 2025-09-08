@@ -324,9 +324,7 @@ table.dataTable,
 }
 
 .datatable-container {
-    max-height: 70vh;
-    overflow-y: auto;
-    max-width: 98%px;
+    max-width: 95%px;
     margin: 40px auto 0 auto;
     width: 98%;
     background: transparent;
@@ -404,10 +402,10 @@ table.dataTable thead th.sorting_desc:before,
   background: rgba(0, 0, 0, 0.4);
 }
 
-.cost-input {
+.cost-input .measurement-input{
     display: block;
     height: 30px;
-    width: 80%;
+    width: 30px;
     background-color: rgba(255,255,255,0.07);
     border-radius: 5px;
     padding: 0 10px;
@@ -418,6 +416,7 @@ table.dataTable thead th.sorting_desc:before,
 }
 
 /* ================= ANIMATED BACKGROUND BLOB ================= */
+/*
 .container-blob {
     overflow: clip;
 }
@@ -471,3 +470,4 @@ table.dataTable thead th.sorting_desc:before,
     border-radius: 76% 24% 33% 67% / 68% 55% 45% 32%;
   }
 }
+  */

@@ -87,16 +87,18 @@ $(document).ready(function() {
         `;
     });
     
-    $('#mediciones-table tbody').html(htmlContent);
-    
     $('#mediciones-table').DataTable({
         "language": {
             "url": "https://cdn.datatables.net/plug-ins/1.11.5/i18n/es-ES.json"
         },
-        "scrollY": "55vh",
+        "scrollY": "50vh",
         "scrollCollapse": true,
         "paging": false, 
     });
+
+    $('#mediciones-table tbody').html(htmlContent);
+    
+
     
 });
 </script>
