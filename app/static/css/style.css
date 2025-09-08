@@ -324,7 +324,9 @@ table.dataTable,
 }
 
 .datatable-container {
-    max-width: 98%px;   /* Ajusta el ancho a tu gusto */
+    max-height: 70vh;
+    overflow-y: auto;
+    max-width: 98%px;
     margin: 40px auto 0 auto;
     width: 98%;
     background: transparent;
