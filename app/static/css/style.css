@@ -7,8 +7,8 @@
     box-sizing: border-box;
 }
 body{
-    /* background-color: #080710;*/
-    background: #1f1f47;
+    background-color: #000000;
+    /*background: #1f1f47;*/
     overflow: hidden;
 }
 
@@ -26,6 +26,7 @@ body{
     position: absolute;
     border-radius: 50%;
 }
+/* Colores originales
 .shape:first-child{
     background: linear-gradient(
         #1845ad,
@@ -43,6 +44,31 @@ body{
     right: -80px;
     bottom: -80px;
 }
+*/
+.shape:first-child {
+  background: linear-gradient(
+    to bottom right, /* Dirección para un brillo diagonal */
+    #f2f2f2 0%,      /* Blanco brillante para el punto de luz */
+    #cccccc 25%,     /* Gris claro */
+    #999999 50%,     /* Gris medio */
+    #666666 75%,     /* Gris oscuro */
+    #404040 100%     /* Gris muy oscuro para la sombra profunda */
+  );
+  left: -80px;
+  top: -80px;
+}
+.shape:last-child {
+  background: linear-gradient(
+    to top left, /* Otra dirección para el brillo */
+    #e0e0e0 0%,
+    #b0b0b0 30%,
+    #808080 60%,
+    #505050 100%
+  );
+  right: -80px;
+  bottom: -80px;
+}
+
 .form-login {
     height: 520px;
     width: 400px;
@@ -416,7 +442,7 @@ table.dataTable thead th.sorting_desc:before,
 }
 
 /* ================= ANIMATED BACKGROUND BLOB ================= */
-/*
+
 .container-blob {
     overflow: clip;
 }
@@ -470,4 +496,3 @@ table.dataTable thead th.sorting_desc:before,
     border-radius: 76% 24% 33% 67% / 68% 55% 45% 32%;
   }
 }
-  */
