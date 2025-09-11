@@ -496,3 +496,20 @@ table.dataTable thead th.sorting_desc:before,
     border-radius: 76% 24% 33% 67% / 68% 55% 45% 32%;
   }
 }
+
+/* ================= GLASSMORPHISM CARD MODAL ================= */
+
+.glass-effect {
+    background: rgba(255, 255, 255, 0.25); /* Fondo semitransparente */
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37); /* Sombra para dar profundidad */
+    backdrop-filter: blur(4px); /* El efecto de desenfoque principal */
+    -webkit-backdrop-filter: blur(4px); /* Soporte para navegadores Webkit */
+    border-radius: 10px; /* Bordes redondeados */
+    border: 1px solid rgba(255, 255, 255, 0.18); /* Borde sutil */
+    padding: 20px;
+    margin: 15% auto;
+    width: 60%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}

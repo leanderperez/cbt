@@ -15,7 +15,6 @@ class Personal(models.Model):
 class Obra(models.Model):
     nombre = models.CharField(max_length=200, verbose_name="Nombre de la Obra")
     descripcion = models.TextField(blank=True, verbose_name="Descripción")
-    
     direccion = models.CharField(max_length=255, verbose_name="Dirección de la Obra")
     centro_servicio = models.ForeignKey(
         Personal,
@@ -62,7 +61,6 @@ class Fase(models.Model):
     nombre = models.CharField(max_length=200, verbose_name="Nombre de la Fase")
     obra = models.ForeignKey(Obra, on_delete=models.CASCADE, verbose_name="Obra")
     presupuesto_asignado = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Presupuesto Asignado")
-    
     costo_mano_de_obra = models.DecimalField(
         max_digits=10, decimal_places=2,
         null=True, blank=True,
@@ -98,7 +96,6 @@ class Tarea(models.Model):
     descripcion = models.TextField(blank=True, verbose_name="Descripción")
     fecha_inicio = models.DateTimeField(verbose_name="Fecha y Hora de Inicio")
     fecha_fin_estimada = models.DateTimeField(verbose_name="Fecha Fin Estimada")
-    
     costo_mano_de_obra = models.DecimalField(
         max_digits=10, decimal_places=2,
         null=True, blank=True,
@@ -111,7 +108,7 @@ class Tarea(models.Model):
     @property
     def costo_ejecutado(self):
         # Suma los costos de las asignaciones de materiales y mano de obra
-        costo_material = sum(asign.costo_total for asign in self.asignacionmaterial_set.all())
+        costo_material = sum(medicion.costo_total for medicion in self.medicionmaterial_set.all())
         costo_mano_de_obra_propio = self.costo_mano_de_obra if self.costo_mano_de_obra is not None else 0
         return costo_material + costo_mano_de_obra_propio
 
@@ -154,6 +151,7 @@ class RequerimientoMaterial(models.Model):
     def __str__(self):
         return f"Requerimiento para {self.tarea.nombre}: {self.cantidad_requerida} {self.material.unidad} de {self.material.nombre}"
 
+"""
 # El modelo AsignacionMaterial ahora no se usa para el cálculo de avance
 # sino para el registro de materiales consumidos de forma general.
 class AsignacionMaterial(models.Model):
@@ -168,6 +166,7 @@ class AsignacionMaterial(models.Model):
     @property
     def costo_total(self):
         return self.cantidad * self.material.costo_unitario
+"""
 
 # Nuevo modelo para las mediciones de avance
 class MedicionMaterial(models.Model):
@@ -178,3 +177,7 @@ class MedicionMaterial(models.Model):
 
     def __str__(self):
         return f"Medición de {self.cantidad} {self.material.unidad} en {self.tarea.nombre} el {self.fecha_medicion}"
+    
+    @property
+    def costo_total(self):
+        return self.cantidad * self.material.costo_unitario

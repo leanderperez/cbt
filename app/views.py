@@ -11,7 +11,7 @@ from django.db import transaction
 from django.http import HttpResponseRedirect
 from django.db.models import F
 from .models import (
-    Obra, Fase, Tarea, RequerimientoMaterial, AsignacionMaterial,
+    Obra, Fase, Tarea, RequerimientoMaterial,
     MedicionMaterial, Material, Personal
 )
 from .forms import (
@@ -20,8 +20,7 @@ from .forms import (
     TareaForm,
     TareaUpdateProgressForm,
     RequerimientoMaterialFormSet,
-    AsignacionMaterialFormSet,
-    MaterialForm, # Nuevo formulario
+    MaterialForm,
     PersonalForm
 )
 import datetime

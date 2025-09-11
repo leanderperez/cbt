@@ -2,8 +2,7 @@ from django import forms
 from django.contrib.auth.models import User
 from django.forms import inlineformset_factory
 from .models import (
-    Obra, Fase, Tarea, RequerimientoMaterial,
-    AsignacionMaterial, Material, Personal
+    Obra, Fase, Tarea, RequerimientoMaterial, Material, Personal
 )
 
 class ObraForm(forms.ModelForm):
@@ -53,10 +52,13 @@ class RequerimientoMaterialForm(forms.ModelForm):
         model = RequerimientoMaterial
         fields = ['material', 'cantidad_requerida']
 
+"""
 class AsignacionMaterialForm(forms.ModelForm):
     class Meta:
         model = AsignacionMaterial
         fields = ['material', 'cantidad']
+"""
+
 
 RequerimientoMaterialFormSet = inlineformset_factory(
     Tarea,
@@ -65,7 +67,7 @@ RequerimientoMaterialFormSet = inlineformset_factory(
     extra=1,
     can_delete=True
 )
-
+"""
 AsignacionMaterialFormSet = inlineformset_factory(
     Tarea,
     AsignacionMaterial,
@@ -73,6 +75,8 @@ AsignacionMaterialFormSet = inlineformset_factory(
     extra=1,
     can_delete=True
 )
+"""
+
 
 class MaterialForm(forms.ModelForm):
     class Meta:
