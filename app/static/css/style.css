@@ -417,7 +417,7 @@ table.dataTable thead th.sorting_desc:before,
 
 /* El "thumb" o el elemento que se desplaza */
 .dataTables_scrollBody::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.3); /* Un gris semi-transparente */
+  background: rgba(131, 131, 131, 0.3); /* Un gris semi-transparente */
   border-radius: 6px; /* Opcional: para bordes redondeados */
   border: 2px solid transparent; /* Opcional: para que el color del fondo se vea a través */
   background-clip: padding-box; /* Opcional: asegura que el borde no oculte el fondo */
@@ -425,14 +425,14 @@ table.dataTable thead th.sorting_desc:before,
 
 /* Opcional: Estilo al pasar el mouse por encima del thumb */
 .dataTables_scrollBody::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(170, 170, 170, 0.4);
 }
 
 .cost-input .measurement-input{
     display: block;
     height: 30px;
     width: 30px;
-    background-color: rgba(255,255,255,0.07);
+    background-color: rgba(184, 184, 184, 0.07);
     border-radius: 5px;
     padding: 0 10px;
     margin-top: 2px;
