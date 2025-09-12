@@ -9,16 +9,16 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
 
-
 <form method="post" action="{% url 'material-list' %}">
     {% csrf_token %}
     <div class="datatable-container">
-        <table id="materialTable" class="material-table">
+        <table id="materialTable" class="obra-table">
             <thead>
                 <tr>
+                    <th><input type="text" placeholder="Código" /></th>
+                    <th>Familia</th>
                     <th>Nombre</th>
                     <th>Unidad</th>
-                    <th>Descripción</th>
                     <th>Precio</th>
                     <th>Nuevo Precio</th>
                 </tr>
@@ -26,9 +26,10 @@
             <tbody>
                 {% for material in materiales %}
                 <tr>
+                    <td>{{ material.codigo }}</td>
+                    <td>{{ material.familia }}</td>
                     <td>{{ material.nombre }}</td>
                     <td>{{ material.unidad }}</td>
-                    <td>{{ material.descripcion }}</td>
                     <td>$ {{ material.costo_unitario|default_if_none:'0.00'|floatformat:'2' }}</td>
                     <td>
                         <input type="number" step="0.1" name="cost-{{ material.pk }}" class="cost-input">
@@ -38,17 +39,31 @@
             </tbody>
         </table>
     </div>
+    <a href="{% url 'material-create' %}" class="btn">Crear Material</a>
     <button type="submit" name="update_costs" class="btn">Guardar Costos</button>
 </form>
 <script>
     $(document).ready(function() {
-        $('#materialTable').DataTable({
+        var table = $('#materialTable').DataTable({
             "language": {
                 "url": "https://cdn.datatables.net/plug-ins/1.11.5/i18n/es-ES.json"
             },
             "scrollY": "55vh",
             "scrollCollapse": true,
             "paging": false, 
+            "deferRender": true
+        });
+
+        table.columns().every(function() {
+            var that = this;
+
+            $('input', this.header()).on('keyup change', function() {
+                if (that.search() !== this.value) {
+                    that
+                        .search(this.value)
+                        .draw();
+                }
+            });
         });
     });
 </script>

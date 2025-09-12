@@ -442,7 +442,7 @@ table.dataTable thead th.sorting_desc:before,
 }
 
 /* ================= ANIMATED BACKGROUND BLOB ================= */
-
+/*
 .container-blob {
     overflow: clip;
 }
@@ -496,6 +496,7 @@ table.dataTable thead th.sorting_desc:before,
     border-radius: 76% 24% 33% 67% / 68% 55% 45% 32%;
   }
 }
+*/
 
 /* ================= GLASSMORPHISM CARD MODAL ================= */
 
@@ -513,3 +514,20 @@ table.dataTable thead th.sorting_desc:before,
     align-items: center;
     justify-content: space-between;
 }
+
+.btn {
+    display: inline-block;
+    padding: 10px 5px;
+    background-color: #bbb7b7; 
+    color: #080710;           /* Color de texto oscuro */
+    text-decoration: none;     /* Quita el subrayado de los enlaces */
+    border-radius: 3px;        /* Bordes redondeados */
+    border: none;              /* Sin borde */
+    cursor: pointer;           /* Muestra una mano al pasar el cursor */
+    font-family: 'Poppins',sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    font-size: 12px
+}
+
+

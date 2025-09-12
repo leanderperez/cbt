@@ -135,11 +135,12 @@ class AsignacionPersonal(models.Model):
         return Decimal('0.00')
 
 class Material(models.Model):
+    codigo = models.CharField(max_length=50, unique=True, verbose_name="Código del Material")
+    familia = models.CharField(max_length=100, verbose_name="Familia del Material")
     nombre = models.CharField(max_length=200, verbose_name="Nombre del Material")
     unidad = models.CharField(max_length=50, verbose_name="Unidad de Medida")
-    descripcion = models.TextField(blank=True, verbose_name="Descripción")
     costo_unitario = models.DecimalField(max_digits=8, decimal_places=2, verbose_name="Costo Unitario")
-
+    
     def __str__(self):
         return f"{self.nombre} ({self.unidad})"
 

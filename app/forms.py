@@ -59,7 +59,6 @@ class AsignacionMaterialForm(forms.ModelForm):
         fields = ['material', 'cantidad']
 """
 
-
 RequerimientoMaterialFormSet = inlineformset_factory(
     Tarea,
     RequerimientoMaterial,
@@ -81,7 +80,7 @@ AsignacionMaterialFormSet = inlineformset_factory(
 class MaterialForm(forms.ModelForm):
     class Meta:
         model = Material
-        fields = ['nombre', 'unidad', 'descripcion', 'costo_unitario']
+        fields = ['codigo', 'familia', 'nombre', 'unidad', 'costo_unitario']
         
 class PersonalForm(forms.ModelForm):
     class Meta:
