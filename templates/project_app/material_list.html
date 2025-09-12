@@ -39,8 +39,11 @@
             </tbody>
         </table>
     </div>
-    <a href="{% url 'material-create' %}" class="btn">Crear Material</a>
-    <button type="submit" name="update_costs" class="btn">Guardar Costos</button>
+    <div style="margin-left: 15px;">
+        <a href="{% url 'material-create' %}" class="btn">Crear Material</a>
+        <button type="submit" name="update_costs" class="btn">Guardar Costos</button>
+    </div>
+
 </form>
 <script>
     $(document).ready(function() {
