@@ -1,103 +1,103 @@
 {% extends 'project_app/base.html' %}
+{% load custom_filters %}
 {% load static %}
-{% block title %}Mediciones{% endblock %}
+
+{% block title %}Mediciones de Obra: {{ obra.nombre }}{% endblock %}
 
 {% block content %}
+
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
 
+<style>
+    /* Contenedor Flexbox para alinear el campo de fecha y el botón */
+    .button-and-date-container {
+        display: flex;
+        align-items: center;
+        gap: 20px; /* Espacio entre los elementos */
+        margin-top: 20px;
+    }
+    
+    .button-and-date-container .form-group {
+        margin-bottom: 0;
+    }
 
-<div class="datatable-container">
-    <form method="post">
+</style>
+
+<form method="post" action="{% url 'obra-mediciones' obra.pk %}">
     {% csrf_token %}
-    <table id="mediciones-table" class="display mediciones-table">
-        <thead>
-            <tr>
-                <th colspan="2">Información y Avance</th>
-                <th>Cantidad Requerida</th>
-                {% for fecha in fechas_medicion %}
-                    <th class="text-center">{{ fecha|date:"d M" }}</th>
+
+    <div class="datatable-container">
+        <table id="mediciones-table" class="table table-striped table-bordered" style="width:100%">
+            <thead>
+                <tr>
+                    <th>Fase</th>
+                    <th>Tarea</th>
+                    <th>Material</th>
+                    <th>Unidad</th>
+                    <th>Cantidad Requerida</th>
+                    {% for fecha in fechas_medicion %}
+                        <th>{{ fecha }}</th>
+                    {% endfor %}
+                    <th>Medición del Día</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in tabla_mediciones %}
+                    <tr>
+                        <td>{{ row.fase_nombre }}</td>
+                        <td>{{ row.tarea_nombre }}</td>
+                        <td>{{ row.material_nombre }}</td>
+                        <td>{{ row.material_unidad }}</td>
+                        <td>{{ row.cantidad_requerida }}</td>
+                        {% for fecha in fechas_medicion %}
+                            <td>
+                                {% if row.mediciones|get:fecha|default:"0" != "0" %}
+                                    {{ row.mediciones|get:fecha }}
+                                {% else %}
+                                    0
+                                {% endif %}
+                            </td>
+                        {% endfor %}
+                        <td>
+                            <input type="number" step="0.01" class="form-control" name="medicion-{{ row.tarea_pk }}-{{ row.material_pk }}" value="0">
+                        </td>
+                    </tr>
                 {% endfor %}
-                <th>Medición Actual</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Las filas se generarán dinámicamente con JavaScript -->
-        </tbody>
-    </table>
-
-    <div class="form-group">
-        <label for="id_fecha_medicion">Fecha de Medición:</label>
-        <input type="date" id="id_fecha_medicion" name="fecha_medicion" required>
+            </tbody>
+        </table>
     </div>
-    <button type="submit" class="btn">Guardar Mediciones</button>
-    </form>
-</div>
 
-
+    <div class="button-and-date-container">
+        <div class="form-group">
+            <input type="date" class="form-control" id="fecha_medicion" name="fecha_medicion" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Guardar Mediciones</button>
+    </div>
+</form>
+ 
 <script>
-$(document).ready(function() {
-    // Carga los datos desde el contexto de Django
-    const medicionesData = JSON.parse('{{ tabla_mediciones_json|safe }}');
-    const fechasMedicion = JSON.parse('{{ fechas_medicion_json|safe }}');
-    
-    // Renderiza la tabla con los datos agrupados
-    let htmlContent = '';
-    let currentPhase = null;
-    let currentTask = null;
-    
-    medicionesData.forEach(item => {
-        // Check for new phase
-        if (item.fase_nombre !== currentPhase) {
-            htmlContent += `<tr class="phase-header"><td colspan="${5 + fechasMedicion.length}">Fase: ${item.fase_nombre}</td></tr>`;
-            currentPhase = item.fase_nombre;
-            currentTask = null; // Reset task when phase changes
-        }
-
-        // Check for new task
-        if (item.tarea_nombre !== currentTask) {
-            htmlContent += `<tr class="task-header"><td colspan="${5 + fechasMedicion.length}">Tarea: ${item.tarea_nombre}</td></tr>`;
-            currentTask = item.tarea_nombre;
-        }
-        
-        // Generate material rows
-        let medicionesHtml = '';
-        fechasMedicion.forEach(fecha => {
-            const medicion = item.mediciones[fecha] || '-';
-            medicionesHtml += `<td class="text-center">${medicion}</td>`;
+    $(document).ready(function() {
+        var table = $('#mediciones-table').DataTable({
+            "language": {
+                "url": "https://cdn.datatables.net/plug-ins/1.11.5/i18n/es-ES.json"
+            },
+            "scrollY": "50vh",
+            "scrollCollapse": true,
+            "paging": false, 
+            "deferRender": true
         });
 
-        htmlContent += `
-            <tr>
-                <td colspan="2">${item.material_nombre}</td>
-                <td>${item.cantidad_requerida} ${item.material_unidad}</td>
-                ${medicionesHtml}
-                <td>
-                    <input type="number" step="0.01"
-                            class="measurement-input"
-                            name="medicion-${item.tarea_pk}-${item.material_pk}"
-                            value=""
-                            placeholder="Cantidad">
-                </td>
-            </tr>
-        `;
-    });
-    
-    $('#mediciones-table').DataTable({
-        "language": {
-            "url": "https://cdn.datatables.net/plug-ins/1.11.5/i18n/es-ES.json"
-        },
-        "scrollY": "50vh",
-        "scrollCollapse": true,
-        "paging": false, 
-    });
+        table.columns().every(function() {
+            var that = this;
 
-    $('#mediciones-table tbody').html(htmlContent);
-    
-
-    
-});
+            $('input', this.header()).on('keyup change', function() {
+                if (that.search() !== this.value) {
+                    that.search(this.value).draw();
+                }
+            });
+        });
+    });
 </script>
-
 {% endblock %}

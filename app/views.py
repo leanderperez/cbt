@@ -140,97 +140,114 @@ class TareaUpdateView(UpdateView):
     def get_success_url(self):
         return reverse_lazy('obra-detail', kwargs={'pk': self.object.fase.obra.pk})
 
-class ObraMedicionesView(View):
+
+class ObraMedicionesView(DetailView):
+    model = Obra
     template_name = 'project_app/obra_mediciones.html'
+    context_object_name = 'obra'
 
-    def get(self, request, pk):
-        obra = get_object_or_404(Obra, pk=pk)
-        
-        # Lógica para obtener las mediciones y requerimientos
-        # Se ordena por fase y tarea para que la agrupación en la plantilla funcione correctamente.
-        requerimientos = RequerimientoMaterial.objects.filter(
-            tarea__fase__obra=obra
-        ).select_related(
-            'tarea', 'material', 'tarea__fase'
-        ).order_by('tarea__fase__nombre', 'tarea__nombre', 'material__nombre')
-        mediciones_qs = MedicionMaterial.objects.filter(tarea__fase__obra=obra).values('tarea__pk', 'material__pk', 'fecha_medicion', 'cantidad')
-        
-        mediciones_dict = {}
-        fechas_medicion = sorted(list(set(m['fecha_medicion'] for m in mediciones_qs)))
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        obra = self.get_object()
 
-        for m in mediciones_qs:
-            key = (m['tarea__pk'], m['material__pk'], m['fecha_medicion'])
-            mediciones_dict[key] = m['cantidad']
+        # Obtener todos los requerimientos de la obra
+        requerimientos = RequerimientoMaterial.objects.filter(tarea__fase__obra=obra).select_related('tarea', 'material', 'tarea__fase').order_by('tarea__fase', 'tarea')
 
         tabla_mediciones = []
+        fechas_medicion_set = set()
+
+        # Cargar las mediciones existentes en un diccionario para acceso rápido
+        mediciones_data = MedicionMaterial.objects.filter(tarea__fase__obra=obra).values('tarea', 'material', 'cantidad', 'fecha_medicion')
+        mediciones_dict = {}
+        for med in mediciones_data:
+            key = (med['tarea'], med['material'])
+            if key not in mediciones_dict:
+                mediciones_dict[key] = {}
+            fecha_str = med['fecha_medicion'].strftime('%Y-%m-%d')
+            mediciones_dict[key][fecha_str] = med['cantidad']
+            fechas_medicion_set.add(fecha_str)
+
+        # Crear la estructura de la tabla
         for req in requerimientos:
-            row_data = {
+            tarea_pk = req.tarea.pk
+            material_pk = req.material.pk
+            
+            mediciones_historicas = mediciones_dict.get((tarea_pk, material_pk), {})
+            
+            row = {
                 'fase_nombre': req.tarea.fase.nombre,
                 'tarea_nombre': req.tarea.nombre,
-                'tarea_pk': req.tarea.pk,
+                'tarea_pk': tarea_pk,
                 'material_nombre': req.material.nombre,
                 'material_unidad': req.material.unidad,
-                'material_pk': req.material.pk,
+                'material_pk': material_pk,
                 'cantidad_requerida': req.cantidad_requerida,
-                'mediciones': {}
+                'mediciones': mediciones_historicas
             }
-            for fecha in fechas_medicion:
-                medicion_val = mediciones_dict.get((req.tarea.pk, req.material.pk, fecha))
-                if isinstance(medicion_val, Decimal):
-                    medicion_val = float(medicion_val)
-                
-                row_data['mediciones'][str(fecha)] = medicion_val
-            tabla_mediciones.append(row_data)
+            tabla_mediciones.append(row)
 
-        # Conversión de los datos para la plantilla
-        def decimal_to_float(obj):
-            if isinstance(obj, Decimal):
-                return float(obj)
-            raise TypeError(f'Object of type {obj.__class__.__name__} is not JSON serializable')
+        fechas_medicion_list = sorted(list(fechas_medicion_set))
 
-        tabla_mediciones_json = json.dumps(tabla_mediciones, default=decimal_to_float)
-        fechas_medicion_str = [f.strftime('%Y-%m-%d') for f in fechas_medicion]
-        fechas_medicion_json = json.dumps(fechas_medicion_str)
+        context['tabla_mediciones'] = tabla_mediciones
+        context['fechas_medicion'] = fechas_medicion_list
+        return context
+
+    def post(self, request, *args, **kwargs):
+        print("Datos recibidos en el POST:", request.POST) # <-- LÍNEA PARA DEPURAR
+
+        obra = self.get_object()
+        fecha_medicion = request.POST.get('fecha_medicion')
+        if not fecha_medicion:
+            return redirect('obra-mediciones', pk=obra.pk)
         
-        context = {
-            'obra': obra,
-            'tabla_mediciones_json': tabla_mediciones_json,
-            'fechas_medicion': fechas_medicion,
-            'fechas_medicion_json': fechas_medicion_json,
-        }
-
-        return render(request, self.template_name, context)
-
-    def post(self, request, pk):
-        obra = get_object_or_404(Obra, pk=pk)
-        fecha_str = request.POST.get('fecha_medicion')
-        if not fecha_str:
-            return redirect('obra-mediciones', pk=pk)
-        try:
-            fecha_medicion = datetime.datetime.strptime(fecha_str, '%Y-%m-%d').date()
-        except ValueError:
-            return redirect('obra-mediciones', pk=pk)
-
         with transaction.atomic():
             for key, value in request.POST.items():
                 if key.startswith('medicion-'):
                     try:
-                        parts = key.split('-')
-                        tarea_id = int(parts[1])
-                        material_id = int(parts[2])
-                        cantidad = float(value) if value else 0
-                        
+                        _, tarea_id, material_id = key.split('-')
+                        cantidad_str = value.replace(',', '.')  # Manejar comas si es necesario
+                        cantidad = Decimal(cantidad_str)
+
                         if cantidad > 0:
-                            # Reemplaza .get() con update_or_create para evitar errores si el objeto no existe
-                            MedicionMaterial.objects.update_or_create(
-                                tarea_id=tarea_id,
-                                material_id=material_id,
-                                fecha_medicion=fecha_medicion,
-                                defaults={'cantidad': Decimal(str(cantidad))} # Usa Decimal para evitar problemas de precisión
+                            MedicionMaterial.objects.create(
+                                tarea_id=int(tarea_id),
+                                material_id=int(material_id),
+                                cantidad=cantidad,
+                                fecha_medicion=fecha_medicion
+                            )
+                            print(f"Medición guardada: Tarea={tarea_id}, Material={material_id}, Cantidad={cantidad}")
+                    except (ValueError, IndexError) as e:
+                        print(f"Error al procesar la clave '{key}': {e}")
+                        continue
+
+        return redirect('obra-mediciones', pk=obra.pk)
+        obra = self.get_object()
+        fecha_medicion = request.POST.get('fecha_medicion')
+        if not fecha_medicion:
+            return redirect('obra-mediciones', pk=obra.pk)
+        
+        with transaction.atomic():
+            for key, value in request.POST.items():
+                if key.startswith('medicion-'):
+                    try:
+                        # Extrae los IDs de la clave 'medicion-tarea_id-material_id'
+                        # El split devuelve una lista: ['medicion', 'tarea_id', 'material_id']
+                        # Usamos la desestructuración para asignar los valores directamente
+                        _, tarea_id, material_id = key.split('-')
+                        cantidad = Decimal(value)
+
+                        if cantidad > 0:
+                            MedicionMaterial.objects.create(
+                                tarea_id=int(tarea_id),
+                                material_id=int(material_id),
+                                cantidad=cantidad,
+                                fecha_medicion=fecha_medicion
                             )
                     except (ValueError, IndexError):
+                        # Ignora las claves que no tengan el formato correcto
                         continue
-        return redirect('obra-mediciones', pk=pk)
+
+        return redirect('obra-mediciones', pk=obra.pk)
 
 class MaterialListView(ListView):
     model = Material

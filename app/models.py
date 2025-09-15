@@ -152,7 +152,7 @@ class RequerimientoMaterial(models.Model):
     def __str__(self):
         return f"Requerimiento para {self.tarea.nombre}: {self.cantidad_requerida} {self.material.unidad} de {self.material.nombre}"
 
-
+''' Modelo AsignacionMaterial eliminado
 # El modelo AsignacionMaterial ahora no se usa para el cálculo de avance
 # sino para el registro de materiales consumidos de forma general.
 class AsignacionMaterial(models.Model):
@@ -168,6 +168,7 @@ class AsignacionMaterial(models.Model):
     def costo_total(self):
         return self.cantidad * self.material.costo_unitario
 
+'''
 
 # Nuevo modelo para las mediciones de avance
 class MedicionMaterial(models.Model):
