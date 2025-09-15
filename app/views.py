@@ -266,6 +266,75 @@ class PersonalListView(ListView):
 
 # Custom Login View
 from django.contrib.auth.views import LoginView
-
 class CustomLoginView(LoginView):
     template_name = 'project_app/login.html'
+
+
+from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse
+from .models import Tarea, Obra
+from datetime import datetime
+
+# proyecto/aplicacion_obras/views.py
+from django.shortcuts import get_object_or_404
+from django.http import JsonResponse
+from .models import Tarea, Obra, Fase
+from datetime import datetime
+from decimal import Decimal
+
+def gantt_data_view(request, pk):
+    obra = get_object_or_404(Obra, pk=pk)
+    
+    # Obtener todas las tareas de la obra
+    tareas = Tarea.objects.filter(fase__obra=obra).order_by('fecha_inicio')
+    
+    # Obtener las fases únicas de la obra
+    fases_obra = Fase.objects.filter(obra=obra).order_by('id')
+    
+    gantt_data = []
+
+    # 1. Crear los objetos de las Fases (actúan como los "agrupadores")
+    for fase in fases_obra:
+        # Encontrar la fecha de inicio más temprana y la fecha de fin más tardía de las tareas en esta fase
+        tareas_en_fase = tareas.filter(fase=fase)
+        
+        if not tareas_en_fase:
+            # Si la fase no tiene tareas, la saltamos o la definimos como un hito
+            continue
+
+        fecha_inicio_fase = min(t.fecha_inicio for t in tareas_en_fase)
+        fecha_fin_fase = max(t.fecha_fin_estimada for t in tareas_en_fase)
+
+        # Calcular el progreso promedio de la fase
+        total_avance = sum(t.porcentaje_avance for t in tareas_en_fase)
+        promedio_avance = total_avance / len(tareas_en_fase) if tareas_en_fase else Decimal('0.00')
+
+        gantt_data.append({
+            'id': f'fase-{fase.id}',
+            'name': fase.nombre,
+            'start': fecha_inicio_fase.strftime('%Y-%m-%d'),
+            'end': fecha_fin_fase.strftime('%Y-%m-%d'),
+            'progress': float(promedio_avance),
+            'dependencies': '',  # Las fases no tienen dependencias
+            'custom_class': 'gantt-phase' # Clase CSS para estilizar si es necesario
+        })
+
+    # 2. Crear los objetos de las Tareas (actúan como los "elementos hijos")
+    for tarea in tareas:
+        start = tarea.fecha_inicio.strftime('%Y-%m-%d')
+        end = tarea.fecha_fin_estimada.strftime('%Y-%m-%d')
+        
+        gantt_data.append({
+            'id': f'tarea-{tarea.id}',
+            'name': tarea.nombre,
+            'start': start,
+            'end': end,
+            'progress': float(tarea.porcentaje_avance),
+            'dependencies': f'fase-{tarea.fase.id}', #La tarea depende de la fase
+        })
+        
+    return JsonResponse(gantt_data, safe=False)
+
+def gantt_chart_view(request, pk):
+    # Pasar el ID de la obra a la plantilla para que el JS lo use
+    return render(request, 'project_app/gantt_chart.html', {'obra_pk': pk})

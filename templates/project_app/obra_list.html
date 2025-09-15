@@ -29,7 +29,7 @@
                 <td>{{ obra.porcentaje_avance|floatformat:2 }}%</td>
                 <td>
                     <a href="{% url 'obra-detail' obra.pk %}">Detalles</a> |
-                    <a href="{% url 'obra-update' obra.pk %}">Editar</a> |
+                    <a href="{% url 'gantt_chart' obra.pk %}">Gantt</a> |
                     <a href="{% url 'obra-mediciones' obra.pk %}">Mediciones</a>
                 </td>
             </tr>

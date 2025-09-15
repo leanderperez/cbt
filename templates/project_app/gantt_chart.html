@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Diagrama de Gantt</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/frappe-gantt/0.6.1/frappe-gantt.min.css" />
+    <style>
+        .gantt-container {
+            width: 80%;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Diagrama de Gantt de Obras</h1>
+
+<div class="gantt-container">
+    <svg id="gantt-chart"></svg>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/frappe-gantt/0.6.1/frappe-gantt.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const obraPk = "{{ obra_pk }}";
+        
+        fetch(`/proyectos/api/gantt_data/${obraPk}/`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Error en la solicitud: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                const gantt = new Gantt("#gantt-chart", data, {
+                    // Configuración del diagrama de Gantt
+                    show_today_line: true,
+                    go_to_today: true,
+                    header_height: 60,
+                    bar_height: 30,
+                    padding: 18,
+                    view_modes: ['Day', 'Week', 'Month'],
+                    view_mode: 'Week', 
+                    
+
+                    // Ajuste de la escala para una mejor visualización diaria
+                    column_width: 30, // Ancho de la columna
+                    step: 1,
+
+                    date_format: 'YYYY-MM-DD',
+                    language: 'es',
+
+                });
+                gantt.go_to_today();
+            })
+            .catch(error => console.error('Error al obtener los datos:', error));
+    });
+</script>
+
+</body>
+</html>
