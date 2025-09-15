@@ -147,7 +147,12 @@ class ObraMedicionesView(View):
         obra = get_object_or_404(Obra, pk=pk)
         
         # Lógica para obtener las mediciones y requerimientos
-        requerimientos = RequerimientoMaterial.objects.filter(tarea__fase__obra=obra).select_related('tarea', 'material', 'tarea__fase')
+        # Se ordena por fase y tarea para que la agrupación en la plantilla funcione correctamente.
+        requerimientos = RequerimientoMaterial.objects.filter(
+            tarea__fase__obra=obra
+        ).select_related(
+            'tarea', 'material', 'tarea__fase'
+        ).order_by('tarea__fase__nombre', 'tarea__nombre', 'material__nombre')
         mediciones_qs = MedicionMaterial.objects.filter(tarea__fase__obra=obra).values('tarea__pk', 'material__pk', 'fecha_medicion', 'cantidad')
         
         mediciones_dict = {}

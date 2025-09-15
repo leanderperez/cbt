@@ -1,18 +1,10 @@
+{% extends 'project_app/base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>
-        {% if form.instance.pk %}Editar Obra{% else %}Crear Obra{% endif %}
-    </title>
-</head>
-<body>
-    <h1>
-        {% if form.instance.pk %}Editar Obra{% else %}Crear Nueva Obra{% endif %}
-    </h1>
-    <form method="post">
+{% block title %}Gestion de Proyectos CBT{% endblock %}
+
+{% block content %}
+    <form class="form-login" method="post">
+        <h3>{% if form.instance.pk %}Editar Obra{% else %}Crear Nueva Obra{% endif %}</h3>
         {% csrf_token %}
         {{ form.as_p }}
         <div class="btn-container">
@@ -20,5 +12,4 @@
             <a href="{% url 'obra-list' %}" class="btn">Cancelar</a>
         </div>
     </form>
-</body>
-</html>
+{% endblock %}

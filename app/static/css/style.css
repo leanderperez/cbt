@@ -103,7 +103,9 @@ label{
     font-size: 14px;
     font-weight: 450;
 }
-input{
+input, 
+textarea,
+select{
     display: block;
     height: 40px;
     width: 100%;
@@ -498,23 +500,7 @@ table.dataTable thead th.sorting_desc:before,
 }
 */
 
-/* ================= GLASSMORPHISM CARD MODAL ================= */
-
-.glass-effect {
-    background: rgba(255, 255, 255, 0.25); /* Fondo semitransparente */
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37); /* Sombra para dar profundidad */
-    backdrop-filter: blur(4px); /* El efecto de desenfoque principal */
-    -webkit-backdrop-filter: blur(4px); /* Soporte para navegadores Webkit */
-    border-radius: 10px; /* Bordes redondeados */
-    border: 1px solid rgba(255, 255, 255, 0.18); /* Borde sutil */
-    padding: 20px;
-    margin: 15% auto;
-    width: 60%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
+/* ================= BOTONES ================= */
 .btn {
     display: inline-block;
     padding: 10px 5px;

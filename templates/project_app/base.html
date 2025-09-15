@@ -8,6 +8,19 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
     {% block extra_css %}{% endblock %}
+    
+    {% block extra_style %}
+        <style>
+            body {
+                background-image: url("{% static 'img/cover.jpeg' %}");
+                background-size: 100% auto;
+                background-position: top;
+                background-repeat: no-repeat;
+                background-attachment: fixed;
+
+            }
+        </style>
+    {% endblock %}
 </head>
 <body>
     {% block navbar %}
