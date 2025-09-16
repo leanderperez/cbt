@@ -140,7 +140,6 @@ class TareaUpdateView(UpdateView):
     def get_success_url(self):
         return reverse_lazy('obra-detail', kwargs={'pk': self.object.fase.obra.pk})
 
-
 class ObraMedicionesView(DetailView):
     model = Obra
     template_name = 'project_app/obra_mediciones.html'
