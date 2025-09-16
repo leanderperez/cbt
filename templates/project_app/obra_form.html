@@ -2,14 +2,64 @@
 {% load static %}
 {% block title %}Gestion de Proyectos CBT{% endblock %}
 
+
 {% block content %}
-    <form class="form-login" method="post">
-        <h3>{% if form.instance.pk %}Editar Obra{% else %}Crear Nueva Obra{% endif %}</h3>
+  <div class="container">
+    <h3>{% if form.instance.pk %}Editar Obra{% else %}Crear Nueva Obra{% endif %}</h3>
+    <div class="content">
+      <form method="post">
         {% csrf_token %}
-        {{ form.as_p }}
-        <div class="btn-container">
-            <button type="submit" class="btn">Guardar</button>
-            <a href="{% url 'obra-list' %}" class="btn">Cancelar</a>
+        <div class="user-details">
+
+          <div class="input-box">
+            <span class="details">Nombre de la Obra</span>
+            {{ form.nombre }}
+          </div>
+
+          <div class="input-box">
+            <span class="details">Dirección</span>
+            {{ form.direccion }}
+          </div>
+
+          <div class="input-box">
+            <span class="details">Descripción</span>
+            {{ form.descripcion }}
+          </div>
+          
+          <div class="input-box">
+            <span class="details">Presupuesto Inicial</span>
+            {{ form.presupuesto_inicial }}
+          </div>
+
+          <div class="input-box">
+            <span class="details">Centro de Servicio</span>
+            {{ form.centro_servicio }}
+          </div>
+
+          <div class="input-box">
+            <span class="details">Ingeniero Encargado</span>
+            {{ form.ingeniero_encargado }}
+          </div>
+
+          <div class="input-box">
+            <span class="details">Fecha de Inicio</span>
+            {{ form.fecha_inicio }}
+          </div>
+
+          <div class="input-box">
+            <span class="details">Fecha de Fin (Estimada)</span>
+            {{ form.fecha_fin_estimada }}
+          </div>
         </div>
-    </form>
+        
+        <div class="button">
+          <input type="submit"></input>
+          <a href="{% url 'obra-list' %}">Cancelar</a>
+        </div>
+      </form>
+    </div>
+  </div>
 {% endblock %}
+
+
+
