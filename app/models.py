@@ -6,11 +6,15 @@ from django.contrib.auth.models import User
 
 
 class Personal(models.Model):
+    empresa = models.CharField(max_length=200, verbose_name="Empresa")
     nombre = models.CharField(max_length=200, verbose_name="Nombre")
-    cargo = models.CharField(max_length=100, verbose_name="Cargo")
+    telefono = models.CharField(max_length=20, verbose_name="Teléfono")
+    telefono_alternativo = models.CharField(max_length=20, blank=True, verbose_name="Teléfono Alternativo")
+    email = models.EmailField(verbose_name="Correo Electrónico")
+    direccion = models.CharField(max_length=255, verbose_name="Dirección")
 
     def __str__(self):
-        return self.nombre
+        return self.empresa
 
 class Obra(models.Model):
     nombre = models.CharField(max_length=200, verbose_name="Nombre de la Obra")

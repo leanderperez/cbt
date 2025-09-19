@@ -1,42 +1,52 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>
-        {% if form.instance.pk %}Editar Personal{% else %}Crear Nuevo Personal{% endif %}
-    </title>
-    <style>
-        body { font-family: sans-serif; margin: 2em; line-height: 1.6; }
-        h1 { color: #333; }
-        form { max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ccc; border-radius: 8px; }
-        label { display: block; margin-bottom: 0.5em; font-weight: bold; }
-        input, textarea, select { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 1em; }
-        .btn-container { margin-top: 1em; text-align: right; }
-        .btn {
-            display: inline-block;
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            border: none;
-            cursor: pointer;
-        }
-        .btn:hover { background-color: #0056b3; }
-    </style>
-</head>
-<body>
-    <h1>
-        {% if form.instance.pk %}Editar Personal{% else %}Crear Nuevo Personal{% endif %}
-    </h1>
-    <form method="post">
+{% extends 'project_app/base.html' %}
+{% load static %}
+{% block title %}Gestion de Proyectos CBT{% endblock %}
+
+
+{% block content %}
+  <div class="container">
+    <h3>{% if form.instance.pk %}Editar Personal{% else %}Crear Nuevo Personal{% endif %}</h3>
+    <div class="content">
+      <form method="post">
         {% csrf_token %}
-        {{ form.as_p }}
-        <div class="btn-container">
-            <button type="submit" class="btn">Guardar</button>
-            <a href="{% url 'personal-list' %}" class="btn">Cancelar</a>
+        <div class="user-details">
+
+          <div class="input-box">
+            <span class="details">Nombre de la Empresa</span>
+            {{ form.empresa }}
+          </div>
+
+          <div class="input-box">
+            <span class="details">Nombre del Resposable</span>
+            {{ form.nombre }}
+          </div>
+
+          <div class="input-box">
+            <span class="details">Teléfono</span>
+            {{ form.telefono }}
+          </div>
+          
+          <div class="input-box">
+            <span class="details">Teléfono Alternativo</span>
+            {{ form.telefono_alternativo }}
+          </div>
+
+          <div class="input-box">
+            <span class="details">Correo Electrónico</span>
+            {{ form.email }}
+          </div>
+
+          <div class="input-box">
+            <span class="details">Dirección</span>
+            {{ form.direccion }}
+          </div>
         </div>
-    </form>
-</body>
-</html>
+        
+        <div class="button">
+          <input type="submit"></input>
+          <a href="{% url 'personal-list' %}">Cancelar</a>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

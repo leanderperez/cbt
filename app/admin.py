@@ -33,8 +33,8 @@ class TareaAdmin(admin.ModelAdmin):
 
 @admin.register(Personal)
 class PersonalAdmin(admin.ModelAdmin):
-    list_display = ('nombre', 'cargo')
-    search_fields = ('nombre', 'cargo')
+    list_display = ('empresa', 'nombre', 'telefono', 'telefono_alternativo', 'email', 'direccion')
+    search_fields = ('nombre', 'empresa', 'email')
 
 @admin.register(AsignacionPersonal)
 class AsignacionPersonalAdmin(admin.ModelAdmin):

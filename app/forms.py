@@ -85,4 +85,4 @@ class MaterialForm(forms.ModelForm):
 class PersonalForm(forms.ModelForm):
     class Meta:
         model = Personal
-        fields = ['nombre', 'cargo']
+        fields = ['empresa', 'nombre', 'telefono', 'telefono_alternativo', 'email', 'direccion']

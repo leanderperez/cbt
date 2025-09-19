@@ -516,16 +516,31 @@ table.dataTable thead th.sorting_desc:before,
     font-size: 12px
 }
 
-/* ================= NUEVOS FORMULARIOS ================= */
+/* ================= NUEVOS FORMULARIOS - GLASSMORFISM ================= */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap');
 
 .container {
-  max-width: 700px;
-  width: 100%;
-  background-color: #fff;
-  padding: 25px 30px;
-  border-radius: 5px;
-  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+    max-width: 700px;
+    width: 100%;
+    /* Glassmorphism */
+    background-color: rgba(255,255,255,0.13); /* Fondo translúcido */
+    padding: 25px 30px;
+    border-radius: 10px;
+    backdrop-filter: blur(10px);              /* Efecto de desenfoque */
+    border: 2px solid rgba(255,255,255,0.1); /* Borde sutil */
+    box-shadow: 0 0 40px rgba(8,7,16,0.6);   /* Sombra profunda */
+
+    /* Nuevas propiedades para centrar */
+    position: absolute;
+    top: 55%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+}
+
+.container * {
+    font-family: 'Poppins', sans-serif;
+    color: #ffffff;
+    letter-spacing: 0.5px;
 }
 
 .container .title {
@@ -533,144 +548,154 @@ table.dataTable thead th.sorting_desc:before,
     font-weight: 450;
     line-height: 42px;
     text-align: center;
+    color: #ffffff;
 }
 
 .container .title::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  height: 3px;
-  width: 30px;
-  border-radius: 5px;
-  background: linear-gradient(135deg, #71b7e6, #9b59b6);
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 3px;
+    width: 30px;
+    border-radius: 5px;
+    /* Color de la línea de título, puedes ajustarlo si lo necesitas */
+    background: #ffffff;
 }
 
 .content form .user-details {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  margin: 20px 0 12px 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin: 20px 0 12px 0;
 }
 
 form .user-details .input-box {
-  margin-bottom: 15px;
-  width: calc(100% / 2 - 20px);
+    margin-bottom: 15px;
+    width: calc(100% / 2 - 20px);
 }
 
 form .input-box span.details {
-  display: block;
-  font-weight: 500;
-  margin-bottom: 5px;
+    display: block;
+    font-weight: 500;
+    margin-bottom: 5px;
+    color: #ffffff;
 }
 
-.user-details .input-box input {
-  height: 45px;
-  width: 100%;
-  outline: none;
-  font-size: 16px;
-  border-radius: 5px;
-  padding-left: 15px;
-  border: 1px solid #ccc;
-  border-bottom-width: 2px;
-  transition: all 0.3s ease;
+.user-details .input-box input,
+.user-details .input-box textarea,
+.user-details .input-box select {
+    height: 45px;
+    width: 100%;
+    outline: none;
+    font-size: 16px;
+    border-radius: 5px;
+    padding-left: 15px;
+    /* Glassmorphism */
+    background-color: rgba(255,255,255,0.07);
+    border: none;
+    color: #ffffff; /* Texto del input en blanco */
+    transition: all 0.3s ease;
 }
 
 .user-details .input-box input:focus,
-.user-details .input-box input:valid {
-  border-color: #9b59b6;
+.user-details .input-box textarea:focus,
+.user-details .input-box select:focus {
+    border-color: none;
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.4);
 }
 
 form .gender-details .gender-title {
-  font-size: 20px;
-  font-weight: 500;
+    font-size: 20px;
+    font-weight: 500;
+    color: #ffffff;
 }
 
 form .category {
-  display: flex;
-  width: 80%;
-  margin: 14px 0;
-  justify-content: space-between;
+    display: flex;
+    width: 80%;
+    margin: 14px 0;
+    justify-content: space-between;
 }
 
 form .category label {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
 }
 
 form .category label .dot {
-  height: 18px;
-  width: 18px;
-  border-radius: 50%;
-  margin-right: 10px;
-  background: #d9d9d9;
-  border: 5px solid transparent;
-  transition: all 0.3s ease;
+    height: 18px;
+    width: 18px;
+    border-radius: 50%;
+    margin-right: 10px;
+    background: rgba(255,255,255,0.3);
+    border: 5px solid rgba(255,255,255,0.1);
+    transition: all 0.3s ease;
 }
 
 #dot-1:checked~.category label .one,
 #dot-2:checked~.category label .two,
 #dot-3:checked~.category label .three {
-  background: #9b59b6;
-  border-color: #d9d9d9;
+    background: #ffffff;
+    border-color: #b3b3b3;
 }
 
 form input[type="radio"] {
-  display: none;
+    display: none;
 }
 
 form .button {
-  height: 45px;
-  margin: 35px 0
+    height: 45px;
+    margin: 35px 0
 }
 
 form .button input {
-  height: 100%;
-  width: 100%;
-  border-radius: 5px;
-  border: none;
-  color: #fff;
-  font-size: 18px;
-  font-weight: 500;
-  letter-spacing: 1px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  background: linear-gradient(135deg, #71b7e6, #9b59b6);
+    height: 100%;
+    width: 100%;
+    border-radius: 5px;
+    border: none;
+    color: #080710;
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background-color: #ffffff;
 }
 
 form .button input:hover {
-  background: linear-gradient(-135deg, #71b7e6, #9b59b6);
+    background-color: #e0e0e0;
 }
 
 /* Responsive media query code for mobile devices */
 @media(max-width: 584px) {
-  .container {
-    max-width: 100%;
-  }
+    .container {
+        max-width: 100%;
+    }
 
-  form .user-details .input-box {
-    margin-bottom: 15px;
-    width: 100%;
-  }
+    form .user-details .input-box {
+        margin-bottom: 15px;
+        width: 100%;
+    }
 
-  form .category {
-    width: 100%;
-  }
+    form .category {
+        width: 100%;
+    }
 
-  .content form .user-details {
-    max-height: 300px;
-    overflow-y: scroll;
-  }
+    .content form .user-details {
+        max-height: 300px;
+        overflow-y: scroll;
+    }
 
-  .user-details::-webkit-scrollbar {
-    width: 5px;
-  }
+    .user-details::-webkit-scrollbar {
+        width: 5px;
+    }
 }
 
 /* Responsive media query code for mobile devices */
 @media(max-width: 459px) {
-  .container .content .category {
-    flex-direction: column;
-  }
+    .container .content .category {
+        flex-direction: column;
+    }
 }
