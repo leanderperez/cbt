@@ -7,6 +7,8 @@
     box-sizing: border-box;
 }
 body{
+
+    font-family: 'Poppins',sans-serif;
     background-color: #000000;
     /*background: #1f1f47;*/
     overflow: hidden;
@@ -84,7 +86,6 @@ body{
     padding: 50px 35px;
 }
 .form-login *{
-    font-family: 'Poppins',sans-serif;
     color: #ffffff;
     letter-spacing: 0.5px;
     outline: none;
@@ -698,4 +699,103 @@ form .button input:hover {
     .container .content .category {
         flex-direction: column;
     }
+}
+
+
+/* ================= GANTT CHART - GLASSMORPHISM ================= */
+
+/* General container to apply the glass effect to the whole chart area */
+.gantt-container {
+    position: relative;
+    overflow: auto;
+    font-size: 12px;
+
+     /* Set max height and enable vertical scroll */
+    max-height: 87vh; /* Adjust this value as needed */
+    overflow-y: auto; /* Adds a vertical scrollbar if content exceeds max-height */
+
+    
+    /* Apply the core glassmorphism properties */
+    background-color: rgba(255, 255, 255, 0.05); /* Lighter transparency for the main container */
+    backdrop-filter: blur(10px);
+    border-radius: 10px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 40px rgba(8, 7, 16, 0.6);
+    
+    padding: 20px; /* Add some padding for visual space */
+    color: #ffffff; /* Set text color for the container */
+}
+
+/* Make grid lines and text transparent with a subtle color */
+.gantt .grid-background,
+.gantt .grid-header,
+.gantt .grid-row {
+    fill: transparent !important;
+}
+
+.gantt .grid-header {
+    /* Use a semi-transparent white for the header lines and text */
+    stroke: rgba(255, 255, 255, 0.3) !important;
+    fill: rgba(255, 255, 255, 0.1) !important;
+}
+
+.gantt .upper-text, .gantt .lower-text {
+    fill: #e5e5e5 !important; /* Lighter text color for better readability on dark background */
+    font-weight: 300;
+}
+
+/* Style for the task bars */
+.gantt .bar-wrapper {
+    cursor: pointer;
+}
+.gantt .bar {
+    fill: rgba(255, 255, 255, 0.2) !important; /* Semi-transparent white for the bar */
+    stroke: rgba(255, 255, 255, 0.5) !important; /* Subtle border for the bar */
+    stroke-width: 1.5; /* Add a bit more width to the stroke */
+    border-radius: 5px; /* Rounded corners for the bars */
+    transition: all 0.3s ease;
+}
+
+/* Progress bar inside the task bar */
+.gantt .bar-progress {
+    fill: #007bff !important;
+    /*fill: #41c24c*/
+    border-radius: 5px;
+}
+
+/* Hover effect for the bar */
+.gantt .bar-wrapper:hover .bar {
+    fill: rgba(255, 255, 255, 0.3) !important;
+    stroke: rgba(255, 255, 255, 0.7) !important;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Label on the bars */
+.gantt .bar-label {
+    fill: #ffffff !important;
+    font-weight: 500;
+}
+.gantt .bar-label.big {
+    fill: #e5e5e5 !important;
+}
+
+/* Today's highlight line */
+.gantt .today-highlight {
+    fill: rgba(0, 123, 255, 0.2) !important; /* Soft blue highlight for today */
+    stroke: #007bff !important;
+    stroke-width: 1px;
+}
+
+/* Scrollbar styles to match the glassmorphism theme */
+.gantt-container::-webkit-scrollbar {
+    width: 10px;
+    height: 8px;
+    background: transparent;
+}
+
+.gantt-container::-webkit-scrollbar-thumb {
+    background: rgba(131, 131, 131, 0.2);
+    border-radius: 6px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
 }

@@ -64,7 +64,7 @@
         <p><strong>Descripción:</strong> {{ obra.descripcion }}</p>
         <p><strong>Dirección:</strong> {{ obra.direccion }}</p>
         <p><strong>Ingeniero Encargado:</strong> {{ obra.ingeniero_encargado.get_full_name|default:obra.ingeniero_encargado.username }}</p>
-        <p><strong>Centro de Servicio:</strong> {{ obra.centro_servicio.nombre|default:"No Asignado" }}</p>
+        <p><strong>Centro de Servicio:</strong> {{ obra.centro_servicio.empresa|default:"No Asignado" }}</p>
         <p><strong>Fechas:</strong> Del {{ obra.fecha_inicio }} al {{ obra.fecha_fin_estimada }}</p>
         <p><strong>Presupuesto Inicial:</strong> ${{ obra.presupuesto_inicial }}</p>
         <p><strong>Presupuesto Ejecutado:</strong> ${{ obra.get_presupuesto_ejecutado|floatformat:2 }}</p>

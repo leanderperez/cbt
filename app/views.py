@@ -357,5 +357,7 @@ def gantt_data_view(request, pk):
     return JsonResponse(gantt_data, safe=False)
 
 def gantt_chart_view(request, pk):
-    # Pasar el ID de la obra a la plantilla para que el JS lo use
-    return render(request, 'project_app/gantt_chart.html', {'obra_pk': pk})
+    obra = get_object_or_404(Obra, pk=pk)
+    return render(request, 'project_app/gantt_chart.html', {
+        'obra_pk': pk,
+        'obra_nombre': obra.nombre,})
