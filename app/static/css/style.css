@@ -711,7 +711,7 @@ form .button input:hover {
     font-size: 12px;
 
      /* Set max height and enable vertical scroll */
-    max-height: 87vh; /* Adjust this value as needed */
+    max-height: 85vh; /* Adjust this value as needed */
     overflow-y: auto; /* Adds a vertical scrollbar if content exceeds max-height */
 
     
