@@ -704,14 +704,34 @@ form .button input:hover {
 
 /* ================= GANTT CHART - GLASSMORPHISM ================= */
 
-/* General container to apply the glass effect to the whole chart area */
-.gantt-container {
+.gantt-container-1 {
     position: relative;
     overflow: auto;
     font-size: 12px;
 
      /* Set max height and enable vertical scroll */
     max-height: 85vh; /* Adjust this value as needed */
+    overflow-y: auto; /* Adds a vertical scrollbar if content exceeds max-height */
+
+    
+    /* Apply the core glassmorphism properties */
+    background-color: rgba(255, 255, 255, 0.05); /* Lighter transparency for the main container */
+    backdrop-filter: blur(10px);
+    border-radius: 10px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 40px rgba(8, 7, 16, 0.6);
+    
+    padding: 20px; /* Add some padding for visual space */
+    color: #ffffff; /* Set text color for the container */
+}
+
+.gantt-container {
+    position: relative;
+    overflow: auto;
+    font-size: 12px;
+
+     /* Set max height and enable vertical scroll */
+    max-height: 75vh; /* Adjust this value as needed */
     overflow-y: auto; /* Adds a vertical scrollbar if content exceeds max-height */
 
     
@@ -787,13 +807,15 @@ form .button input:hover {
 }
 
 /* Scrollbar styles to match the glassmorphism theme */
-.gantt-container::-webkit-scrollbar {
+.gantt-container::-webkit-scrollbar,
+.gantt-container-1::-webkit-scrollbar {
     width: 10px;
     height: 8px;
     background: transparent;
 }
 
-.gantt-container::-webkit-scrollbar-thumb {
+.gantt-container::-webkit-scrollbar-thumb,
+.gantt-container-1::-webkit-scrollbar-thumb {
     background: rgba(131, 131, 131, 0.2);
     border-radius: 6px;
     border: 2px solid transparent;

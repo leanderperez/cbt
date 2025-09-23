@@ -26,6 +26,7 @@ from .forms import (
 import datetime
 import json
 from decimal import Decimal
+from formtools.wizard.views import SessionWizardView
 
 
 class ObraListView(ListView):
@@ -53,6 +54,9 @@ class ObraDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         return context
+
+# La vista FaseCreateView y TareaCreateView serán reemplazadas por el Form Wizard, pero
+# las mantendremos para referencia si no se desea eliminar.
 
 class FaseCreateView(CreateView):
     model = Fase
@@ -361,3 +365,91 @@ def gantt_chart_view(request, pk):
     return render(request, 'project_app/gantt_chart.html', {
         'obra_pk': pk,
         'obra_nombre': obra.nombre,})
+
+# --- NUEVAS VISTAS PARA FORM WIZARD Y EDICIÓN DE MATERIALES ---
+
+class ObraFaseTareaWizard(SessionWizardView):
+    # ... (get_template_names y get_context_data se mantienen igual) ...
+
+    def done(self, form_list, **kwargs):
+        with transaction.atomic():
+            # Paso 0: Obra
+            # Usar get_cleaned_data_for_step con el nombre del paso 'obra'
+            obra_form_data = self.get_cleaned_data_for_step('obra')
+            if not obra_form_data:
+                # Esto no debería ocurrir si el flujo es correcto, pero es una buena práctica
+                # para manejar errores.
+                return self.render_done_step(form_list)
+            obra = Obra.objects.create(**obra_form_data)
+
+            # Paso 1: Fase
+            # Usar get_cleaned_data_for_step con el nombre del paso 'fase'
+            fase_form_data = self.get_cleaned_data_for_step('fase')
+            if not fase_form_data:
+                return self.render_done_step(form_list)
+            fase = Fase.objects.create(obra=obra, **fase_form_data)
+
+            # Paso 2: Tarea y Requerimientos de Materiales
+            tarea_form = form_list[2] # Obtener el formulario de la tarea
+            tarea = Tarea.objects.create(fase=fase, **tarea_form.cleaned_data)
+            
+            # Procesar los datos de la tabla de materiales
+            for key, value in self.request.POST.items():
+                if key.startswith('material-quantity-'):
+                    try:
+                        material_pk = int(key.split('-')[-1])
+                        cantidad = float(value) if value else 0
+                        
+                        if cantidad > 0:
+                            material = get_object_or_404(Material, pk=material_pk)
+                            RequerimientoMaterial.objects.create(
+                                tarea=tarea,
+                                material=material,
+                                cantidad_requerida=cantidad
+                            )
+                    except (ValueError, IndexError, Material.DoesNotExist):
+                        continue
+            
+        return redirect('obra-detail', pk=obra.pk)
+# Vista para editar los requerimientos de material de una tarea
+class TareaRequerimientoMaterialUpdateView(UpdateView):
+    model = Tarea
+    template_name = 'project_app/tarea_material_update.html'
+    form_class = TareaForm # Usamos TareaForm solo para mostrar los detalles de la tarea
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        tarea = self.object
+        context['tarea'] = tarea
+        context['materiales'] = Material.objects.all().order_by('nombre')
+        
+        # Cargar las cantidades requeridas existentes en un diccionario
+        requerimientos = {req.material.pk: req.cantidad_requerida for req in tarea.requerimientomaterial_set.all()}
+        context['requerimientos'] = requerimientos
+        
+        return context
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        with transaction.atomic():
+            # Eliminar todos los requerimientos existentes para la tarea
+            RequerimientoMaterial.objects.filter(tarea=self.object).delete()
+            
+            # Crear los nuevos requerimientos a partir del formulario
+            for key, value in request.POST.items():
+                if key.startswith('material-quantity-'):
+                    try:
+                        material_pk = int(key.split('-')[-1])
+                        cantidad = float(value) if value else 0
+                        
+                        if cantidad > 0:
+                            material = get_object_or_404(Material, pk=material_pk)
+                            RequerimientoMaterial.objects.create(
+                                tarea=self.object,
+                                material=material,
+                                cantidad_requerida=cantidad
+                            )
+                    except (ValueError, IndexError, Material.DoesNotExist):
+                        continue
+
+        return redirect('obra-detail', pk=self.object.fase.obra.pk)

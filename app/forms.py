@@ -38,8 +38,8 @@ class TareaForm(forms.ModelForm):
             'fecha_fin_estimada', 'costo_mano_de_obra'
         ]
         widgets = {
-            'fecha_inicio': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
-            'fecha_fin_estimada': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+            'fecha_inicio': forms.DateTimeInput(attrs={'type': 'date'}),
+            'fecha_fin_estimada': forms.DateTimeInput(attrs={'type': 'date'}),
         }
 
 class TareaUpdateProgressForm(forms.ModelForm):
@@ -66,6 +66,7 @@ RequerimientoMaterialFormSet = inlineformset_factory(
     extra=1,
     can_delete=True
 )
+
 """
 AsignacionMaterialFormSet = inlineformset_factory(
     Tarea,

@@ -3,8 +3,16 @@ from django.contrib.auth.views import LogoutView
 from .views import (
     ObraListView, ObraCreateView, ObraUpdateView, ObraDetailView,
     FaseCreateView, TareaCreateView, TareaUpdateView, ObraMedicionesView,
-    MaterialListView, MaterialCreateView, PersonalCreateView, PersonalListView, gantt_data_view, gantt_chart_view
+    MaterialListView, MaterialCreateView, PersonalCreateView, PersonalListView, gantt_data_view, gantt_chart_view,
+    ObraFaseTareaWizard, TareaRequerimientoMaterialUpdateView # <-- NUEVAS VISTAS
 )
+from .forms import ObraForm, FaseForm, TareaForm # <-- IMPORTAR LOS FORMULARIOS
+
+FORMS = [
+    ("obra", ObraForm),
+    ("fase", FaseForm),
+    ("tarea", TareaForm),
+]
 
 urlpatterns = [
     # Rutas para Obras
@@ -20,6 +28,7 @@ urlpatterns = [
     # Rutas para Tareas
     path('fase/<int:pk>/tarea/new/', TareaCreateView.as_view(), name='tarea-create'),
     path('tarea/<int:pk>/edit/', TareaUpdateView.as_view(), name='tarea-update'),
+    path('tarea/<int:pk>/edit-materials/', TareaRequerimientoMaterialUpdateView.as_view(), name='tarea-edit-materials'), # <-- NUEVA RUTA
 
     # Rutas para Materiales
     path('materiales/', MaterialListView.as_view(), name='material-list'),
@@ -36,4 +45,7 @@ urlpatterns = [
     path('gantt/<int:pk>/', gantt_chart_view, name='gantt_chart'),
     # URL de la API que recibe el ID de la obra
     path('api/gantt_data/<int:pk>/', gantt_data_view, name='gantt_data'),
+    
+    # RUTA PARA EL FORM WIZARD
+    path('wizard/create/', ObraFaseTareaWizard.as_view(FORMS), name='obra-wizard-create'),
 ]
