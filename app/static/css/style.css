@@ -316,7 +316,7 @@ table.dataTable tbody tr:hover,
 .dataTables_wrapper .dataTables_filter input {
     background: rgba(255,255,255,0.13);
     color: #fff;
-    border: 1:px solid rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.18);
     border-radius: 6px;
     padding: 6px 12px;
     margin-left: 8px;
@@ -637,13 +637,18 @@ form .button input:hover {
 /* ================= GANTT CHART - GLASSMORPHISM ================= */
 
 .gantt-container-1 {
-    position: relative;
     overflow: auto;
     font-size: 12px;
 
      /* Set max height and enable vertical scroll */
     max-height: 85vh; /* Adjust this value as needed */
+    width: 99vw;
     overflow-y: auto; /* Adds a vertical scrollbar if content exceeds max-height */
+
+    position: absolute;
+    top: 55%;
+    left: 50%;
+    transform: translate(-50%,-50%);
 
     
     /* Apply the core glassmorphism properties */
@@ -942,7 +947,7 @@ form .button input:hover {
     background: rgba(255, 255, 255, 0.4);
 }
 
-/* --- ESTILOS DEL MODAL (Alineados con el estilo de Formulario .container) --- */
+/* ========== ESTILOS DEL MODAL (Alineados con el estilo de Formulario .container) =========== */
 .modal {
     display: none; 
     position: fixed; 
