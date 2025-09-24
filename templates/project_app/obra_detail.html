@@ -2,155 +2,6 @@
 {% load static %}
 {% block title %}Detalles de la Obra: {{ obra.nombre }}{% endblock %}
 
-{% block extra_css %}
-    <style>
-        .container-glass {
-            max-width: 1000px;
-            margin: 1em auto;
-            color: #ffffff;
-        }
-        .card-glass {
-            background: rgba(255, 255, 255, 0.13);
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            box-shadow: 0 0 40px rgba(8, 7, 16, 0.6);
-            padding: 0.8em 1em;
-            margin-bottom: 1em;
-            transition: all 0.3s ease-in-out;
-            cursor: pointer;
-        }
-        .card-glass:hover {
-            box-shadow: 0 0 50px rgba(8, 7, 16, 0.8);
-        }
-        .project-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .project-info-full {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.5s ease-in-out, opacity 0.5s ease-in-out;
-            opacity: 0;
-            padding-top: 0;
-        }
-        .project-info-full.expanded {
-            max-height: 500px;
-            opacity: 1;
-            padding-top: 0.8em;
-        }
-        h1, h2, h3 { margin: 0.2em 0; font-size: 1.2em;}
-        p, .small-text { margin: 0.1em 0; font-size: 0.8em; }
-        .progress-circle {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-        }
-        .progress-circle::after {
-            content: '';
-            width: 60px;
-            height: 60px;
-            background: #000000;
-            border-radius: 50%;
-            position: absolute;
-            opacity: 0.8;
-        }
-        .progress-circle span {
-            z-index: 1;
-            font-weight: bold;
-            font-size: 1em;
-            color: #fff;
-        }
-        .phase-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            padding: 0.3em 0;
-        }
-        .phase-title-group {
-            display: flex;
-            align-items: center;
-            gap: 0.8em;
-        }
-        .btn-add {
-            font-size: 0.7em;
-            padding: 0.3em 0.6em;
-            background-color: #6c757d;
-            color: white;
-            border-radius: 5px;
-            text-decoration: none;
-            border: none;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-        .btn-add:hover {
-            background-color: #5a6268;
-        }
-        .action-buttons {
-            display: flex;
-            gap: 0.5em;
-        }
-        .tasks-container {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.5s ease-in-out;
-        }
-        .tasks-container.expanded {
-            max-height: 500px;
-        }
-        .card-phase {
-            padding: 0.6em 0.8em;
-            margin-bottom: 0.8em;
-        }
-        .card-phase .phase-title-group h3 {
-            font-size: 1.1em;
-        }
-        .card-phase .progress-circle {
-            width: 50px;
-            height: 50px;
-        }
-        .card-phase .progress-circle::after {
-            width: 40px;
-            height: 40px;
-        }
-        .card-phase .progress-circle span {
-            font-size: 0.7em;
-        }
-        .task-item {
-            padding: 0.3em 0;
-            border-bottom: 1px dashed #ccc;
-            margin-top: 0.3em;
-            font-size: 0.8em;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .task-item:last-child {
-            border-bottom: none;
-        }
-        .phases-scroll-container {
-            max-height: 60vh;
-            overflow-y: auto;
-        }
-        .phases-scroll-container::-webkit-scrollbar {
-            width: 8px;
-        }
-        .phases-scroll-container::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 4px;
-        }
-        .phases-scroll-container::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.4);
-        }
-    </style>
-{% endblock %}
-
 {% block content %}
 <div class="container-glass">
     <div class="card-glass" onclick="toggleProjectDetails()">
@@ -175,7 +26,8 @@
         <h2>Fases del Proyecto</h2>
         <div>
             <a href="{% url 'obra-mediciones' obra.pk %}" class="btn-add">Realizar Medición</a>
-            <a href="{% url 'fase-create' pk=obra.pk %}" class="btn-add">Agregar Fase</a>
+            <button type="button" onclick="openModal('faseModal')" class="btn-add">Agregar Fase</button>
+            <a href="{% url 'gantt_chart' obra.pk %}" class="btn-add">Project</a>
         </div>
     </div>
 
@@ -205,6 +57,39 @@
     </div>
 </div>
 
+<div id="faseModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeModal('faseModal')">&times;</span>
+        
+        <h3>Agregar Nueva Fase</h3>
+        <div class="content">
+            <form method="post" action="{% url 'fase-create' pk=obra.pk %}">
+                {% csrf_token %}
+                <div class="user-details">
+                    <div class="input-box">
+                        <span class="details">Nombre de la Fase</span>
+                        <input type="text" name="nombre" placeholder="Nombre de la Fase" required>
+                    </div>
+                    
+                    <div class="input-box">
+                        <span class="details">Presupuesto Asignado</span>
+                        <input type="number" name="presupuesto_asignado" step="0.01" value="">
+                    </div>
+                    
+                    <div class="input-box">
+                        <span class="details">Costo de Mano de Obra (Si aplica)</span>
+                        <input type="number" name="costo_mano_de_obra" step="0.01" value="">
+                    </div>
+                </div>
+                
+                <div class="button">
+                    <input type="submit" value="Guardar Fase">
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
     function toggleProjectDetails() {
         const projectInfo = document.querySelector('.project-info-full');
@@ -218,8 +103,26 @@
             tasksContainer.classList.remove('expanded');
             tasksContainer.style.maxHeight = '0';
         } else {
+            // Se le suma 20 para dar espacio a los botones/elementos adicionales.
             tasksContainer.classList.add('expanded');
-            tasksContainer.style.maxHeight = tasksContainer.scrollHeight + 'px';
+            tasksContainer.style.maxHeight = (tasksContainer.scrollHeight + 20) + 'px';
+        }
+    }
+
+    // Funciones para el Modal
+    function openModal(modalId) {
+        document.getElementById(modalId).style.display = 'block';
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).style.display = 'none';
+    }
+
+    // Cerrar el modal al hacer clic fuera de él
+    window.onclick = function(event) {
+        const modal = document.getElementById('faseModal');
+        if (event.target == modal) {
+            modal.style.display = "none";
         }
     }
 </script>

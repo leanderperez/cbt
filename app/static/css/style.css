@@ -28,25 +28,7 @@ body{
     position: absolute;
     border-radius: 50%;
 }
-/* Colores originales
-.shape:first-child{
-    background: linear-gradient(
-        #1845ad,
-        #23a2f6
-    );
-    left: -80px;
-    top: -80px;
-}
-.shape:last-child{
-    background: linear-gradient(
-        to right,
-        #ff512f,
-        #f09819
-    );
-    right: -80px;
-    bottom: -80px;
-}
-*/
+
 .shape:first-child {
   background: linear-gradient(
     to bottom right, /* Dirección para un brillo diagonal */
@@ -104,6 +86,7 @@ label{
     font-size: 14px;
     font-weight: 450;
 }
+
 input, 
 textarea,
 select{
@@ -242,8 +225,7 @@ table.dataTable,
 
 /* Efecto glassmorphism en cada fila */
 table.dataTable tbody tr,
-.obra-table tbody tr,
-.glass-row {
+.obra-table tbody tr { /* ✨ MODIFICADO: Se eliminó .glass-row (redundancia) */
     background: rgba(255,255,255,0.13) !important;
     box-shadow: 0 4px 24px rgba(8,7,16,0.15);
     backdrop-filter: blur(10px);
@@ -334,7 +316,7 @@ table.dataTable tbody tr:hover,
 .dataTables_wrapper .dataTables_filter input {
     background: rgba(255,255,255,0.13);
     color: #fff;
-    border: 1px solid rgba(255,255,255,0.18);
+    border: 1:px solid rgba(255,255,255,0.18);
     border-radius: 6px;
     padding: 6px 12px;
     margin-left: 8px;
@@ -444,63 +426,6 @@ table.dataTable thead th.sorting_desc:before,
     font-weight: 300;
 }
 
-/* ================= ANIMATED BACKGROUND BLOB ================= */
-/*
-.container-blob {
-    overflow: clip;
-}
-.blob {
-  position: absolute;
-  width: 1000px;
-  height: 1000px;
-  background: linear-gradient(
-    180deg,
-    #4c78dd 31.77%,
-    #23a2f6 100%
-  );
-  mix-blend-mode: color-dodge;
-  -webkit-animation: move 120s infinite alternate;
-          animation: move 120s infinite alternate;
-  transition: 1s cubic-bezier(0.07, 0.8, 0.16, 1);
-}
-
-.blob:hover {
-  width: 1000px;
-  height: 1000px;
-  -webkit-filter: blur(30px);
-          filter: blur(30px);
-  box-shadow:
-    inset 0 0 0 5px rgba(255,255,255, 0.6),
-    inset 100px 100px 0 0px #fd684a,
-    inset 200px 200px 0 0px #f09819,
-    inset 300px 300px 0 0px #2b86c5;
-}
-
-@-webkit-keyframes move {
-  from {
-    transform: translate(-50px, -50px) rotate(-90deg);
-    border-radius: 24% 76% 35% 65% / 27% 36% 64% 73%;
-  }
-
-  to {
-    transform: translate(780px, 100px) rotate(-10deg);
-    border-radius: 76% 24% 33% 67% / 68% 55% 45% 32%;
-  }
-}
-
-@keyframes move {
-  from {
-    transform: translate(-50px, -50px) rotate(-90deg);
-    border-radius: 24% 76% 35% 65% / 27% 36% 64% 73%;
-  }
-
-  to {
-    transform: translate(780px, 100px) rotate(-10deg);
-    border-radius: 76% 24% 33% 67% / 68% 55% 45% 32%;
-  }
-}
-*/
-
 /* ================= BOTONES ================= */
 .btn {
     display: inline-block;
@@ -531,11 +456,12 @@ table.dataTable thead th.sorting_desc:before,
     border: 2px solid rgba(255,255,255,0.1); /* Borde sutil */
     box-shadow: 0 0 40px rgba(8,7,16,0.6);   /* Sombra profunda */
 
-    /* Nuevas propiedades para centrar */
+
     position: absolute;
     top: 55%;
     left: 50%;
     transform: translate(-50%,-50%);
+
 }
 
 .container * {
@@ -575,6 +501,12 @@ form .user-details .input-box {
     margin-bottom: 15px;
     width: calc(100% / 2 - 20px);
 }
+/* Asegura el 100% de ancho en el modal y la vista de detalle cuando se aplica */
+.modal-content .input-box,
+.container-glass .input-box {
+    width: 100% !important;
+}
+
 
 form .input-box span.details {
     display: block;
@@ -820,4 +752,341 @@ form .button input:hover {
     border-radius: 6px;
     border: 2px solid transparent;
     background-clip: padding-box;
+}
+
+.cost-input .measurement-input{
+    display: block;
+    height: 30px;
+    width: 30px;
+    background-color: rgba(184, 184, 184, 0.07);
+    border-radius: 5px;
+    padding: 0 10px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+    font-size: 14px;
+    font-weight: 300;
+}
+
+
+/* ================= GLASSMORPHISM DETAIL VIEW ================= */
+
+.container-glass {
+    max-width: 1000px;
+    width: 95%; /* Ajuste para mejor responsividad */
+    margin: 1em auto;
+    color: #ffffff;
+}
+.card-glass {
+    background: rgba(255, 255, 255, 0.13);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    box-shadow: 0 0 40px rgba(8, 7, 16, 0.6);
+    padding: 0.8em 1em;
+    margin-bottom: 1em;
+    transition: all 0.3s ease-in-out;
+    cursor: pointer;
+}
+.card-glass:hover {
+    box-shadow: 0 0 50px rgba(8, 7, 16, 0.8);
+}
+.project-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.project-info-full {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s ease-in-out, opacity 0.5s ease-in-out;
+    opacity: 0;
+    padding-top: 0;
+}
+.project-info-full.expanded {
+    max-height: 500px; /* Suficientemente grande para el contenido */
+    opacity: 1;
+    padding-top: 0.8em;
+}
+.container-glass h1 { 
+    margin: 0.2em 0; 
+    font-size: 1.2em;
+    font-weight: 500;
+}
+.container-glass h2 { 
+    margin: 0.2em 0; 
+    font-size: 1.1em;
+    font-weight: 500;
+} 
+.container-glass p, .container-glass .small-text { 
+    margin: 0.1em 0; 
+    font-size: 0.8em;
+    color: #e5e5e5; /* Color ligeramente más claro */
+}
+.progress-circle {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+.progress-circle::after {
+    content: '';
+    width: 60px;
+    height: 60px;
+    background: #000000;
+    border-radius: 50%;
+    position: absolute;
+    opacity: 0.8;
+}
+.progress-circle span {
+    z-index: 1;
+    font-weight: bold;
+    font-size: 1em;
+    color: #fff;
+}
+.phase-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    padding: 0.1em 0;
+}
+.phase-title-group {
+    display: flex;
+    align-items: center;
+    gap: 0.6em;
+}
+.btn-add {
+    font-size: 0.8em; 
+    padding: 0.4em 0.8em; /* Aumentado un poco el padding */
+    background-color: #6c757d; /* Color primario para los botones de acción */
+    color: white;
+    border-radius: 5px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-weight: 500;
+}
+.btn-add:hover {
+    background-color: #5a6268;
+}
+.action-buttons {
+    display: flex;
+    gap: 0.5em;
+}
+.tasks-container {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s ease-in-out;
+}
+.tasks-container.expanded {
+    max-height: 500px;
+}
+.card-phase {
+    padding: 0.3em 0.5em;
+    margin-bottom: 0.6em; /* Aumentado el margin-bottom */
+}
+.card-phase .phase-title-group h3 {
+    font-size: 1em; /* Ligeramente más grande */
+    margin: 0;
+    font-weight: 400;
+}
+.card-phase .progress-circle {
+    width: 40px;
+    height: 40px;
+}
+.card-phase .progress-circle::after {
+    width: 30px;
+    height: 30px;
+}
+.card-phase .progress-circle span {
+    font-size: 0.7em; /* Ligeramente más grande */
+}
+.tasks-container .btn-add {
+    margin-top: 0.8em !important; 
+    margin-bottom: 0.8em; 
+    margin-left: 0.5em !important;
+    display: inline-block;
+    background-color: #6c757d; /* Color secundario para botón de tarea */
+}
+.tasks-container .btn-add:hover {
+    background-color: #5a6268;
+}
+.task-item {
+    padding: 0.3em 0.5em; /* Aumentado padding */
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.3); /* Cambiado a blanco semi-transparente */
+    margin-top: 0.15em;
+    font-size: 0.8em; /* Ligeramente más grande */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.task-item:last-child {
+    border-bottom: none;
+}
+.phases-scroll-container {
+    max-height: 60vh;
+    overflow-y: auto;
+}
+.phases-scroll-container::-webkit-scrollbar {
+    width: 8px;
+}
+.phases-scroll-container::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+}
+.phases-scroll-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.4);
+}
+
+/* --- ESTILOS DEL MODAL (Alineados con el estilo de Formulario .container) --- */
+.modal {
+    display: none; 
+    position: fixed; 
+    z-index: 100; 
+    left: 0;
+    top: 0;
+    width: 100%; 
+    height: 100%; 
+    overflow: auto; 
+    /* Fondo con alto desenfoque para oscurecer y desenfocar la vista de fondo */
+    background-color: rgba(0,0,0,0.5); 
+    padding-top: 60px;
+    backdrop-filter: blur(8px); /* Desenfoque del fondo */
+}
+
+.modal-content {
+    /* Usamos las propiedades de .container para el glassmorphism */
+    max-width: 550px;
+    width: 80%;
+    margin: 5% auto; 
+    padding: 25px 30px; /* Padding del formulario */
+    
+    /* Glassmorphism Copiado de .container */
+    background-color: rgba(255,255,255,0.13); 
+    border-radius: 10px;
+    backdrop-filter: blur(10px);              
+    border: 2px solid rgba(255,255,255,0.1); 
+    box-shadow: 0 0 40px rgba(8,7,16,0.6);   
+    
+    color: #ffffff; 
+}
+/* Asegura que los elementos dentro del modal usen el estilo de .container */
+.modal-content * {
+    font-family: 'Poppins', sans-serif;
+    color: #ffffff;
+    letter-spacing: 0.5px;
+}
+
+
+.modal-content h3 {
+    /* Estilo para el título del modal */
+    font-size: 28px;
+    font-weight: 450;
+    line-height: 42px;
+    text-align: center;
+    color: #ffffff; 
+    margin-top: 0;
+}
+
+.close-btn {
+    color: #fff; 
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    opacity: 0.8;
+    transition: opacity 0.3s;
+}
+
+.close-btn:hover,
+.close-btn:focus {
+    color: #fff;
+    opacity: 1;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* Usamos los estilos de input existentes */
+.modal-content .user-details {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin: 20px 0 12px 0; /* Margen del formulario */
+}
+
+.modal-content .input-box {
+    margin-bottom: 15px;
+    width: 100%; /* Forzado a 100% para modals pequeños */
+}
+
+.modal-content .user-details-two-columns .input-box {
+    width: calc(100% / 2 - 20px) !important; /* Devuelve a 2 columnas con margen */
+}
+
+.modal-content .details {
+    /* Coincide con .input-box span.details */
+    display: block;
+    font-weight: 500;
+    margin-bottom: 5px;
+}
+
+.modal-content input[type="text"],
+.modal-content input[type="number"] {
+    /* Coincide con .user-details .input-box input */
+    height: 45px;
+    width: 100%;
+    outline: none;
+    font-size: 16px;
+    border-radius: 5px;
+    padding-left: 15px;
+    background-color: rgba(255,255,255,0.07); 
+    border: none; 
+    color: #fff; 
+    transition: all 0.3s ease;
+}
+.modal-content input[type="text"]:focus,
+.modal-content input[type="number"]:focus {
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.4);
+}
+
+
+/* Paleta de colores para los botones */
+.modal-content .button {
+    margin-top: 35px; /* Margen del botón de formulario */
+    height: 45px;
+    display: flex;
+    gap: 10px;
+}
+
+.modal-content .button input[type="submit"],
+.modal-content .button button {
+    height: 100%;
+    flex: 1; /* Ocupa el espacio disponible */
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+}
+
+.modal-content .button input[type="submit"] {
+    background: #ffffff; /* Color de botón primario (blanco) */
+    color: #080710;
+}
+.modal-content .button input[type="submit"]:hover {
+    background-color: #e0e0e0;
+}
+
+.modal-content .button button {
+    background: #6c757d; /* Color secundario (Gris) */
+    color: white;
+}
+.modal-content .button button:hover {
+    background-color: #5a6268;
 }

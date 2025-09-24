@@ -1,49 +1,43 @@
-{% extends 'project_app/base.html' %}
-{% load static %}
-{% block title %}Gestion de Proyectos CBT{% endblock %}
-
-
-{% block content %}
-  <div class="container">
-    <h3>{% if form.instance.pk %}Editar Material - {{ form.instance.codigo }}{% else %}Crear Nuevo Material{% endif %}</h3>
-    <div class="content">
-      <form method="post">
+<h3>{% if form.instance.pk %}Editar Material - {{ form.instance.codigo }}{% else %}Crear Nuevo Material{% endif %}</h3>
+<div class="content">
+    <form method="post" action="{% url 'material-create' %}" id="materialForm">
         {% csrf_token %}
-        <div class="user-details">
-
-          <div class="input-box">
-            <span class="details">Código del Material</span>
-            {{ form.codigo }}
-          </div>
-
-          <div class="input-box">
-            <span class="details">Nombre del Material</span>
-            {{ form.nombre }}
-          </div>
-
-          <div class="input-box">
-            <span class="details">Familia del Material</span>
-            {{ form.familia }}
-          </div>
-          
-          <div class="input-box">
-            <span class="details">Unidad de Medida</span>
-            {{ form.unidad }}
-          </div>
-
-          <div class="input-box">
-            <span class="details">Costo Unitario</span>
-            {{ form.costo_unitario }}
-          </div>
-        </div>
         
-        <div class="button">
-          <input type="submit"></input>
-          <a href="{% url 'material-list' %}">Cancelar</a>
-        </div>
-      </form>
-    </div>
-  </div>
-{% endblock %}
+        <div class="user-details user-details-two-columns"> 
 
+            <div class="input-box">
+                <span class="details">Código del Material</span>
+                {{ form.codigo }}
+            </div>
+
+            <div class="input-box">
+                <span class="details">Nombre del Material</span>
+                {{ form.nombre }}
+            </div>
+
+            <div class="input-box">
+                <span class="details">Familia del Material</span>
+                {{ form.familia }}
+            </div>
+
+            <div class="input-box">
+                <span class="details">Unidad de Medida</span>
+                {{ form.unidad }}
+            </div>
+
+            <div class="input-box">
+                <span class="details">Costo Unitario</span>
+                {{ form.costo_unitario }}
+            </div>
+            
+            <div class="input-box">
+                </div>
+
+        </div>
+
+        <div class="button">
+            <input type="submit" value="Guardar Material"/>
+        </div>
+    </form>
+</div>
 

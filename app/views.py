@@ -252,6 +252,11 @@ class MaterialListView(ListView):
     template_name = 'project_app/material_list.html'
     context_object_name = 'materiales'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['material_form'] = MaterialForm()
+        return context
+
     def post(self, request):
         if 'update_costs' in request.POST:
             with transaction.atomic():

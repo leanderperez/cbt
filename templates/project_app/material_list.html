@@ -39,11 +39,22 @@
         </table>
     </div>
     <div style="margin-left: 15px;">
-        <a href="{% url 'material-create' %}" class="btn">Crear Material</a>
+        <button type="button" onclick="openModal('materialModal')" class="btn">Crear Material</button>
         <button type="submit" name="update_costs" class="btn">Guardar Costos</button>
     </div>
 
 </form>
+
+<div id="materialModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeModal('materialModal')">&times;</span>
+        
+        <div class="container-modal">
+            {% include 'project_app/material_form.html' with form=material_form %}
+        </div>
+    </div>
+</div>
+
 <script>
     $(document).ready(function() {
         var table = $('#materialTable').DataTable({
@@ -68,5 +79,21 @@
             });
         });
     });
+
+    function openModal(modalId) {
+        document.getElementById(modalId).style.display = 'block';
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).style.display = 'none';
+    }
+
+    // Cerrar el modal al hacer clic fuera de él
+    window.onclick = function(event) {
+        const modal = document.getElementById('materialModal');
+        if (event.target == modal) {
+            modal.style.display = 'none';
+        }
+    }
 </script>
-{% endblock %}
+{% endblock content %}
