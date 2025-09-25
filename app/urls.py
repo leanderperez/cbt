@@ -3,7 +3,8 @@ from django.contrib.auth.views import LogoutView
 from .views import (
     ObraListView, ObraCreateView, ObraUpdateView, ObraDetailView,
     FaseCreateView, TareaCreateView, TareaUpdateView, ObraMedicionesView,
-    MaterialListView, MaterialCreateView, PersonalCreateView, PersonalListView, gantt_data_view, gantt_chart_view,
+    MaterialListView, MaterialCreateView, PersonalCreateView, PersonalListView, 
+    gantt_data_view, gantt_chart_view, calculadora_view
 )
 
 
@@ -36,5 +37,8 @@ urlpatterns = [
     # URL para ver el gráfico de una obra específica
     path('gantt/<int:pk>/', gantt_chart_view, name='gantt_chart'),
     # URL de la API que recibe el ID de la obra
-    path('api/gantt_data/<int:pk>/', gantt_data_view, name='gantt_data')
+    path('api/gantt_data/<int:pk>/', gantt_data_view, name='gantt_data'),
+
+    
+    path('calculadora/', calculadora_view, name='calculadora')
 ]

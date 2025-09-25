@@ -5,6 +5,7 @@
       <li class="nav-item"><a class="nav-link" href="{% url 'obra-list' %}">Gestión de Obras</a></li>
       <li class="nav-item"><a class="nav-link" href="{% url 'material-list' %}">Gestion de Materiales</a></li>
       <li class="nav-item"><a class="nav-link" href="{% url 'personal-list' %}">Centros de Servicio</a></li>
+      <li class="nav-item"><a class="nav-link" href="{% url 'calculadora' %}">Herramientas</a></li>
       <li class="nav-item">
         <form id="logout-form" class="logout-form" action="{% url 'logout' %}" method="post" style="display: inline;">
           {% csrf_token %}

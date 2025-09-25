@@ -1,0 +1,346 @@
+{% extends 'project_app/base.html' %}
+{% load static %}
+
+{% block title %}Calculadora de Rollos de Velumoide{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ========== Calculadora de Rollos de Velumoide ========== */
+
+    /* Letras blancas en toda la calculadora */
+    .calculadora-container,
+    .calculadora-card,
+    .calculadora-card-sec,
+    .calculadora-title,
+    .calculadora-small-text,
+    .calculadora-result-title,
+    .calculadora-result-p,
+    .calculadora-result-final,
+    #tabla-calculo,
+    #tabla-calculo th,
+    #tabla-calculo td,
+    #tabla-calculo tfoot td,
+    .input-cantidad {
+        color: #fff !important;
+    }
+
+    /* Fondo y glassmorphism */
+    .calculadora-container {
+        max-width: 85vw;
+        width: 80vw;
+        max-height: 80vh;
+        height: 88vh;
+        margin: 50px auto;
+        position: static;
+        transform: none;
+        overflow-y: hidden;
+    }
+    .calculadora-card,
+    .calculadora-card-sec {
+        background: rgba(255,255,255,0.15);
+        backdrop-filter: blur(10px);
+        border-radius: 10px;
+        border: 1px solid rgba(255,255,255,0.18);
+    }
+    .calculadora-card {
+        padding: 25px 30px;
+        height: 100%;
+        overflow-y: auto;
+    }
+    .calculadora-card-sec {
+        padding: 15px;
+        height: 55%;
+        overflow-y: auto;
+        margin-top: 30px;
+        border: 2px solid rgba(255,255,255,0.2);
+    }
+
+    /* Estilos de la Tabla (Desactivamos border-spacing de la tabla Glassmorphism original) */
+    #tabla-calculo {
+        width: 100% !important;
+        border-collapse: collapse !important; /* Asegura que no haya doble borde */
+        border-spacing: 0 0 !important; /* Elimina espaciado entre filas */
+        min-width: 800px;
+        margin-top: 0 !important;
+        color: #fff !important;
+    }
+
+    /* Encabezado de la Tabla (Headers) */
+    #tabla-calculo thead th {
+        /* Glassmorphism para el encabezado pegajoso */
+        background: rgba(0, 0, 0, 0.8) !important; /* Fondo oscuro para contraste */
+        color: #ffffff !important;
+        padding: 10px 15px !important;
+        text-align: center !important;
+        font-weight: 600 !important;
+        border: none !important;
+        position: sticky; /* Se mantiene al hacer scroll */
+        top: 0;
+        z-index: 2; /* Asegura que esté sobre el cuerpo de la tabla */
+    }
+    
+    /* Cuerpo de la Tabla (Filas y Celdas) */
+    #tabla-calculo tbody tr td {
+        /* Fondo Glassmorphism uniforme para evitar doble gris */
+        background-color: rgba(255, 255, 255, 0.08) !important; 
+        color: #e5e5e5 !important;
+        padding: 10px 15px !important;
+        text-align: right !important;
+        border: none !important; /* Eliminamos todos los bordes heredados */
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important; /* Borde de separación sutil */
+        vertical-align: middle;
+        transition: background-color 0.2s ease;
+    }
+    
+    #tabla-calculo tbody tr:hover td {
+        background-color: rgba(255, 255, 255, 0.15) !important; /* Efecto hover */
+    }
+
+    #tabla-calculo tbody tr td:first-child {
+        text-align: left !important;
+    }
+    
+    /* Inputs dentro de las Celdas */
+    #tabla-calculo tbody input[type="number"] {
+        height: 30px !important; 
+        width: 70px !important; 
+        text-align: center !important; 
+        padding: 0 5px !important; 
+        margin: 0 !important; 
+        font-size: 13px !important; 
+        /* Estilo Glassmorphism para el input */
+        background-color: rgba(255, 255, 255, 0.15) !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        color: #ffffff !important;
+        border-radius: 5px !important;
+        outline: none !important;
+    }
+    
+    /* Pie de Tabla (Footer) */
+    #tabla-calculo tfoot td {
+        /* Fondo más sólido para el resumen */
+        background: rgba(0, 0, 0, 0.7) !important; 
+        border-top: 2px solid rgba(255, 255, 255, 0.2) !important;
+        color: #ffffff !important;
+        font-weight: 600 !important;
+        padding: 12px 20px !important;
+        font-size: 15px !important;
+    }
+
+    .card-glass::-webkit-scrollbar,
+    .card-glass::-webkit-scrollbar {
+        width: 10px;
+        height: 8px;
+        background: transparent;
+    }
+
+    .card-glass::-webkit-scrollbar-thumb,
+    .card-glass::-webkit-scrollbar-thumb {
+        background: rgba(131, 131, 131, 0.2);
+        border-radius: 6px;
+        border: 2px solid transparent;
+        background-clip: padding-box;
+    }
+
+    /* Detalles y título */
+    .calculadora-title {
+        text-align: center;
+    }
+    .calculadora-small-text {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    .calculadora-perdida {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        max-width: 100px;
+    }
+    .calculadora-result-title {
+        margin-top: 0;
+        color: #fff;
+        text-align: center;
+        font-size: 1.5em;
+        font-weight: 600;
+    }
+    .calculadora-result-p {
+        text-align: center;
+    }
+    .calculadora-result-final {
+        font-size: 1.8em;
+        font-weight: 800;
+        color: #fff;
+    }
+
+    /* Scrollbar styles to match the glassmorphism theme */
+    .calculadora-card::-webkit-scrollbar,
+    .calculadora-card::-webkit-scrollbar {
+        width: 10px;
+        height: 8px;
+        background: transparent;
+    }
+    
+    .calculadora-card::-webkit-scrollbar-thumb,
+    .calculadora-card::-webkit-scrollbar-thumb {
+        background: rgba(131, 131, 131, 0.2);
+        border-radius: 6px;
+        border: 2px solid transparent;
+        background-clip: padding-box;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="calculadora-container">
+    
+    <div class="calculadora-card">
+        
+        <h1 class="calculadora-title">Calculadora de Rollos de Velumoide</h1>
+        <p class="calculadora-small-text">Cálculo de área de Velumoide para bridas ANSI/ASME B16.5</p>
+
+        <div class="user-details" style="justify-content: center;">
+            <div class="input-box" style="width: auto; margin-bottom: 10px;">
+                <span class="details">Pérdida por Desperdicio (Nesting):</span>
+                <div class="calculadora-perdida">
+                    <input type="number" id="perdida_pct" class="input-glass" value="15" min="0" step="1" oninput="calcularRollos()">
+                    <span class="details">%</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="datatable-container" style="max-width: 100%; width: 100%; margin-top: 15px; flex-grow: 1; overflow: auto; min-height: 200px;">
+            <div style="overflow: auto;">
+                <table id="tabla-calculo"> 
+                    <thead>
+                        <tr>
+                            <th>DN (pulgadas)</th>
+                            <th>OD (m)</th>
+                            <th>Cantidad Requerida (N)</th>
+                            <th>Área Unitaria (m2)</th>
+                            <th>Área Total Ítem (m2)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="4" style="text-align: right; padding-right: 20px;">Área Neta Total:</td>
+                            <td id="area-neta-total" class="resultado">0.000</td>
+                        </tr>
+                        <tr>
+                            <td colspan="4" style="text-align: right; padding-right: 20px;">Área con Pérdida (15%):</td>
+                            <td id="area-con-perdida" class="resultado">0.000</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+
+        <div class="calculadora-card-sec">
+            <h2 class="calculadora-result-title">Resultado Final</h2>
+            <p class="calculadora-result-p">Rollos Calculados (Matemático): 
+                <span id="rollos-calculado" class="resultado" style="font-weight: 700; color: #e5e5e5 !important;">0.00</span>
+            </p>
+            <p class="calculadora-result-p">**Rollos a Comprar (Redondeo al alza):** <span id="rollos-final" class="resultado calculadora-result-final" style="color: #ffffff !important;">0</span>
+            </p>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Se mantiene el código JavaScript funcionalmente idéntico
+    const LARGO_ROLLO = 25.0; 
+    const ANCHO_ROLLO = 1.0;  
+    const AREA_ROLLO = LARGO_ROLLO * ANCHO_ROLLO; 
+
+    const BRIDAS_DATA = [
+        { dn: "1 1/2\"", od: 0.1270 }, { dn: "2\"", od: 0.1524 }, { dn: "2 1/2\"", od: 0.1778 }, 
+        { dn: "3\"", od: 0.1905 }, { dn: "4\"", od: 0.2286 }, { dn: "5\"", od: 0.2540 }, 
+        { dn: "6\"", od: 0.2794 }, { dn: "7\"", od: 0.3048 }, { dn: "8\"", od: 0.3429 }, 
+        { dn: "10\"", od: 0.4064 }, { dn: "12\"", od: 0.4826 }, { dn: "14\"", od: 0.5334 }
+    ].sort((a, b) => {
+        const parseDN = (dn) => {
+            if (dn.includes('1/2')) return parseFloat(dn.replace(' 1/2', '.5'));
+            return parseFloat(dn);
+        };
+        return parseDN(a.dn) - parseDN(b.dn);
+    });
+
+    function initTable() {
+        const tbody = document.getElementById('tabla-calculo').getElementsByTagName('tbody')[0];
+        tbody.innerHTML = '';
+        
+        BRIDAS_DATA.forEach((brida, index) => {
+            const tr = tbody.insertRow();
+            
+            const cellDN = tr.insertCell();
+            cellDN.textContent = brida.dn;
+            cellDN.style.textAlign = 'left';
+
+            tr.insertCell().textContent = brida.od.toFixed(4);
+
+            const cellCantidad = tr.insertCell();
+            cellCantidad.style.textAlign = 'center'; 
+            const input = document.createElement('input');
+            input.type = 'number';
+            input.value = ''; 
+            input.min = '0';
+            input.placeholder = '0';
+            // Ya no es necesario el estilo en línea gracias al CSS interno
+            input.className = 'input-cantidad'; 
+            input.oninput = calcularRollos;
+            input.dataset.od = brida.od;
+            cellCantidad.appendChild(input);
+
+            const areaUnitaria = Math.PI * (brida.od / 2) ** 2;
+            tr.insertCell().textContent = areaUnitaria.toFixed(5);
+            
+            const cellAreaTotal = tr.insertCell();
+            cellAreaTotal.id = `area-total-${index}`;
+            cellAreaTotal.textContent = '0.000';
+        });
+        
+        calcularRollos();
+    }
+
+    function calcularRollos() {
+        let areaNetaTotal = 0.0;
+        const inputs = document.querySelectorAll('#tabla-calculo input[type="number"]'); 
+        const perdidaPctInput = document.getElementById('perdida_pct');
+        const perdidaPct = parseFloat(perdidaPctInput ? perdidaPctInput.value : 0) || 0;
+        const factorPerdida = 1 + (perdidaPct / 100);
+
+        Array.from(inputs).forEach((input, index) => {
+            const cantidad = parseInt(input.value) || 0; 
+            const od = parseFloat(input.dataset.od);
+            const areaUnitaria = Math.PI * (od / 2) ** 2;
+            const areaTotalItem = cantidad * areaUnitaria;
+            document.getElementById(`area-total-${index}`).textContent = areaTotalItem.toFixed(3);
+            areaNetaTotal += areaTotalItem;
+        });
+
+        document.getElementById('area-neta-total').textContent = areaNetaTotal.toFixed(3);
+        const areaConPerdida = areaNetaTotal * factorPerdida;
+        document.getElementById('area-con-perdida').textContent = areaConPerdida.toFixed(3);
+
+        const tfoot_loss_cell = document.querySelector('#tabla-calculo tfoot tr:last-child td:first-child');
+        tfoot_loss_cell.textContent = `Área con Pérdida (${perdidaPct}%)`;
+
+        let rollosCalculado = 0.0;
+        let rollosFinal = 0;
+
+        if (areaNetaTotal > 0) {
+            rollosCalculado = areaConPerdida / AREA_ROLLO;
+            rollosFinal = Math.ceil(rollosCalculado);
+        }
+
+        document.getElementById('rollos-calculado').textContent = rollosCalculado.toFixed(2);
+        document.getElementById('rollos-final').textContent = rollosFinal;
+    }
+
+    window.onload = initTable;
+</script>
+{% endblock %}

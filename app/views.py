@@ -405,3 +405,8 @@ def gantt_chart_view(request, pk):
                         continue
 
         return redirect('obra-detail', pk=self.object.fase.obra.pk)
+    
+
+def calculadora_view(request):
+    # No se necesita lógica de servidor, solo renderizar el template.
+    return render(request, 'project_app/calculadora.html', {})
