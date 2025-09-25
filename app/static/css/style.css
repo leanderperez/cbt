@@ -142,9 +142,7 @@ select{
 
 .navbar .nav-link:hover,
 .navbar .logout-button:hover {
-    color: #007bff !important;
-    background: rgba(255,255,255,0.3);
-    border-radius: 8px;
+    color: rgba(255,255,255,0.3) !important;
 }
 
 /* Forzar navbar en una sola fila */
@@ -171,9 +169,9 @@ select{
 
 .navbar {
     --bs-navbar-color: #222;
-    --bs-navbar-active-color: #007bff;
+    --bs-navbar-active-color: rgba(255,255,255,0.3);
     --bs-navbar-brand-color: #222;
-    --bs-navbar-brand-hover-color: #007bff;
+    --bs-navbar-brand-hover-color: rgba(255,255,255,0.3);
 }
 
 /* Anula estilos globales para el formulario de logout */
@@ -202,9 +200,7 @@ select{
     padding: 0;
 }
 .logout-form button:hover {
-    color: #007bff !important;
-    background: rgba(255,255,255,0.3);
-    border-radius: 8px;
+    color: rgba(255,255,255,0.3) !important;
 }
 
 /* ================= GLASSMORPHISM DATATABLE ================= */
@@ -716,7 +712,6 @@ form .button input:hover {
 /* Progress bar inside the task bar */
 .gantt .bar-progress {
     fill: #007bff !important;
-    /*fill: #41c24c*/
     border-radius: 5px;
 }
 
@@ -947,7 +942,7 @@ form .button input:hover {
     background: rgba(255, 255, 255, 0.4);
 }
 
-/* ========== ESTILOS DEL MODAL (Alineados con el estilo de Formulario .container) =========== */
+/* ========== ESTILOS DEL MODAL (Alineados con el estilo de Formulario) =========== */
 .modal {
     display: none; 
     position: fixed; 
