@@ -22,3 +22,6 @@ muttrc
 .dockerignore
 docker-compose.yml
 dockerfile
+
+/migrations
+*.sqlite3
