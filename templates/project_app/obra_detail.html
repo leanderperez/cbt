@@ -8,7 +8,7 @@
         <div class="project-card-header">
             <h1>{{ obra.nombre }}</h1>
             <div class="progress-circle" style="background: {% if obra.porcentaje_avance > 0 %}conic-gradient(#007bff {{ obra.porcentaje_avance|floatformat:0 }}%, #e0e0e0 {{ obra.porcentaje_avance|floatformat:0 }}%){% else %}#e0e0e0{% endif %};">
-                <span>{{ obra.porcentaje_avance|floatformat:2 }}%</span>
+                <span>{{ obra.porcentaje_avance|floatformat:0 }}%</span>
             </div>
         </div>
         <div class="project-info-full">
@@ -38,7 +38,7 @@
                     <div class="phase-title-group">
                         <h3>Fase: {{ fase.nombre }}</h3>
                         <div class="progress-circle" style="background: {% if fase.porcentaje_avance > 0 %}conic-gradient(#007bff {{ fase.porcentaje_avance|floatformat:0 }}%, #e0e0e0 {{ fase.porcentaje_avance|floatformat:0 }}%){% else %}#e0e0e0{% endif %};">
-                            <span>{{ fase.porcentaje_avance|floatformat:2 }}%</span>
+                            <span>{{ fase.porcentaje_avance|floatformat:0 }}%</span>
                         </div>
                     </div>
                 </div>
@@ -46,7 +46,12 @@
                     <a href="{% url 'tarea-create' pk=fase.pk %}" class="btn-add" style="margin-top: 0.8em; margin-left: 0.8em;">Agregar Tarea</a>
                     {% for tarea in fase.tarea_set.all %}
                         <div class="task-item">
-                            <span>Tarea: {{ tarea.nombre }} ({{ tarea.porcentaje_avance|floatformat:2 }}%)</span>
+                            <span>
+                                <a href="{% url 'tarea-update' pk=tarea.pk %}" style="color: #fff; text-decoration: underline;">
+                                    Tarea: {{ tarea.nombre }}
+                                </a>
+                                ({{ tarea.porcentaje_avance|floatformat:0 }}%)
+                            </span>
                         </div>
                     {% endfor %}
                 </div>

@@ -38,8 +38,12 @@ class TareaForm(forms.ModelForm):
             'fecha_fin_estimada', 'costo_mano_de_obra'
         ]
         widgets = {
-            'fecha_inicio': forms.DateTimeInput(attrs={'type': 'date'}),
-            'fecha_fin_estimada': forms.DateTimeInput(attrs={'type': 'date'}),
+            'fecha_inicio': forms.DateInput (
+                format='%Y-%m-%d', 
+                attrs={'type': 'date'}),
+            'fecha_fin_estimada': forms.DateInput (
+                format='%Y-%m-%d', 
+                attrs={'type': 'date'}),
         }
 
 class TareaUpdateProgressForm(forms.ModelForm):

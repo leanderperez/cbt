@@ -77,6 +77,7 @@ class TareaCreateView(CreateView):
         context['fase'] = fase
         # Obtener todos los materiales disponibles para la tabla
         context['materiales'] = Material.objects.all().order_by('nombre')
+        context['requerimientos'] = {} 
         return context
 
     def form_valid(self, form):
@@ -106,36 +107,53 @@ class TareaCreateView(CreateView):
 
 class TareaUpdateView(UpdateView):
     model = Tarea
-    form_class = TareaUpdateProgressForm
+    # Cambiamos la clase del formulario para que incluya todos los campos de la Tarea
+    form_class = TareaForm
     template_name = 'project_app/tarea_form.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['tarea'] = self.object
-        if self.request.POST:
-            context['requerimientos_formset'] = RequerimientoMaterialFormSet(self.request.POST, instance=self.object, prefix='req')
-            context['asignaciones_formset'] = AsignacionMaterialFormSet(self.request.POST, instance=self.object, prefix='asig')
-        else:
-            context['requerimientos_formset'] = RequerimientoMaterialFormSet(instance=self.object, prefix='req')
-            context['asignaciones_formset'] = AsignacionMaterialFormSet(instance=self.object, prefix='asig')
+        tarea = self.object
+        context['fase'] = tarea.fase
+        context['materiales'] = Material.objects.all().order_by('nombre')
+        
+        # Cargar las cantidades requeridas existentes para rellenar la tabla
+        requerimientos_actuales = {
+            req.material.pk: req.cantidad_requerida 
+            for req in tarea.requerimientomaterial_set.all()
+        }
+        context['requerimientos'] = requerimientos_actuales
         return context
 
     def form_valid(self, form):
-        context = self.get_context_data()
-        requerimientos_formset = context['requerimientos_formset']
-        asignaciones_formset = context['asignaciones_formset']
-
         with transaction.atomic():
+            # 1. Guardar la información principal de la Tarea
             self.object = form.save()
-            if requerimientos_formset.is_valid() and asignaciones_formset.is_valid():
-                requerimientos_formset.instance = self.object
-                requerimientos_formset.save()
-                asignaciones_formset.instance = self.object
-                asignaciones_formset.save()
-                return redirect('obra-detail', pk=self.object.fase.obra.pk)
-            else:
-                return self.render_to_response(self.get_context_data(form=form))
-        
+
+            # 2. Eliminar los requerimientos de material existentes
+            # Esto simplifica el proceso de actualización (se borra todo y se vuelve a crear)
+            RequerimientoMaterial.objects.filter(tarea=self.object).delete()
+            
+            # 3. Procesar los nuevos datos de la tabla de materiales (similar a TareaCreateView)
+            for key, value in self.request.POST.items():
+                if key.startswith('material-quantity-'):
+                    try:
+                        material_pk = int(key.split('-')[-1])
+                        # Usar float() para validar la entrada y permitir decimales
+                        cantidad = float(value) if value else 0
+                        
+                        if cantidad > 0:
+                            material = get_object_or_404(Material, pk=material_pk)
+                            RequerimientoMaterial.objects.create(
+                                tarea=self.object,
+                                material=material,
+                                cantidad_requerida=cantidad
+                            )
+                    except (ValueError, IndexError, Material.DoesNotExist):
+                        continue
+            
+            return redirect('obra-detail', pk=self.object.fase.obra.pk)
+
     def get_success_url(self):
         return reverse_lazy('obra-detail', kwargs={'pk': self.object.fase.obra.pk})
 

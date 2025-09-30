@@ -98,7 +98,7 @@ class Tarea(models.Model):
     nombre = models.CharField(max_length=200, verbose_name="Nombre de la Tarea")
     fase = models.ForeignKey(Fase, on_delete=models.CASCADE, verbose_name="Fase")
     descripcion = models.TextField(blank=True, verbose_name="Descripción")
-    fecha_inicio = models.DateField(verbose_name="Fecha y Hora de Inicio")
+    fecha_inicio = models.DateField(verbose_name="Fecha de Inicio")
     fecha_fin_estimada = models.DateField(verbose_name="Fecha Fin Estimada")
     costo_mano_de_obra = models.DecimalField(
         max_digits=10, decimal_places=2,
