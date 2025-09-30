@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models import Sum
+from django.db.models import Sum, JSONField
 from datetime import timedelta
 from decimal import Decimal
 from django.contrib.auth.models import User
@@ -174,7 +174,6 @@ class AsignacionMaterial(models.Model):
 
 '''
 
-# Nuevo modelo para las mediciones de avance
 class MedicionMaterial(models.Model):
     tarea = models.ForeignKey(Tarea, on_delete=models.CASCADE, verbose_name="Tarea")
     material = models.ForeignKey(Material, on_delete=models.CASCADE, verbose_name="Material")
@@ -187,3 +186,12 @@ class MedicionMaterial(models.Model):
     @property
     def costo_total(self):
         return self.cantidad * self.material.costo_unitario
+    
+class Cotizacion(models.Model):
+    nombre = models.CharField(max_length=255, unique=True)
+    datos = JSONField() # Aquí se guardan todas las variables
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    fecha_modificacion = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.nombre

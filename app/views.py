@@ -13,6 +13,9 @@ from .models import (
     Obra, Fase, Tarea, RequerimientoMaterial,
     MedicionMaterial, Material, Personal
 )
+from django.http import JsonResponse
+from .models import Tarea, Obra, Fase
+from datetime import datetime
 from .forms import (
     ObraForm,
     FaseForm,
@@ -25,7 +28,7 @@ from .forms import (
 import datetime
 import json
 from decimal import Decimal
-
+from django.contrib.auth.views import LoginView
 
 class ObraListView(ListView):
     model = Obra
@@ -306,22 +309,8 @@ class PersonalListView(ListView):
     template_name = 'project_app/personal_list.html'
     context_object_name = 'personal'
 
-
-# Custom Login View
-from django.contrib.auth.views import LoginView
 class CustomLoginView(LoginView):
     template_name = 'project_app/login.html'
-
-
-from django.shortcuts import render, get_object_or_404
-from django.http import JsonResponse
-from .models import Tarea, Obra
-
-from django.shortcuts import get_object_or_404
-from django.http import JsonResponse
-from .models import Tarea, Obra, Fase
-from datetime import datetime
-from decimal import Decimal
 
 def gantt_data_view(request, pk):
     obra = get_object_or_404(Obra, pk=pk)
@@ -427,3 +416,61 @@ def gantt_chart_view(request, pk):
 def calculadora_view(request):
     # No se necesita lógica de servidor, solo renderizar el template.
     return render(request, 'project_app/calculadora.html', {})
+
+
+
+
+from formtools.wizard.views import SessionWizardView
+from .forms import Pagina1Form, Pagina2Form, Pagina3Form
+from .models import Cotizacion
+
+FORMS = [("1", Pagina1Form), ("2", Pagina2Form), ("3", Pagina3Form)]
+TEMPLATES = {
+    "1": "project_app/pagina1.html",
+    "2": "project_app/pagina2.html",
+    "3": "project_app/pagina3.html",
+}
+
+class CalculoWizard(SessionWizardView):
+    def get_template_names(self):
+        return [TEMPLATES[self.steps.current]]
+
+    def done(self, form_list, **kwargs):
+        # Cuando el formulario se completa, procesa los datos
+        form_data = [form.cleaned_data for form in form_list]
+        
+        # Unifica los datos en un solo diccionario
+        data = {}
+        for d in form_data:
+            data.update(d)
+        
+        # Guarda los datos en la base de datos con un nombre específico
+        # Usa el nombre_proyecto para identificar el registro
+        nombre = data.pop('nombre_proyecto', 'Proyecto sin nombre')
+        Cotizacion.objects.create(nombre=nombre, datos=data) # 'datos' es un campo JSONField
+        
+        return redirect('confirmacion') # Redirecciona a una página de confirmación
+    
+# Vista simple para la página de confirmación
+def confirmacion_guardado(request):
+    return render(request, 'project_app/confirmacion.html')
+    
+def editar_proyecto(request, nombre_proyecto):
+    proyecto = get_object_or_404(Cotizacion, nombre=nombre_proyecto)
+    
+    # Supongamos que tienes un solo formulario para la edición
+    # que contiene todos los campos
+    
+    # Combina los datos guardados con los datos del formulario (si aplica)
+    form_data = proyecto.datos
+    
+    if request.method == 'POST':
+        form = TuFormularioCompleto(request.POST)
+        if form.is_valid():
+            proyecto.datos.update(form.cleaned_data)
+            proyecto.save()
+            return redirect('confirmacion_edicion')
+    else:
+        form = TuFormularioCompleto(initial=form_data)
+        
+    return render(request, 'tu_app/editar_proyecto.html', {'form': form, 'proyecto': proyecto})

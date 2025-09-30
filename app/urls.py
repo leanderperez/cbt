@@ -3,8 +3,9 @@ from django.contrib.auth.views import LogoutView
 from .views import (
     ObraListView, ObraCreateView, ObraUpdateView, ObraDetailView,
     FaseCreateView, TareaCreateView, TareaUpdateView, ObraMedicionesView,
-    MaterialListView, MaterialCreateView, PersonalCreateView, PersonalListView, 
-    gantt_data_view, gantt_chart_view, calculadora_view
+    MaterialListView, MaterialCreateView, PersonalCreateView, PersonalListView, CalculoWizard, 
+    editar_proyecto, gantt_data_view, gantt_chart_view, calculadora_view, confirmacion_guardado,
+    FORMS
 )
 
 
@@ -40,5 +41,9 @@ urlpatterns = [
     path('api/gantt_data/<int:pk>/', gantt_data_view, name='gantt_data'),
 
     
-    path('calculadora/', calculadora_view, name='calculadora')
+    path('calculadora/', calculadora_view, name='calculadora'),
+     
+    path('calculo/', CalculoWizard.as_view(FORMS), name='calculo_wizard'),
+    path('confirmado/', confirmacion_guardado, name='confirmacion'), 
+    path('editar/<str:nombre_proyecto>/', editar_proyecto, name='editar_proyecto'),
 ]

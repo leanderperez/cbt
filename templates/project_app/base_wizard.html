@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Formulario Multi-Paso</title>
+</head>
+<body>
+
+    <h1>Registro de Proyecto - Paso {{ wizard.steps.step1 }} de {{ wizard.steps.count }}</h1>
+    <hr>
+    
+    <form action="" method="post">
+        {% csrf_token %}
+
+        {{ wizard.management_form }}
+
+        {% block wizard_content %}
+        {% endblock %}
+
+        <hr>
+        
+        <div style="margin-top: 20px;">
+            
+            {% if wizard.steps.prev %}
+            <button name="wizard_goto_step" type="submit" value="{{ wizard.steps.prev }}" class="btn btn-secondary">
+                &laquo; Atrás
+            </button>
+            {% endif %}
+
+            <button type="submit" class="btn btn-primary">
+                {% if wizard.steps.next %}Siguiente &raquo;{% else %}Finalizar y Guardar Proyecto{% endif %}
+            </button>
+            
+        </div>
+    </form>
+
+</body>
+</html>

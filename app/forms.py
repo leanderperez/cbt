@@ -81,7 +81,6 @@ AsignacionMaterialFormSet = inlineformset_factory(
 )
 """
 
-
 class MaterialForm(forms.ModelForm):
     class Meta:
         model = Material
@@ -91,3 +90,16 @@ class PersonalForm(forms.ModelForm):
     class Meta:
         model = Personal
         fields = ['empresa', 'nombre', 'telefono', 'telefono_alternativo', 'email', 'direccion']
+
+# Formulario Multi-step para cotizaciones
+class Pagina1Form(forms.Form):
+    nombre_proyecto = forms.CharField(max_length=100)
+    descripcion = forms.CharField(widget=forms.Textarea)
+
+class Pagina2Form(forms.Form):
+    variable_a = forms.IntegerField()
+    variable_b = forms.IntegerField()
+
+class Pagina3Form(forms.Form):
+    variable_c = forms.FloatField()
+    variable_d = forms.FloatField()
