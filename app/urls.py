@@ -26,6 +26,7 @@ urlpatterns = [
 
     # Rutas para Materiales
     path('materiales/', MaterialListView.as_view(), name='material-list'),
+    path('materiales/<str:sistema>/', MaterialListView.as_view(), name='material-list-filter'),
     path('materiales/new/', MaterialCreateView.as_view(), name='material-create'),
 
     # Rutas para Personal

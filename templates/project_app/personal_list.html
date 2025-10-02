@@ -11,15 +11,19 @@
     <table id="personalTable" class="obra-table">
         <thead>
             <tr>
-                <th>Nombre</th>
-                <th>Cargo</th>
+                <th>Centro de Servicio</th>
+                <th>Responsable</th>
+                <th>Teléfono</th>
+                <th>Dirección</th>
             </tr>
         </thead>
         <tbody>
             {% for p in personal %}
             <tr>
+                <td>{{ p.empresa }}</td>
                 <td>{{ p.nombre }}</td>
-                <td>{{ p.cargo }}</td>
+                <td>{{ p.telefono }}</td>
+                <td>{{ p.direccion }}</td>
             </tr>
             {% endfor %}
         </tbody>
@@ -38,7 +42,8 @@
             },
             "scrollY": "55vh",
             "scrollCollapse": true,
-            "paging": false, 
+            "paging": false,
+            "info": false, 
         });
     });
 </script>

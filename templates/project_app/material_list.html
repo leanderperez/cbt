@@ -14,21 +14,21 @@
         <table id="materialTable" class="obra-table">
             <thead>
                 <tr>
-                    <th><input type="text" placeholder="Código" /></th>
-                    <th>Familia</th>
-                    <th>Nombre</th>
-                    <th>Unidad</th>
-                    <th>Precio</th>
-                    <th>Nuevo Precio</th>
+                    <th><input type="text" placeholder="CODIGO" /></th>
+                    <th>NOMBRE</th>
+                    <th>UNIDAD</th>
+                    <th>CATEGORIA</th>
+                    <th>PRECIO</th>
+                    <th>NUEVO PRECIO</th>
                 </tr>
             </thead>
             <tbody>
                 {% for material in materiales %}
                 <tr>
                     <td>{{ material.codigo }}</td>
-                    <td>{{ material.familia }}</td>
                     <td>{{ material.nombre }}</td>
                     <td>{{ material.unidad }}</td>
+                    <td>{{ material.familia }}</td>
                     <td>$ {{ material.costo_unitario|default_if_none:'0.00'|floatformat:'2' }}</td>
                     <td>
                         <input type="number" step="0.1" name="cost-{{ material.pk }}" class="cost-input">
@@ -64,6 +64,7 @@
             "scrollY": "54vh",
             "scrollCollapse": true,
             "paging": false, 
+            "info": false,
             "deferRender": true
         });
 

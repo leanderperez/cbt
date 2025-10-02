@@ -1,3 +1,15 @@
+# Estándar de Python
+import datetime
+import json
+from datetime import datetime
+from decimal import Decimal
+
+# Django
+from django.contrib.auth.views import LoginView
+from django.db import transaction
+from django.db.models import F
+from django.http import JsonResponse
+from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views.generic import (
     ListView,
@@ -6,16 +18,21 @@ from django.views.generic import (
     DetailView,
     View
 )
-from django.shortcuts import render, get_object_or_404, redirect
-from django.db import transaction
-from django.db.models import F
+
+# Terceros
+from formtools.wizard.views import SessionWizardView
+
+# Locales (tu app)
 from .models import (
-    Obra, Fase, Tarea, RequerimientoMaterial,
-    MedicionMaterial, Material, Personal
+    Obra,
+    Fase,
+    Tarea,
+    RequerimientoMaterial,
+    MedicionMaterial,
+    Material,
+    Personal,
+    Cotizacion
 )
-from django.http import JsonResponse
-from .models import Tarea, Obra, Fase
-from datetime import datetime
 from .forms import (
     ObraForm,
     FaseForm,
@@ -23,12 +40,11 @@ from .forms import (
     TareaUpdateProgressForm,
     RequerimientoMaterialFormSet,
     MaterialForm,
-    PersonalForm
+    PersonalForm,
+    Pagina1Form,
+    Pagina2Form,
+    Pagina3Form
 )
-import datetime
-import json
-from decimal import Decimal
-from django.contrib.auth.views import LoginView
 
 class ObraListView(ListView):
     model = Obra
@@ -272,24 +288,54 @@ class MaterialListView(ListView):
     model = Material
     template_name = 'project_app/material_list.html'
     context_object_name = 'materiales'
+    
+    # MODIFICADO: Añadimos get_queryset para filtrar por sistema
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        # Obtener el parámetro de la URL (si existe)
+        sistema_filtro = self.kwargs.get('sistema') 
+        
+        if sistema_filtro:
+            # Aseguramos que el filtro coincida con las opciones válidas
+            # (VRF o CHW que es el alias para Agua Helada)
+            if sistema_filtro.upper() in ['VRF', 'CHW']:
+                # El filtro se hace sobre el campo 'sistema' del modelo Material
+                queryset = queryset.filter(sistema__iexact=sistema_filtro)
+                
+        return queryset.order_by('nombre') # Ordenamos para consistencia
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['material_form'] = MaterialForm()
+        # MODIFICADO: Añadimos las opciones de sistema al contexto
+        context['sistemas'] = Material.SISTEMA_CHOICES # Se obtienen de models.py
+        # El sistema actualmente seleccionado para mantener el estado
+        context['sistema_actual'] = self.kwargs.get('sistema', 'Todos') 
         return context
 
-    def post(self, request):
+    def post(self, request, *args, **kwargs):
+        # NOTA: La lógica del POST no requiere cambios ya que sigue usando 
+        # 'material-list' como la URL de acción del formulario. 
+        # La lógica de filtrado se maneja en get_queryset/get_context_data.
+
         if 'update_costs' in request.POST:
             with transaction.atomic():
                 for key, value in request.POST.items():
                     if key.startswith('cost-'):
                         try:
                             material_pk = int(key.split('-')[-1])
-                            costo = float(value) if value else 0.0
-                            if costo > 0:
+                            # Reemplaza la coma por punto para manejar la entrada de decimales
+                            costo = float(value.replace(',', '.')) if value else 0.0
+                            if costo >= 0: # Permitimos 0 como costo válido
                                 Material.objects.filter(pk=material_pk).update(costo_unitario=costo)
                         except (ValueError, IndexError):
                             continue
+                            
+        # Para que al redirigir se mantenga el filtro activo
+        sistema_actual = self.kwargs.get('sistema')
+        if sistema_actual:
+            return redirect('material-list-filter', sistema=sistema_actual)
+
         return redirect('material-list')
 
 class MaterialCreateView(CreateView):
@@ -314,13 +360,8 @@ class CustomLoginView(LoginView):
 
 def gantt_data_view(request, pk):
     obra = get_object_or_404(Obra, pk=pk)
-    
-    # Obtener todas las tareas de la obra
     tareas = Tarea.objects.filter(fase__obra=obra).order_by('fecha_inicio')
-    
-    # Obtener las fases únicas de la obra
     fases_obra = Fase.objects.filter(obra=obra).order_by('id')
-    
     gantt_data = []
 
     # 1. Crear los objetos de las Fases (actúan como los "agrupadores")
@@ -371,7 +412,6 @@ def gantt_chart_view(request, pk):
         'obra_pk': pk,
         'obra_nombre': obra.nombre,})
 
-
     model = Tarea
     template_name = 'project_app/tarea_material_update.html'
     form_class = TareaForm # Usamos TareaForm solo para mostrar los detalles de la tarea
@@ -417,13 +457,6 @@ def calculadora_view(request):
     # No se necesita lógica de servidor, solo renderizar el template.
     return render(request, 'project_app/calculadora.html', {})
 
-
-
-
-from formtools.wizard.views import SessionWizardView
-from .forms import Pagina1Form, Pagina2Form, Pagina3Form
-from .models import Cotizacion
-
 FORMS = [("1", Pagina1Form), ("2", Pagina2Form), ("3", Pagina3Form)]
 TEMPLATES = {
     "1": "project_app/pagina1.html",
@@ -450,8 +483,7 @@ class CalculoWizard(SessionWizardView):
         Cotizacion.objects.create(nombre=nombre, datos=data) # 'datos' es un campo JSONField
         
         return redirect('confirmacion') # Redirecciona a una página de confirmación
-    
-# Vista simple para la página de confirmación
+
 def confirmacion_guardado(request):
     return render(request, 'project_app/confirmacion.html')
     

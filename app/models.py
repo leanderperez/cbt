@@ -139,10 +139,15 @@ class AsignacionPersonal(models.Model):
         return Decimal('0.00')
 
 class Material(models.Model):
+    SISTEMA_CHOICES = [
+    ('VRF', 'VRF'),
+    ('CHW', 'Agua Helada (Chilled Water)')
+    ]
     codigo = models.CharField(max_length=50, unique=True, verbose_name="Código del Material")
     familia = models.CharField(max_length=100, verbose_name="Familia del Material")
     nombre = models.CharField(max_length=200, verbose_name="Nombre del Material")
     unidad = models.CharField(max_length=50, verbose_name="Unidad de Medida")
+    sistema = models.CharField(max_length=3, choices=SISTEMA_CHOICES, default='VRF', verbose_name='Tipo de Sistema')
     costo_unitario = models.DecimalField(max_digits=8, decimal_places=2, verbose_name="Costo Unitario")
     
     def __str__(self):

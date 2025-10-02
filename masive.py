@@ -21,7 +21,7 @@ def cargar_datos_masivos_sqlite(nombre_archivo_csv, ruta_bd, nombre_tabla, codif
             for fila in lector_csv:
                 # Modificación clave: Reemplazar la coma por un punto en el campo de costo_unitario
                 # Se asume que la columna 'costo_unitario' es la quinta columna (índice 4).
-                fila[4] = fila[4].replace(',', '.')
+                fila[5] = fila[5].replace(',', '.')
                 
                 # Se limpia el espacio en blanco al final de algunos campos.
                 fila = [x.strip() for x in fila]
@@ -31,7 +31,7 @@ def cargar_datos_masivos_sqlite(nombre_archivo_csv, ruta_bd, nombre_tabla, codif
             placeholders = ', '.join(['?'] * len(datos_para_insertar[0]))
             
             # La consulta de inserción especifica las 5 columnas del CSV.
-            consulta_insert = f"INSERT INTO {nombre_tabla} (codigo, familia, nombre, unidad, costo_unitario) VALUES ({placeholders})"
+            consulta_insert = f"INSERT INTO {nombre_tabla} (codigo, nombre, unidad, familia, sistema, costo_unitario) VALUES ({placeholders})"
             
             # Usar `executemany` para una carga masiva eficiente
             cursor.executemany(consulta_insert, datos_para_insertar)
@@ -53,7 +53,7 @@ def cargar_datos_masivos_sqlite(nombre_archivo_csv, ruta_bd, nombre_tabla, codif
 # Ejemplo de uso:
 ruta_db_django = 'db.sqlite3'
 cargar_datos_masivos_sqlite(
-    nombre_archivo_csv='materiales.csv',
+    nombre_archivo_csv='materiales_VRF.csv',
     ruta_bd=ruta_db_django,
     nombre_tabla='app_material'
 )

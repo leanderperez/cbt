@@ -84,7 +84,7 @@ AsignacionMaterialFormSet = inlineformset_factory(
 class MaterialForm(forms.ModelForm):
     class Meta:
         model = Material
-        fields = ['codigo', 'familia', 'nombre', 'unidad', 'costo_unitario']
+        fields = ['codigo', 'familia', 'nombre', 'unidad', 'sistema', 'costo_unitario']
         
 class PersonalForm(forms.ModelForm):
     class Meta:

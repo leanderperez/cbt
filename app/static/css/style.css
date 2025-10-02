@@ -1090,3 +1090,83 @@ form .button input:hover {
 .modal-content .button button:hover {
     background-color: #5a6268;
 }
+
+/* ================= DROPDOWN PERSONALIZADO ================= */
+
+/* Contenedor del Dropdown */
+.custom-dropdown {
+    position: relative; /* Es crucial para posicionar el menú hijo */
+    list-style: none;
+    /* Esto es para asegurar que el contenido se muestre encima de otros elementos */
+    z-index: 10; 
+}
+
+/* Enlace principal que abre el menú */
+.dropdown-toggle-custom {
+    /* Mantiene los estilos de un nav-link */
+    cursor: pointer;
+    text-decoration: none;
+    display: block;
+    padding: .5rem 1rem; /* Ajusta según tu padding de navbar */
+}
+
+/* El menú desplegable en sí */
+.dropdown-menu-custom {
+    display: none; /* Oculto por defecto */
+    position: absolute;
+    z-index: 9999;
+    /* Posicionamiento: debajo del elemento padre */
+    top: 100%; 
+    left: 0;
+    
+    /* Estilos del menú */
+    background-color: #fff; /* Fondo blanco */
+    border: 1px solid rgba(0, 0, 0, 0.15); /* Borde sutil */
+    min-width: 10rem;
+    padding: .5rem 0;
+    margin: 0;
+    list-style: none;
+    text-align: left;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.175);
+    border-radius: 0.25rem;
+}
+
+/* Clase para mostrar el menú (se añade con JavaScript) */
+.dropdown-menu-custom.open {
+    display: block;
+}
+
+/* Estilo de los ítems del menú */
+.dropdown-menu-custom li {
+    padding: 0;
+    margin: 0;
+}
+
+.dropdown-item-custom {
+    color: #212529; /* Color de texto oscuro */
+    padding: .25rem 1rem;
+    display: block;
+    width: 100%;
+    text-decoration: none;
+    clear: both;
+    font-weight: 400;
+    background-color: transparent;
+    border: 0;
+}
+
+.dropdown-item-custom:hover,
+.dropdown-item-custom:focus {
+    color: #1e2125;
+    background-color: #e9ecef; /* Color de fondo al pasar el ratón */
+}
+
+/* Estilo para la flecha indicadora (opcional) */
+.dropdown-toggle-custom .arrow {
+    margin-left: 5px;
+    font-size: 0.8em;
+}
+
+/* Opcional: Rotar la flecha al abrir (si quieres un estilo más dinámico) */
+.dropdown-menu-custom.open + .dropdown-toggle-custom .arrow {
+    transform: rotate(180deg);
+}

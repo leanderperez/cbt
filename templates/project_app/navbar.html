@@ -1,9 +1,19 @@
 <nav class="navbar navbar-expand-lg navbar-dark">
   <div class="container-fluid d-flex align-items-center justify-content-between">
-    <a class="navbar-brand" href="#">CBT</a>
+    <a class="navbar-brand" href="https://linktr.ee/COZYBUILDINGTECH">CBT</a>
     <ul class="navbar-nav flex-row flex-nowrap align-items-center" style="gap: 1.5rem;">
       <li class="nav-item"><a class="nav-link" href="{% url 'obra-list' %}">Gestión de Obras</a></li>
-      <li class="nav-item"><a class="nav-link" href="{% url 'material-list' %}">Gestion de Materiales</a></li>
+      
+      <li class="nav-item custom-dropdown" id="materialDropdownToggle">
+        <a class="nav-link dropdown-toggle-custom" href="{% url 'material-list' %}">
+          Materiales <span class="arrow">▼</span>
+        </a>
+        
+        <ul class="dropdown-menu-custom" id="materialDropdownMenu">
+          <li><a class="dropdown-item-custom" href="{% url 'material-list-filter' sistema='VRF' %}">VRF</a></li>
+          <li><a class="dropdown-item-custom" href="{% url 'material-list-filter' sistema='CHW' %}">Agua Helada</a></li>
+        </ul>
+      </li>
       <li class="nav-item"><a class="nav-link" href="{% url 'personal-list' %}">Centros de Servicio</a></li>
       <li class="nav-item"><a class="nav-link" href="{% url 'calculadora' %}">Herramientas</a></li>
       <li class="nav-item">
@@ -15,3 +25,31 @@
     </ul>
   </div>
 </nav>
+
+<script>
+  // Script para manejar el desplegable
+  document.addEventListener('DOMContentLoaded', function() {
+      const toggleItem = document.getElementById('materialDropdownToggle');
+      const menu = document.getElementById('materialDropdownMenu');
+
+      // Función para alternar la visibilidad
+      toggleItem.addEventListener('click', function(e) {
+          // Evita que el enlace superior se active al hacer clic en el contenedor (li)
+          // pero permite la navegación si se hace clic en el <a> si se desea.
+          // Si quieres que el clic en el <a> también abra/cierre el menú:
+          if (e.target.closest('.dropdown-toggle-custom')) {
+              e.preventDefault();
+          }
+
+          // Alternar la clase 'open' para mostrar/ocultar
+          menu.classList.toggle('open');
+      });
+
+      // Cerrar el menú si se hace clic fuera de él
+      document.addEventListener('click', function(e) {
+          if (!toggleItem.contains(e.target) && menu.classList.contains('open')) {
+              menu.classList.remove('open');
+          }
+      });
+  });
+</script>
