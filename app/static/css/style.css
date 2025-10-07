@@ -1170,3 +1170,16 @@ form .button input:hover {
 .dropdown-menu-custom.open + .dropdown-toggle-custom .arrow {
     transform: rotate(180deg);
 }
+
+.obra-link {
+    color: #fff !important;
+    font-family: 'Poppins', sans-serif !important;
+    text-decoration: none;
+    font-size: inherit;
+    font-weight: inherit;
+    transition: color 0.2s;
+}
+.obra-link:hover {
+    color: #007bff !important;
+    text-decoration: underline;
+}
