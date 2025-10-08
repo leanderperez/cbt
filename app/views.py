@@ -35,6 +35,8 @@ from .models import (
 )
 from .forms import (
     ObraForm,
+    ObraPage1Form,
+    ObraPage2Form,
     FaseForm,
     TareaForm,
     TareaUpdateProgressForm,
@@ -506,3 +508,88 @@ def editar_proyecto(request, nombre_proyecto):
         form = TuFormularioCompleto(initial=form_data)
         
     return render(request, 'tu_app/editar_proyecto.html', {'form': form, 'proyecto': proyecto})
+
+
+
+# --- Nuevo Wizard para la creación de Obra y Fases ---
+
+FASES_WIZARD_FORMS = [
+    ("obra_data", ObraPage1Form),
+    ("card_selection", ObraPage2Form)
+]
+TEMPLATES_WIZARD_OBRA = {
+    "obra_data": "project_app/obra_form.html",
+    "card_selection": "project_app/obra_form2.html",
+}
+
+class ObraWizard(SessionWizardView):
+    
+    def get_template_names(self):
+        return [TEMPLATES_WIZARD_OBRA[self.steps.current]]
+        
+    def get_context_data(self, form, **kwargs):
+        context = super().get_context_data(form=form, **kwargs)
+        return context
+
+    def done(self, form_list, **kwargs):
+        # 1. Unifica los datos
+        form_data = [form.cleaned_data for form in form_list]
+        data = {}
+        for d in form_data:
+            data.update(d)
+        
+        obra_data = data.copy()
+        
+        # --- FIX: Obtención de fases por el nombre del checkbox ---
+        # El ObraPage2Form (paso 'card_selection') está vacío, pero el request.POST contiene 
+        # los datos de los checkboxes bajo el nombre 'fases_seleccionadas'.
+        # Se obtiene el array de nombres de fase.
+        
+        # Primero, aseguramos el nombre en el diccionario de datos del Wizard:
+        # Nota: El atributo 'get' puede devolver un string si solo se selecciona una fase, 
+        # un list si se seleccionan varias, o None.
+        fase_names_raw = self.request.POST.getlist('fases_seleccionadas')
+        
+        # Si la lista está vacía, la inicializamos a una lista vacía
+        fase_names_list = fase_names_raw if fase_names_raw else []
+        
+        # Output de depuración (CONFIRMARÁ si los checkboxes están funcionando)
+        print("---------------------------------------")
+        print(f"Lista de Fases (Python): {fase_names_list}")
+        print(f"Total de fases a crear: {len(fase_names_list)}")
+        print("---------------------------------------")
+        
+        ingeniero_encargado_obj = obra_data.get('ingeniero_encargado')
+        
+        try:
+            with transaction.atomic():
+                # Crear la instancia de Obra
+                nueva_obra = Obra.objects.create(
+                    nombre=obra_data.get('nombre'),
+                    descripcion=obra_data.get('descripcion'),
+                    direccion=obra_data.get('direccion'),
+                    centro_servicio=obra_data.get('centro_servicio'),
+                    ingeniero_encargado=ingeniero_encargado_obj, 
+                    toneladas_frio=obra_data.get('toneladas_frio'),
+                    fecha_inicio=obra_data.get('fecha_inicio'),
+                    fecha_fin_estimada=obra_data.get('fecha_fin_estimada'),
+                    presupuesto_inicial=obra_data.get('presupuesto_inicial'),
+                )
+                
+                # 2. Crear las Fases
+                presupuesto_por_defecto = Decimal('100.00') 
+
+                for fase_name in fase_names_list:
+                    Fase.objects.create(
+                        obra=nueva_obra,
+                        nombre=fase_name,
+                        presupuesto_asignado=presupuesto_por_defecto,
+                        costo_mano_de_obra=Decimal('0.00')
+                    )
+                
+                # Retorno exitoso
+                return redirect('obra-detail', pk=nueva_obra.pk)
+        
+        except Exception as e:
+            print(f"Error al crear Obra/Fases: {e}")
+            return redirect('obra-list') 

@@ -18,12 +18,42 @@ class ObraForm(forms.ModelForm):
         fields = [
             'nombre', 'descripcion', 'direccion', 'centro_servicio',
             'ingeniero_encargado', 'fecha_inicio', 'fecha_fin_estimada',
-            'presupuesto_inicial'
+            'presupuesto_inicial', 'toneladas_frio'
         ]
         widgets = {
             'fecha_inicio': forms.DateInput(attrs={'type': 'date'}),
             'fecha_fin_estimada': forms.DateInput(attrs={'type': 'date'}),
         }
+
+# Nuevo Formulario para el paso 1 del Wizard
+class ObraPage1Form(forms.ModelForm):
+    ingeniero_encargado = forms.ModelChoiceField(
+        queryset=User.objects.all(),
+        required=False,
+        label="Ingeniero Encargado"
+    )
+    
+    class Meta:
+        model = Obra
+        # Excluimos la descripcion para que no se repita el campo con el widget Textarea
+        # La incluiremos de nuevo como CharField para el Wizard, para que se muestre como input normal.
+        fields = [
+            'nombre', 'descripcion', 'direccion', 'centro_servicio',
+            'ingeniero_encargado', 'fecha_inicio', 'fecha_fin_estimada',
+            'presupuesto_inicial', 'toneladas_frio'
+        ]
+        widgets = {
+            'fecha_inicio': forms.DateInput(attrs={'type': 'date'}),
+            'fecha_fin_estimada': forms.DateInput(attrs={'type': 'date'})
+        }
+
+# Nuevo Formulario para el paso 2 del Wizard (Selección de Cards)
+class ObraPage2Form(forms.Form):
+    # Ya no se necesitan los campos 'selected_fases' ni 'fase_names', 
+    # porque los datos serán enviados directamente por los checkboxes HTML
+    pass 
+
+
 
 class FaseForm(forms.ModelForm):
     class Meta:

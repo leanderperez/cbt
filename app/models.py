@@ -36,7 +36,7 @@ class Obra(models.Model):
         related_name='obras_ingeniero',
         verbose_name="Ingeniero Encargado"
     )
-
+    toneladas_frio = models.DecimalField(max_digits=6, decimal_places=2, verbose_name="Toneladas de Frío", blank=True, null=True)
     fecha_inicio = models.DateField(verbose_name="Fecha de Inicio")
     fecha_fin_estimada = models.DateField(verbose_name="Fecha Fin Estimada")
     presupuesto_inicial = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Presupuesto Inicial")

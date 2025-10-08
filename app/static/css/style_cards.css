@@ -1,0 +1,216 @@
+@import url("https://fonts.cdnfonts.com/css/mona-sans");
+*{ box-sizing: border-box; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; scroll-behavior: smooth;}
+html, body { overflow: auto; }
+body {
+    min-height: 100vh;
+    display: flex; flex-direction: row; flex-wrap: wrap;
+    justify-content: center; align-items: center; margin: 0;
+    background: #343434;
+    background: linear-gradient(
+        180deg,
+        #343434 0%,
+        #252525 100%
+    );
+    font-family: "Mona-Sans", sans-serif;
+	font-family: "Mona Sans", sans-serif;
+    padding: 20px;
+}
+
+.card-container {
+    display: flex;
+    gap: 20px; /* Reducido para 5 tarjetas */
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    max-width: 1300px; /* Aumentado para 5 tarjetas */
+    flex-wrap: wrap; /* Permitir que se envuelvan si la pantalla es muy pequeña */
+}
+
+/* NUEVA ESTRUCTURA PARA EL CHECKBOX */
+.card-wrapper {
+    display: inline-block;
+}
+/* Oculta el checkbox nativo */
+.card-wrapper input[type="checkbox"] {
+    display: none;
+}
+/* Aplica el estilo de selección cuando el checkbox está marcado */
+.card-wrapper input[type="checkbox"]:checked + label .card {
+    transform: translateY(-5px);
+    box-shadow: inset 0 2px 2px 0 #e7c4a088, 
+                inset 0 -2px 2px 0 #0003,
+                0 0 0 3px #e7c4a0; /* Resaltado visual */
+}
+/* Imagen a color en el estado seleccionado */
+.card-wrapper input[type="checkbox"]:checked + label .card img {
+    filter: grayscale(0%);
+}
+/* Enciende la luz en el estado seleccionado */
+.card-wrapper input[type="checkbox"]:checked + label .card .accents .top-light {
+    opacity: 1;
+}
+
+
+.card {
+    position: relative;
+    left: unset; right: unset;
+    top: unset; 
+    margin: 0;
+    width: 220px; /* Reducido el ancho */
+    height: 380px; /* Reducido la altura */
+    border-radius: 16px;
+    background: #191919aa;
+    background: linear-gradient(
+        180deg,
+        #292929aa 0%,
+        #191919cc 50%
+    );
+    backdrop-filter: blur(4px);
+    
+    box-shadow: inset 0 2px 2px 0 #e7c4a005, 
+                inset 0 -2px 2px 0 #0003;    
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out; 
+    
+    color: #ccc;
+    text-shadow: 1px 1px 3px #333a;
+    padding: 24px;
+    padding-right: 42px;
+    display: flex; flex-direction: column; justify-content: end;
+
+
+    /* ESTADO HOVER (solo hover, el selected se maneja con :checked) */
+    &:hover { 
+        transform: translateY(-5px);
+        box-shadow: inset 0 2px 2px 0 #e7c4a088, 
+                    inset 0 -2px 2px 0 #0003;    
+    }
+
+    h2, p {
+        margin: 8px 0;
+    }
+    h2 {
+        font-size: 1.1em;
+    }
+    p {
+        font-size: 0.9em;
+        font-weight: 800;
+        color: #aaa;
+    }
+    .button {
+        width: fit-content;
+        border-radius: 100px;
+        padding: 8px 36px;
+        margin-top: 12px;
+        background: #fff2;
+        box-shadow: 
+        0 0 0 1px #fff3, 
+        inset 120px 0 100px -100px #000c, 
+        0 0 0 0 #fff1;
+
+        transition: box-shadow 0.4s ease-in-out;
+        cursor: pointer;
+        &:hover {
+            box-shadow: 
+            0 0 0 1px #fff3, 
+            inset 200px 0px 100px -100px #000a, 
+            -4px 0 8px 2px #fff2;
+        }
+    }
+    img {
+        position: absolute;
+        top: 32px;
+        left: 0; right: 0;
+        width: 80%;
+        margin: auto;
+        object-fit: contain;
+        user-select: none;
+        pointer-events: none;
+
+        filter: grayscale(100%); 
+        transition: filter 0.3s ease-in-out; 
+    }
+
+    /* IMAGEN A COLOR EN HOVER (solo hover) */
+    &:hover img {
+        filter: grayscale(0%);
+    }
+}
+.accents {
+    user-select: none;
+    pointer-events: none;
+    position: absolute;
+    left: 0; right: 0;
+    top: 0;
+    z-index: 1;
+
+    .top-light {
+        position: absolute;
+        left: 0; right: 0; 
+        top: -42px;
+        margin: auto;
+        width: 200px; /* Reducido */
+        height: 6px;
+        border-radius: 10px;
+        background: #ffffff; 
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out;
+        box-shadow: 
+        0 0px 1px 1px #e0e0e0, 
+        0 1px 2px 1px #c0c0c077, 
+        0 2px 6px 1px #a0a0a077, 
+        0 4px 12px 0px #80808099,
+        0 12px 20px 12px #60606044;
+    }
+}
+
+/* EFECTO HOVER: La luz se enciende al pasar el ratón */
+.card:hover .accents .top-light {
+    opacity: 1;
+}
+
+@keyframes rotate360 { to { rotate: 360deg;} }
+@keyframes wobble {
+    0% {
+        transform: translateX(10px) translateY(20px) rotate(-3deg) scale(1);
+    }
+    20% {
+        transform: translateX(-44px) translateY(-8px) rotate(6deg) scale(1.02);
+    }
+    60% {
+        transform: translateX(32px) translateY(18px) rotate(-8deg) scale(1);
+    }
+    80% {
+        transform: translateX(-42px) translateY(-22px) rotate(12deg) scale(0.94);
+    }
+    100% {
+        transform: translateX(10px) translateY(20px) rotate(-3deg) scale(1);
+    }
+}
+
+/* Media queries ajustadas para 5 tarjetas */
+@media screen and ( max-width: 1200px ){
+    .card-container {
+        gap: 30px;
+    }
+    .card{
+        width: 250px;
+        height: 400px;
+    }
+}
+
+@media screen and ( max-width: 850px ){
+    .card-container {
+        flex-direction: column;
+        gap: 40px;
+    }
+}
+
+@media screen and ( max-height: 600px ){
+    .card{
+        height: fit-content !important;  
+        img { display: none; }
+    } 
+    .acc-card{
+      height: 180px !important; 
+    }
+}

@@ -3,16 +3,17 @@ from django.contrib.auth.views import LogoutView
 from .views import (
     ObraListView, ObraCreateView, ObraUpdateView, ObraDetailView,
     FaseCreateView, TareaCreateView, TareaUpdateView, ObraMedicionesView,
-    MaterialListView, MaterialCreateView, PersonalCreateView, PersonalListView, CalculoWizard, 
+    MaterialListView, MaterialCreateView, PersonalCreateView, PersonalListView, CalculoWizard, ObraWizard, 
     editar_proyecto, gantt_data_view, gantt_chart_view, calculadora_view, confirmacion_guardado,
-    FORMS
+    FORMS, FASES_WIZARD_FORMS
 )
 
 
 urlpatterns = [
     # Rutas para Obras
     path('', ObraListView.as_view(), name='obra-list'),
-    path('obra/new/', ObraCreateView.as_view(), name='obra-create'),
+    # path('obra/new/', ObraCreateView.as_view(), name='obra-create'),
+    path('obra/new/', ObraWizard.as_view(FASES_WIZARD_FORMS), name='obra-create'),
     path('obra/<int:pk>/edit/', ObraUpdateView.as_view(), name='obra-update'),
     path('obra/<int:pk>/', ObraDetailView.as_view(), name='obra-detail'),
     path('obra/<int:pk>/mediciones/', ObraMedicionesView.as_view(), name='obra-mediciones'),
@@ -41,9 +42,10 @@ urlpatterns = [
     # URL de la API que recibe el ID de la obra
     path('api/gantt_data/<int:pk>/', gantt_data_view, name='gantt_data'),
 
-    
+    # Calculadora de papel de empacaduras
     path('calculadora/', calculadora_view, name='calculadora'),
-     
+
+    # Cotizaciones 
     path('calculo/', CalculoWizard.as_view(FORMS), name='calculo_wizard'),
     path('confirmado/', confirmacion_guardado, name='confirmacion'), 
     path('editar/<str:nombre_proyecto>/', editar_proyecto, name='editar_proyecto'),

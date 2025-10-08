@@ -5,12 +5,16 @@
 
 {% block content %}
   <div class="container">
-    <h3>{% if form.instance.pk %}Editar Obra - {{ form.instance.nombre }}{% else %}Crear Nueva Obra{% endif %}</h3>
+    <h3>{% if wizard.steps.prev %}Paso 1: Datos Generales de la Obra{% else %}Crear Nueva Obra{% endif %}</h3>
     <div class="content">
       <form method="post">
         {% csrf_token %}
+        {{ wizard.management_form }}
+        
+        <input type="hidden" name="wizard_next_step" value="{{ wizard.steps.next }}">
+        
         <div class="user-details">
-
+          
           <div class="input-box">
             <span class="details">Nombre de la Obra</span>
             {{ form.nombre }}
@@ -20,12 +24,12 @@
             <span class="details">Dirección</span>
             {{ form.direccion }}
           </div>
-
+          
           <div class="input-box">
             <span class="details">Descripción</span>
             {{ form.descripcion }}
           </div>
-          
+
           <div class="input-box">
             <span class="details">Presupuesto Inicial</span>
             {{ form.presupuesto_inicial }}
@@ -50,16 +54,20 @@
             <span class="details">Fecha de Fin (Estimada)</span>
             {{ form.fecha_fin_estimada }}
           </div>
+
+          <div class="input-box">
+            <span class="details">Toneladas de Frío</span>
+            {{ form.toneladas_frio }}
+          </div>
+          
         </div>
         
         <div class="button">
-          <input type="submit"></input>
+          <button type="submit">Siguiente</button>
           <a href="{% url 'obra-list' %}">Cancelar</a>
         </div>
       </form>
     </div>
   </div>
 {% endblock %}
-
-
 
