@@ -1,28 +1,36 @@
-/* ================= GLASSMORPHISM BASE / LOGIN ================= */
+/* ========================================================================= */
+/* ======================== 01. REINICIO Y BASE ============================ */
+/* ========================================================================= */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap');
+
 *,
 *:before,
-*:after{
+*:after {
     padding: 0;
     margin: 0;
     box-sizing: border-box;
 }
-body{
 
-    font-family: 'Poppins',sans-serif;
+body {
+    font-family: 'Poppins', sans-serif;
     background-color: #000000;
-    /*background: #1f1f47;*/
     overflow: hidden;
 }
 
-.background{
+/* ========================================================================= */
+/* ===================== 02. ESTRUCTURA Y FONDO (LAYOUT) =================== */
+/* ========================================================================= */
+
+.background {
     width: 430px;
     height: 520px;
     position: absolute;
-    transform: translate(-50%,-50%);
+    transform: translate(-50%, -50%);
     left: 50%;
     top: 50%;
 }
-.background .shape{
+
+.background .shape {
     height: 300px;
     width: 300px;
     position: absolute;
@@ -30,80 +38,114 @@ body{
 }
 
 .shape:first-child {
-  background: linear-gradient(
-    to bottom right, /* Dirección para un brillo diagonal */
-    #f2f2f2 0%,      /* Blanco brillante para el punto de luz */
-    #cccccc 25%,     /* Gris claro */
-    #999999 50%,     /* Gris medio */
-    #666666 75%,     /* Gris oscuro */
-    #404040 100%     /* Gris muy oscuro para la sombra profunda */
-  );
-  left: -80px;
-  top: -80px;
+    background: linear-gradient(
+        to bottom right,
+        #f2f2f2 0%,
+        #cccccc 25%,
+        #999999 50%,
+        #666666 75%,
+        #404040 100%
+    );
+    left: -80px;
+    top: -80px;
 }
+
 .shape:last-child {
-  background: linear-gradient(
-    to top left, /* Otra dirección para el brillo */
-    #e0e0e0 0%,
-    #b0b0b0 30%,
-    #808080 60%,
-    #505050 100%
-  );
-  right: -80px;
-  bottom: -80px;
+    background: linear-gradient(
+        to top left,
+        #e0e0e0 0%,
+        #b0b0b0 30%,
+        #808080 60%,
+        #505050 100%
+    );
+    right: -80px;
+    bottom: -80px;
 }
+
+
+/* ========================================================================= */
+/* ====================== 03. FORMULARIO DE LOGIN ========================== */
+/* ========================================================================= */
 
 .form-login {
     height: 520px;
     width: 400px;
-    background-color: rgba(255,255,255,0.13);
+    background-color: rgba(255, 255, 255, 0.13);
     position: absolute;
-    transform: translate(-50%,-50%);
+    transform: translate(-50%, -50%);
     top: 50%;
     left: 50%;
     border-radius: 10px;
     backdrop-filter: blur(10px);
-    border: 2px solid rgba(255,255,255,0.1);
-    box-shadow: 0 0 40px rgba(8,7,16,0.6);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 40px rgba(8, 7, 16, 0.6);
     padding: 50px 35px;
 }
-.form-login *{
+
+.form-login * {
     color: #ffffff;
     letter-spacing: 0.5px;
     outline: none;
     border: none;
 }
-.form-login h3{
+
+.form-login h3 {
     font-size: 28px;
     font-weight: 450;
     line-height: 42px;
     text-align: center;
 }
 
-label{
+/* ========================================================================= */
+/* =========================== 04. ELEMENTOS DE FORMULARIO BASE ============ */
+/* ========================================================================= */
+
+label {
     display: block;
     margin-top: 20px;
     font-size: 14px;
     font-weight: 450;
 }
 
-input, 
+input,
 textarea,
-select{
+select {
     display: block;
     height: 40px;
     width: 100%;
-    background-color: rgba(255,255,255,0.07);
+    background-color: rgba(255, 255, 255, 0.07);
     border-radius: 3px;
     padding: 0 10px;
     margin-top: 6px;
     font-size: 14px;
     font-weight: 300;
+    /* Ajuste para mantener consistencia con .form-login */
+    color: #ffffff; 
 }
-::placeholder{
+
+::placeholder {
     color: #e5e5e5;
 }
-.button-login{
+
+.cost-input .measurement-input {
+    display: block;
+    height: 30px;
+    width: 30px;
+    background-color: rgba(184, 184, 184, 0.07);
+    border-radius: 5px;
+    padding: 0 10px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+    font-size: 14px;
+    font-weight: 300;
+}
+
+
+/* ========================================================================= */
+/* ============================= 05. BOTONES =============================== */
+/* ========================================================================= */
+
+.button-login {
     margin-top: 30px;
     width: 100%;
     background-color: #ffffff;
@@ -115,37 +157,62 @@ select{
     cursor: pointer;
 }
 
-/* ================= GLASSMORPHISM NAVBAR ================= */
+.btn {
+    display: inline-block;
+    padding: 10px 5px;
+    background-color: #bbb7b7;
+    color: #080710;
+    text-decoration: none;
+    border-radius: 3px;
+    border: none;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    font-size: 12px; /* Se usa el último valor definido */
+    font-weight: 400;
+}
+
+
+/* ========================================================================= */
+/* ======================== 06. GLASSMORPHISM NAVBAR ======================= */
+/* ========================================================================= */
+
 .navbar {
+    /* Glassmorphism */
     background: rgba(255, 255, 255, 0.15);
     box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     border-radius: 5px;
     border: 1px solid rgba(255, 255, 255, 0.18);
+    /* Layout */
     margin: 20px 40px;
     padding: 10px 30px;
+    /* Bootstrap variables override */
+    --bs-navbar-color: #222;
+    --bs-navbar-active-color: rgba(255, 255, 255, 0.3);
+    --bs-navbar-brand-color: #222;
+    --bs-navbar-brand-hover-color: rgba(255, 255, 255, 0.3);
 }
 
 .navbar .navbar-brand,
 .navbar .nav-link,
 .navbar .logout-button {
-    font-family: 'Poppins',sans-serif;
+    font-family: 'Poppins', sans-serif;
     color: #ffffff;
     letter-spacing: 0.5px;
     outline: none;
     border: none;
     font-weight: 500;
-    text-shadow: 0 1px 2px rgba(255,255,255,0.5);
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
     transition: color 0.2s;
 }
 
 .navbar .nav-link:hover,
 .navbar .logout-button:hover {
-    color: rgba(255,255,255,0.3) !important;
+    color: rgba(255, 255, 255, 0.3) !important;
 }
 
-/* Forzar navbar en una sola fila */
+/* Forzar navbar en una sola fila (Override de Bootstrap) */
 .navbar .container-fluid {
     display: flex !important;
     flex-direction: row !important;
@@ -167,18 +234,12 @@ select{
     align-items: center !important;
 }
 
-.navbar {
-    --bs-navbar-color: #222;
-    --bs-navbar-active-color: rgba(255,255,255,0.3);
-    --bs-navbar-brand-color: #222;
-    --bs-navbar-brand-hover-color: rgba(255,255,255,0.3);
-}
-
 /* Anula estilos globales para el formulario de logout */
 .logout-form {
     all: unset;
     display: inline;
 }
+
 .logout-form * {
     all: unset;
     font-family: inherit;
@@ -190,274 +251,40 @@ select{
     border: none;
     cursor: pointer;
 }
+
 .logout-form button {
     color: #222 !important;
     background: none;
     font-weight: 500;
-    text-shadow: 0 1px 2px rgba(255,255,255,0.5);
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
     transition: color 0.2s;
     border-radius: 0;
     padding: 0;
 }
+
 .logout-form button:hover {
-    color: rgba(255,255,255,0.3) !important;
+    color: rgba(255, 255, 255, 0.3) !important;
 }
 
-/* ================= GLASSMORPHISM DATATABLE ================= */
-/* Fondo general de la tabla */
-table.dataTable,
-.obra-table {
-    background: transparent !important;
-    border-collapse: separate !important;
-    border-spacing: 0 5px !important; /* Espacio entre filas */
-    font-family: 'Poppins',sans-serif;
-    color: #ffffff;
-    letter-spacing: 0.5px;
-    max-width: 100%;      /* Ajusta este valor según tu preferencia */
-    width: 100%;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-/* Efecto glassmorphism en cada fila */
-table.dataTable tbody tr,
-.obra-table tbody tr { /* ✨ MODIFICADO: Se eliminó .glass-row (redundancia) */
-    background: rgba(255,255,255,0.13) !important;
-    box-shadow: 0 4px 24px rgba(8,7,16,0.15);
-    backdrop-filter: blur(10px);
-    border: 1.5px solid rgba(255,255,255,0.12);
-    transition: box-shadow 0.2s;
-    min-height: 28px;
-    height: 32px;
-    border-radius: 20px;
-    overflow: hidden;
-}
-
-/* Redondear solo las primeras y últimas celdas de cada fila */
-table.dataTable tbody tr td:first-child,
-.obra-table tbody tr td:first-child {
-    border-top-left-radius: 8px;
-    border-bottom-left-radius: 8px;
-}
-table.dataTable tbody tr td:last-child,
-.obra-table tbody tr td:last-child {
-    border-top-right-radius: 8px;
-    border-bottom-right-radius: 8px;
-}
-
-/* Encabezado: solo extremos superiores */
-table.dataTable thead tr th:first-child,
-.obra-table thead tr th:first-child {
-    border-top-left-radius: 8px;
-    border-bottom-left-radius: 8px;
-}
-table.dataTable thead tr th:last-child,
-.obra-table thead tr th:last-child {
-    border-top-right-radius: 8px;
-    border-bottom-right-radius: 8px;
-}
-
-/* Quitar bordes de celdas y encabezados */
-table.dataTable th,
-table.dataTable td,
-.obra-table th,
-.obra-table td {
-    border: none !important;
-    background: transparent !important;
-    color: #fff !important;
-    padding: 3px 12px !important;
-    vertical-align: middle;
-}
-
-/* Ajusta el espacio entre filas, pero no entre columnas */
-table.dataTable,
-.obra-table {
-    border-spacing: 0 5px !important; /* solo espacio vertical */
-    border-collapse: separate !important;
-}
-
-/* Encabezado de la tabla */
-table.dataTable thead tr,
-.obra-table thead tr {
-    background: rgba(255,255,255,0.18) !important;
-    backdrop-filter: blur(6px);
-    color: #fff !important;
-    border-radius: 12px 12px 0 0;
-}
-
-/* Hover en filas */
-table.dataTable tbody tr:hover,
-.obra-table tbody tr:hover {
-    box-shadow: 0 8px 32px rgba(8,7,16,0.25);
-    background: rgba(255,255,255,0.22) !important;
-
-}
-
-/* Paginación y controles de DataTables */
-.dataTables_wrapper .dataTables_paginate .paginate_button {
-    background: rgba(255,255,255,0.13);
-    color: #fff !important;
-    border-radius: 6px;
-    border: 1px solid rgba(255,255,255,0.18);
-    margin: 0 2px;
-}
-.dataTables_wrapper .dataTables_paginate .paginate_button.current,
-.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
-    background: rgba(0,123,255,0.25) !important;
-    color: #fff !important;
-    border: 1px solid #007bff !important;
-}
-
-/* Filtro de búsqueda */
-.dataTables_wrapper .dataTables_filter input {
-    background: rgba(255,255,255,0.13);
-    color: #fff;
-    border: 1px solid rgba(255,255,255,0.18);
-    border-radius: 6px;
-    padding: 6px 12px;
-    margin-left: 8px;
-}
-
-/* Info y length */
-.dataTables_wrapper .dataTables_info,
-.dataTables_wrapper .dataTables_length label {
-    color: #fff;
-}
-
-/* Ajuste para que los bordes redondeados no se vean cortados */
-table.dataTable,
-.obra-table {
-    overflow: visible !important;
-}
-
-.datatable-container {
-    max-width: 95%px;
-    margin: 40px auto 0 auto;
-    width: 98%;
-    background: transparent;
-    position: relative;
-}
-
-/* Limita el ancho de los controles de DataTables */
-.datatable-container .dataTables_wrapper {
-    max-width: 100%;
-    margin: 0 auto;
-}
-
-/* Corrige la apariencia de los triángulos de ordenamiento en DataTables */
-table.dataTable thead th,
-.obra-table thead th {
-    position: relative;
-    padding-right: 28px !important; /* Espacio para los íconos */
-    background-clip: padding-box !important;
-    overflow: visible;
-}
-
-/* Corrige el fondo de los encabezados de DataTables para glassmorphism */
-table.dataTable thead th:before,
-.obra-table thead th:before {
-    content: none !important;
-    background: transparent !important;
-    display: none !important;
-    box-shadow: none !important;
-}
-
-/* Elimina el fondo y el área de clic de ordenamiento de DataTables */
-table.dataTable thead th.sorting,
-table.dataTable thead th.sorting_asc,
-table.dataTable thead th.sorting_desc,
-.obra-table thead th.sorting,
-.obra-table thead th.sorting_asc,
-.obra-table thead th.sorting_desc {
-    background: transparent !important;
-    background-color: transparent !important;
-    position: relative;
-    cursor: pointer;
-}
-
-/* Elimina el pseudo-elemento :before que cubre el fondo */
-table.dataTable thead th.sorting:before,
-table.dataTable thead th.sorting_asc:before,
-table.dataTable thead th.sorting_desc:before,
-.obra-table thead th.sorting:before,
-.obra-table thead th.sorting_asc:before,
-.obra-table thead th.sorting_desc:before {
-    display: none !important;
-    content: none !important;
-    background: none !important;
-    box-shadow: none !important;
-    pointer-events: none !important;
-}
-/* Este es el contenedor que tiene el scrollbar */
-.dataTables_scrollBody::-webkit-scrollbar {
-  width: 10px; /* Ancho de la barra de desplazamiento */
-  height: 8px; /* Altura para el scrollbar horizontal */
-  background: transparent; /* Hace la pista (track) transparente */
-  scroll-padding-left: 5px; /* Espacio a la izquierda */
-}
-
-/* El "thumb" o el elemento que se desplaza */
-.dataTables_scrollBody::-webkit-scrollbar-thumb {
-  background: rgba(131, 131, 131, 0.3); /* Un gris semi-transparente */
-  border-radius: 6px; /* Opcional: para bordes redondeados */
-  border: 2px solid transparent; /* Opcional: para que el color del fondo se vea a través */
-  background-clip: padding-box; /* Opcional: asegura que el borde no oculte el fondo */
-}
-
-/* Opcional: Estilo al pasar el mouse por encima del thumb */
-.dataTables_scrollBody::-webkit-scrollbar-thumb:hover {
-  background: rgba(170, 170, 170, 0.4);
-}
-
-.cost-input .measurement-input{
-    display: block;
-    height: 30px;
-    width: 30px;
-    background-color: rgba(184, 184, 184, 0.07);
-    border-radius: 5px;
-    padding: 0 10px;
-    margin-top: 2px;
-    margin-bottom: 2px;
-    font-size: 14px;
-    font-weight: 300;
-}
-
-/* ================= BOTONES ================= */
-.btn {
-    display: inline-block;
-    padding: 10px 5px;
-    background-color: #bbb7b7; 
-    color: #080710;           /* Color de texto oscuro */
-    text-decoration: none;     /* Quita el subrayado de los enlaces */
-    border-radius: 3px;        /* Bordes redondeados */
-    border: none;              /* Sin borde */
-    cursor: pointer;           /* Muestra una mano al pasar el cursor */
-    font-family: 'Poppins',sans-serif;
-    font-size: 14px;
-    font-weight: 400;
-    font-size: 12px
-}
-
-/* ================= NUEVOS FORMULARIOS - GLASSMORFISM ================= */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap');
+/* ========================================================================= */
+/* ================== 07. FORMULARIO GENERAL (GLASSMORFISM) ================ */
+/* ========================================================================= */
 
 .container {
     max-width: 700px;
     width: 100%;
     /* Glassmorphism */
-    background-color: rgba(255,255,255,0.13); /* Fondo translúcido */
+    background-color: rgba(255, 255, 255, 0.13);
     padding: 25px 30px;
     border-radius: 10px;
-    backdrop-filter: blur(10px);              /* Efecto de desenfoque */
-    border: 2px solid rgba(255,255,255,0.1); /* Borde sutil */
-    box-shadow: 0 0 40px rgba(8,7,16,0.6);   /* Sombra profunda */
-
-
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 40px rgba(8, 7, 16, 0.6);
+    /* Layout */
     position: absolute;
     top: 55%;
     left: 50%;
-    transform: translate(-50%,-50%);
-
+    transform: translate(-50%, -50%);
 }
 
 .container * {
@@ -482,7 +309,6 @@ table.dataTable thead th.sorting_desc:before,
     height: 3px;
     width: 30px;
     border-radius: 5px;
-    /* Color de la línea de título, puedes ajustarlo si lo necesitas */
     background: #ffffff;
 }
 
@@ -497,12 +323,6 @@ form .user-details .input-box {
     margin-bottom: 15px;
     width: calc(100% / 2 - 20px);
 }
-/* Asegura el 100% de ancho en el modal y la vista de detalle cuando se aplica */
-.modal-content .input-box,
-.container-glass .input-box {
-    width: 100% !important;
-}
-
 
 form .input-box span.details {
     display: block;
@@ -521,9 +341,9 @@ form .input-box span.details {
     border-radius: 5px;
     padding-left: 15px;
     /* Glassmorphism */
-    background-color: rgba(255,255,255,0.07);
+    background-color: rgba(255, 255, 255, 0.07);
     border: none;
-    color: #ffffff; /* Texto del input en blanco */
+    color: #ffffff;
     transition: all 0.3s ease;
 }
 
@@ -534,6 +354,7 @@ form .input-box span.details {
     box-shadow: 0 0 5px rgba(255, 255, 255, 0.4);
 }
 
+/* Radio buttons */
 form .gender-details .gender-title {
     font-size: 20px;
     font-weight: 500;
@@ -558,8 +379,8 @@ form .category label .dot {
     width: 18px;
     border-radius: 50%;
     margin-right: 10px;
-    background: rgba(255,255,255,0.3);
-    border: 5px solid rgba(255,255,255,0.1);
+    background: rgba(255, 255, 255, 0.3);
+    border: 5px solid rgba(255, 255, 255, 0.1);
     transition: all 0.3s ease;
 }
 
@@ -597,7 +418,763 @@ form .button input:hover {
     background-color: #e0e0e0;
 }
 
-/* Responsive media query code for mobile devices */
+
+/* ========================================================================= */
+/* ============================= 08. MODAL ================================= */
+/* ========================================================================= */
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 100;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    /* Fondo con alto desenfoque */
+    background-color: rgba(0, 0, 0, 0.5);
+    padding-top: 60px;
+    backdrop-filter: blur(8px);
+}
+
+.modal-content {
+    /* Glassmorphism Copiado de .container */
+    max-width: 550px;
+    width: 80%;
+    margin: 5% auto;
+    padding: 25px 30px;
+    background-color: rgba(255, 255, 255, 0.13);
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 40px rgba(8, 7, 16, 0.6);
+    color: #ffffff;
+}
+
+.modal-content * {
+    font-family: 'Poppins', sans-serif;
+    color: #ffffff;
+    letter-spacing: 0.5px;
+}
+
+.modal-content h3 {
+    font-size: 28px;
+    font-weight: 450;
+    line-height: 42px;
+    text-align: center;
+    color: #ffffff;
+    margin-top: 0;
+}
+
+.close-btn {
+    color: #fff;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    opacity: 0.8;
+    transition: opacity 0.3s;
+}
+
+.close-btn:hover,
+.close-btn:focus {
+    color: #fff;
+    opacity: 1;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* Input styles within modal */
+.modal-content .user-details {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin: 20px 0 12px 0;
+}
+
+.modal-content .input-box {
+    margin-bottom: 15px;
+    width: 100%;
+}
+
+.modal-content .user-details-two-columns .input-box {
+    width: calc(100% / 2 - 20px) !important;
+}
+
+.modal-content .details {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 5px;
+}
+
+.modal-content input[type="text"],
+.modal-content input[type="number"] {
+    height: 45px;
+    width: 100%;
+    outline: none;
+    font-size: 16px;
+    border-radius: 5px;
+    padding-left: 15px;
+    background-color: rgba(255, 255, 255, 0.07);
+    border: none;
+    color: #fff;
+    transition: all 0.3s ease;
+}
+
+.modal-content input[type="text"]:focus,
+.modal-content input[type="number"]:focus {
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.4);
+}
+
+/* Modal buttons */
+.modal-content .button {
+    margin-top: 35px;
+    height: 45px;
+    display: flex;
+    gap: 10px;
+}
+
+.modal-content .button input[type="submit"],
+.modal-content .button button {
+    height: 100%;
+    flex: 1;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+}
+
+.modal-content .button input[type="submit"] {
+    background: #ffffff;
+    color: #080710;
+}
+
+.modal-content .button input[type="submit"]:hover {
+    background-color: #e0e0e0;
+}
+
+.modal-content .button button {
+    background: #6c757d;
+    color: white;
+}
+
+.modal-content .button button:hover {
+    background-color: #5a6268;
+}
+
+
+/* ========================================================================= */
+/* ========================= 09. DATATABLES (TABLAS) ======================= */
+/* ========================================================================= */
+
+table.dataTable,
+.obra-table {
+    background: transparent !important;
+    border-collapse: separate !important;
+    border-spacing: 0 5px !important;
+    font-family: 'Poppins', sans-serif;
+    color: #ffffff;
+    letter-spacing: 0.5px;
+    max-width: 100%;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    overflow: visible !important;
+}
+
+.datatable-container {
+    max-width: 95%px; /* ERROR: 'px' no está correctamente declarado. Debería ser '95%' o un valor fijo. Se deja tal cual para no romper lógica, pero es un error a corregir. */
+    margin: 40px auto 0 auto;
+    width: 98%;
+    background: transparent;
+    position: relative;
+}
+
+.datatable-container .dataTables_wrapper {
+    max-width: 100%;
+    margin: 0 auto;
+}
+
+/* Encabezado de la tabla */
+table.dataTable thead tr,
+.obra-table thead tr {
+    background: rgba(255, 255, 255, 0.18) !important;
+    backdrop-filter: blur(6px);
+    color: #fff !important;
+    border-radius: 12px 12px 0 0;
+}
+
+table.dataTable thead tr th:first-child,
+.obra-table thead tr th:first-child {
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px; /* Se deja, aunque es redundante para el thead */
+}
+
+table.dataTable thead tr th:last-child,
+.obra-table thead tr th:last-child {
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px; /* Se deja, aunque es redundante para el thead */
+}
+
+/* Filas (tbody) */
+table.dataTable tbody tr,
+.obra-table tbody tr {
+    /* Glassmorphism en la fila */
+    background: rgba(255, 255, 255, 0.13) !important;
+    box-shadow: 0 4px 24px rgba(8, 7, 16, 0.15);
+    backdrop-filter: blur(10px);
+    border: 1.5px solid rgba(255, 255, 255, 0.12);
+    transition: box-shadow 0.2s;
+    min-height: 28px;
+    height: 32px;
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+/* Hover en filas */
+table.dataTable tbody tr:hover,
+.obra-table tbody tr:hover {
+    box-shadow: 0 8px 32px rgba(8, 7, 16, 0.25);
+    background: rgba(255, 255, 255, 0.22) !important;
+
+}
+
+/* Celdas */
+table.dataTable th,
+table.dataTable td,
+.obra-table th,
+.obra-table td {
+    border: none !important;
+    background: transparent !important;
+    color: #fff !important;
+    padding: 3px 12px !important;
+    vertical-align: middle;
+}
+
+/* Redondear celdas de las esquinas */
+table.dataTable tbody tr td:first-child,
+.obra-table tbody tr td:first-child {
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+}
+
+table.dataTable tbody tr td:last-child,
+.obra-table tbody tr td:last-child {
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+/* Enlaces dentro de celdas */
+.obra-link {
+    color: #fff !important;
+    font-family: 'Poppins', sans-serif !important;
+    text-decoration: none;
+    font-size: inherit;
+    font-weight: inherit;
+    transition: color 0.2s;
+}
+
+.obra-link:hover {
+    color: #007bff !important;
+    text-decoration: underline;
+}
+
+/* Paginación y Controles de DataTables */
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    background: rgba(255, 255, 255, 0.13);
+    color: #fff !important;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    margin: 0 2px;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.current,
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    background: rgba(0, 123, 255, 0.25) !important;
+    color: #fff !important;
+    border: 1px solid #007bff !important;
+}
+
+/* Filtro de búsqueda */
+.dataTables_wrapper .dataTables_filter input {
+    background: rgba(255, 255, 255, 0.13);
+    color: #fff;
+    border: 1: px solid rgba(255, 255, 255, 0.18);
+    border-radius: 6px;
+    padding: 6px 12px;
+    margin-left: 8px;
+}
+
+/* Info y length */
+.dataTables_wrapper .dataTables_info,
+.dataTables_wrapper .dataTables_length label {
+    color: #fff;
+}
+
+/* Ordenamiento (Sorting) de DataTables */
+table.dataTable thead th,
+.obra-table thead th {
+    position: relative;
+    padding-right: 28px !important;
+    background-clip: padding-box !important;
+    overflow: visible;
+}
+
+table.dataTable thead th:before,
+.obra-table thead th:before {
+    content: none !important;
+    background: transparent !important;
+    display: none !important;
+    box-shadow: none !important;
+}
+
+table.dataTable thead th.sorting,
+table.dataTable thead th.sorting_asc,
+table.dataTable thead th.sorting_desc,
+.obra-table thead th.sorting,
+.obra-table thead th.sorting_asc,
+.obra-table thead th.sorting_desc {
+    background: transparent !important;
+    background-color: transparent !important;
+    position: relative;
+    cursor: pointer;
+}
+
+table.dataTable thead th.sorting:before,
+table.dataTable thead th.sorting_asc:before,
+table.dataTable thead th.sorting_desc:before,
+.obra-table thead th.sorting:before,
+.obra-table thead th.sorting_asc:before,
+.obra-table thead th.sorting_desc:before {
+    display: none !important;
+    content: none !important;
+    background: none !important;
+    box-shadow: none !important;
+    pointer-events: none !important;
+}
+
+/* ========================================================================= */
+/* ==================== 10. GLASSMORPHISM DETAIL VIEW ====================== */
+/* ========================================================================= */
+
+.container-glass {
+    max-width: 1000px;
+    width: 95%;
+    margin: 1em auto;
+    color: #ffffff;
+}
+
+.card-glass {
+    /* Glassmorphism */
+    background: rgba(255, 255, 255, 0.13);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    box-shadow: 0 0 40px rgba(8, 7, 16, 0.6);
+    /* Layout */
+    padding: 0.8em 1em;
+    margin-bottom: 1em;
+    transition: all 0.3s ease-in-out;
+    cursor: pointer;
+}
+
+.card-glass:hover {
+    box-shadow: 0 0 50px rgba(8, 7, 16, 0.8);
+}
+
+.project-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.project-info-full {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s ease-in-out, opacity 0.5s ease-in-out;
+    opacity: 0;
+    padding-top: 0;
+}
+
+.project-info-full.expanded {
+    max-height: 500px;
+    opacity: 1;
+    padding-top: 0.8em;
+}
+
+/* Títulos y texto */
+.container-glass h1 {
+    margin: 0.2em 0;
+    font-size: 1.2em;
+    font-weight: 500;
+}
+
+.container-glass h2 {
+    margin: 0.2em 0;
+    font-size: 1.1em;
+    font-weight: 500;
+}
+
+.container-glass p,
+.container-glass .small-text {
+    margin: 0.1em 0;
+    font-size: 0.8em;
+    color: #e5e5e5;
+}
+
+/* Círculo de progreso */
+.progress-circle {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+.progress-circle::after {
+    content: '';
+    width: 60px;
+    height: 60px;
+    background: #000000;
+    border-radius: 50%;
+    position: absolute;
+    opacity: 0.8;
+}
+
+.progress-circle span {
+    z-index: 1;
+    font-weight: bold;
+    font-size: 1em;
+    color: #fff;
+}
+
+/* Card de Fase */
+.phase-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    padding: 0.1em 0;
+}
+
+.phase-title-group {
+    display: flex;
+    align-items: center;
+    gap: 0.6em;
+}
+
+.card-phase {
+    padding: 0.3em 0.5em;
+    margin-bottom: 0.6em;
+}
+
+.card-phase .phase-title-group h3 {
+    font-size: 1em;
+    margin: 0;
+    font-weight: 400;
+}
+
+.card-phase .progress-circle {
+    width: 40px;
+    height: 40px;
+}
+
+.card-phase .progress-circle::after {
+    width: 30px;
+    height: 30px;
+}
+
+.card-phase .progress-circle span {
+    font-size: 0.7em;
+}
+
+/* Botones de acción de la vista de detalle */
+.action-buttons {
+    display: flex;
+    gap: 0.5em;
+}
+
+.btn-add {
+    font-size: 0.8em;
+    padding: 0.4em 0.8em;
+    background-color: #6c757d;
+    color: white;
+    border-radius: 5px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-weight: 500;
+}
+
+.btn-add:hover {
+    background-color: #5a6268;
+}
+
+/* Tareas */
+.tasks-container {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s ease-in-out;
+}
+
+.tasks-container.expanded {
+    max-height: 500px;
+}
+
+.tasks-container .btn-add {
+    margin-top: 0.8em !important;
+    margin-bottom: 0.8em;
+    margin-left: 0.5em !important;
+    display: inline-block;
+    background-color: #6c757d;
+}
+
+.tasks-container .btn-add:hover {
+    background-color: #5a6268;
+}
+
+.task-item {
+    padding: 0.3em 0.5em;
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.3);
+    margin-top: 0.15em;
+    font-size: 0.8em;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.task-item:last-child {
+    border-bottom: none;
+}
+
+/* Ajustes de columnas para formularios dentro de esta vista (e.g. modal) */
+.modal-content .input-box,
+.container-glass .input-box {
+    width: 100% !important;
+}
+
+
+/* ========================================================================= */
+/* ==================== 11. GLASSMORPHISM GANTT CHART ====================== */
+/* ========================================================================= */
+
+/* Contenedor principal para el Gantt que cubre toda la vista */
+.gantt-container-1 {
+    overflow: auto;
+    font-size: 12px;
+    max-height: 85vh;
+    width: 99vw;
+    overflow-y: auto;
+    /* Layout */
+    position: absolute;
+    top: 55%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    /* Glassmorphism */
+    background-color: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border-radius: 10px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 40px rgba(8, 7, 16, 0.6);
+    padding: 20px;
+    color: #ffffff;
+}
+
+/* Contenedor secundario para el Gantt (posiblemente usado en otra vista) */
+.gantt-container {
+    position: relative;
+    overflow: auto;
+    font-size: 12px;
+    max-height: 75vh;
+    overflow-y: auto;
+    /* Glassmorphism */
+    background-color: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border-radius: 10px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 40px rgba(8, 7, 16, 0.6);
+    padding: 20px;
+    color: #ffffff;
+}
+
+/* Estilos de la librería Gantt */
+.gantt .grid-background,
+.gantt .grid-header,
+.gantt .grid-row {
+    fill: transparent !important;
+}
+
+.gantt .grid-header {
+    stroke: rgba(255, 255, 255, 0.3) !important;
+    fill: rgba(255, 255, 255, 0.1) !important;
+}
+
+.gantt .upper-text,
+.gantt .lower-text {
+    fill: #e5e5e5 !important;
+    font-weight: 300;
+}
+
+/* Estilo de las barras de tareas */
+.gantt .bar-wrapper {
+    cursor: pointer;
+}
+
+.gantt .bar {
+    fill: rgba(255, 255, 255, 0.2) !important;
+    stroke: rgba(255, 255, 255, 0.5) !important;
+    stroke-width: 1.5;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+/* Barra de progreso */
+.gantt .bar-progress {
+    fill: #007bff !important;
+    border-radius: 5px;
+}
+
+/* Hover effect */
+.gantt .bar-wrapper:hover .bar {
+    fill: rgba(255, 255, 255, 0.3) !important;
+    stroke: rgba(255, 255, 255, 0.7) !important;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Etiquetas */
+.gantt .bar-label {
+    fill: #ffffff !important;
+    font-weight: 500;
+}
+
+.gantt .bar-label.big {
+    fill: #e5e5e5 !important;
+}
+
+/* Línea de hoy */
+.gantt .today-highlight {
+    fill: rgba(0, 123, 255, 0.2) !important;
+    stroke: #007bff !important;
+    stroke-width: 1px;
+}
+
+/* ========================================================================= */
+/* ==================== 12. DROPDOWN PERSONALIZADO ========================= */
+/* ========================================================================= */
+
+.custom-dropdown {
+    position: relative;
+    list-style: none;
+    z-index: 10;
+}
+
+.dropdown-toggle-custom {
+    cursor: pointer;
+    text-decoration: none;
+    display: block;
+    padding: .5rem 1rem;
+}
+
+.dropdown-menu-custom {
+    display: none;
+    position: absolute;
+    z-index: 9999;
+    top: 100%;
+    left: 0;
+    /* Estilos */
+    background-color: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    min-width: 10rem;
+    padding: .5rem 0;
+    margin: 0;
+    list-style: none;
+    text-align: left;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.175);
+    border-radius: 0.25rem;
+}
+
+.dropdown-menu-custom.open {
+    display: block;
+}
+
+.dropdown-menu-custom li {
+    padding: 0;
+    margin: 0;
+}
+
+.dropdown-item-custom {
+    color: #212529;
+    padding: .25rem 1rem;
+    display: block;
+    width: 100%;
+    text-decoration: none;
+    clear: both;
+    font-weight: 400;
+    background-color: transparent;
+    border: 0;
+}
+
+.dropdown-item-custom:hover,
+.dropdown-item-custom:focus {
+    color: #1e2125;
+    background-color: #e9ecef;
+}
+
+.dropdown-toggle-custom .arrow {
+    margin-left: 5px;
+    font-size: 0.8em;
+}
+
+/* ========================================================================= */
+/* ======================== 13. ESTILOS DE SCROLLBAR ======================= */
+/* ========================================================================= */
+
+/* General Scrollbars for DataTables and others */
+.dataTables_scrollBody::-webkit-scrollbar,
+.gantt-container::-webkit-scrollbar,
+.gantt-container-1::-webkit-scrollbar,
+.phases-scroll-container::-webkit-scrollbar {
+    width: 10px;
+    height: 8px;
+    background: transparent;
+}
+
+.dataTables_scrollBody::-webkit-scrollbar-thumb,
+.gantt-container::-webkit-scrollbar-thumb,
+.gantt-container-1::-webkit-scrollbar-thumb {
+    background: rgba(131, 131, 131, 0.3);
+    border-radius: 6px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+
+.phases-scroll-container::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+}
+
+.dataTables_scrollBody::-webkit-scrollbar-thumb:hover,
+.gantt-container::-webkit-scrollbar-thumb:hover,
+.gantt-container-1::-webkit-scrollbar-thumb:hover {
+    background: rgba(170, 170, 170, 0.4);
+}
+
+.phases-scroll-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.4);
+}
+
+
+/* ========================================================================= */
+/* ===================== 14. MEDIA QUERIES (RESPONSIVE) ==================== */
+/* ========================================================================= */
+
 @media(max-width: 584px) {
     .container {
         max-width: 100%;
@@ -622,564 +1199,8 @@ form .button input:hover {
     }
 }
 
-/* Responsive media query code for mobile devices */
 @media(max-width: 459px) {
     .container .content .category {
         flex-direction: column;
     }
-}
-
-
-/* ================= GANTT CHART - GLASSMORPHISM ================= */
-
-.gantt-container-1 {
-    overflow: auto;
-    font-size: 12px;
-
-     /* Set max height and enable vertical scroll */
-    max-height: 85vh; /* Adjust this value as needed */
-    width: 99vw;
-    overflow-y: auto; /* Adds a vertical scrollbar if content exceeds max-height */
-
-    position: absolute;
-    top: 55%;
-    left: 50%;
-    transform: translate(-50%,-50%);
-
-    
-    /* Apply the core glassmorphism properties */
-    background-color: rgba(255, 255, 255, 0.05); /* Lighter transparency for the main container */
-    backdrop-filter: blur(10px);
-    border-radius: 10px;
-    border: 2px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 0 40px rgba(8, 7, 16, 0.6);
-    
-    padding: 20px; /* Add some padding for visual space */
-    color: #ffffff; /* Set text color for the container */
-}
-
-.gantt-container {
-    position: relative;
-    overflow: auto;
-    font-size: 12px;
-
-     /* Set max height and enable vertical scroll */
-    max-height: 75vh; /* Adjust this value as needed */
-    overflow-y: auto; /* Adds a vertical scrollbar if content exceeds max-height */
-
-    
-    /* Apply the core glassmorphism properties */
-    background-color: rgba(255, 255, 255, 0.05); /* Lighter transparency for the main container */
-    backdrop-filter: blur(10px);
-    border-radius: 10px;
-    border: 2px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 0 40px rgba(8, 7, 16, 0.6);
-    
-    padding: 20px; /* Add some padding for visual space */
-    color: #ffffff; /* Set text color for the container */
-}
-
-/* Make grid lines and text transparent with a subtle color */
-.gantt .grid-background,
-.gantt .grid-header,
-.gantt .grid-row {
-    fill: transparent !important;
-}
-
-.gantt .grid-header {
-    /* Use a semi-transparent white for the header lines and text */
-    stroke: rgba(255, 255, 255, 0.3) !important;
-    fill: rgba(255, 255, 255, 0.1) !important;
-}
-
-.gantt .upper-text, .gantt .lower-text {
-    fill: #e5e5e5 !important; /* Lighter text color for better readability on dark background */
-    font-weight: 300;
-}
-
-/* Style for the task bars */
-.gantt .bar-wrapper {
-    cursor: pointer;
-}
-.gantt .bar {
-    fill: rgba(255, 255, 255, 0.2) !important; /* Semi-transparent white for the bar */
-    stroke: rgba(255, 255, 255, 0.5) !important; /* Subtle border for the bar */
-    stroke-width: 1.5; /* Add a bit more width to the stroke */
-    border-radius: 5px; /* Rounded corners for the bars */
-    transition: all 0.3s ease;
-}
-
-/* Progress bar inside the task bar */
-.gantt .bar-progress {
-    fill: #007bff !important;
-    border-radius: 5px;
-}
-
-/* Hover effect for the bar */
-.gantt .bar-wrapper:hover .bar {
-    fill: rgba(255, 255, 255, 0.3) !important;
-    stroke: rgba(255, 255, 255, 0.7) !important;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-}
-
-/* Label on the bars */
-.gantt .bar-label {
-    fill: #ffffff !important;
-    font-weight: 500;
-}
-.gantt .bar-label.big {
-    fill: #e5e5e5 !important;
-}
-
-/* Today's highlight line */
-.gantt .today-highlight {
-    fill: rgba(0, 123, 255, 0.2) !important; /* Soft blue highlight for today */
-    stroke: #007bff !important;
-    stroke-width: 1px;
-}
-
-/* Scrollbar styles to match the glassmorphism theme */
-.gantt-container::-webkit-scrollbar,
-.gantt-container-1::-webkit-scrollbar {
-    width: 10px;
-    height: 8px;
-    background: transparent;
-}
-
-.gantt-container::-webkit-scrollbar-thumb,
-.gantt-container-1::-webkit-scrollbar-thumb {
-    background: rgba(131, 131, 131, 0.2);
-    border-radius: 6px;
-    border: 2px solid transparent;
-    background-clip: padding-box;
-}
-
-.cost-input .measurement-input{
-    display: block;
-    height: 30px;
-    width: 30px;
-    background-color: rgba(184, 184, 184, 0.07);
-    border-radius: 5px;
-    padding: 0 10px;
-    margin-top: 2px;
-    margin-bottom: 2px;
-    font-size: 14px;
-    font-weight: 300;
-}
-
-
-/* ================= GLASSMORPHISM DETAIL VIEW ================= */
-
-.container-glass {
-    max-width: 1000px;
-    width: 95%; /* Ajuste para mejor responsividad */
-    margin: 1em auto;
-    color: #ffffff;
-}
-.card-glass {
-    background: rgba(255, 255, 255, 0.13);
-    backdrop-filter: blur(10px);
-    border: 2px solid rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
-    box-shadow: 0 0 40px rgba(8, 7, 16, 0.6);
-    padding: 0.8em 1em;
-    margin-bottom: 1em;
-    transition: all 0.3s ease-in-out;
-    cursor: pointer;
-}
-.card-glass:hover {
-    box-shadow: 0 0 50px rgba(8, 7, 16, 0.8);
-}
-.project-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-.project-info-full {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.5s ease-in-out, opacity 0.5s ease-in-out;
-    opacity: 0;
-    padding-top: 0;
-}
-.project-info-full.expanded {
-    max-height: 500px; /* Suficientemente grande para el contenido */
-    opacity: 1;
-    padding-top: 0.8em;
-}
-.container-glass h1 { 
-    margin: 0.2em 0; 
-    font-size: 1.2em;
-    font-weight: 500;
-}
-.container-glass h2 { 
-    margin: 0.2em 0; 
-    font-size: 1.1em;
-    font-weight: 500;
-} 
-.container-glass p, .container-glass .small-text { 
-    margin: 0.1em 0; 
-    font-size: 0.8em;
-    color: #e5e5e5; /* Color ligeramente más claro */
-}
-.progress-circle {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: relative;
-}
-.progress-circle::after {
-    content: '';
-    width: 60px;
-    height: 60px;
-    background: #000000;
-    border-radius: 50%;
-    position: absolute;
-    opacity: 0.8;
-}
-.progress-circle span {
-    z-index: 1;
-    font-weight: bold;
-    font-size: 1em;
-    color: #fff;
-}
-.phase-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    cursor: pointer;
-    padding: 0.1em 0;
-}
-.phase-title-group {
-    display: flex;
-    align-items: center;
-    gap: 0.6em;
-}
-.btn-add {
-    font-size: 0.8em; 
-    padding: 0.4em 0.8em; /* Aumentado un poco el padding */
-    background-color: #6c757d; /* Color primario para los botones de acción */
-    color: white;
-    border-radius: 5px;
-    text-decoration: none;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    font-weight: 500;
-}
-.btn-add:hover {
-    background-color: #5a6268;
-}
-.action-buttons {
-    display: flex;
-    gap: 0.5em;
-}
-.tasks-container {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.5s ease-in-out;
-}
-.tasks-container.expanded {
-    max-height: 500px;
-}
-.card-phase {
-    padding: 0.3em 0.5em;
-    margin-bottom: 0.6em; /* Aumentado el margin-bottom */
-}
-.card-phase .phase-title-group h3 {
-    font-size: 1em; /* Ligeramente más grande */
-    margin: 0;
-    font-weight: 400;
-}
-.card-phase .progress-circle {
-    width: 40px;
-    height: 40px;
-}
-.card-phase .progress-circle::after {
-    width: 30px;
-    height: 30px;
-}
-.card-phase .progress-circle span {
-    font-size: 0.7em; /* Ligeramente más grande */
-}
-.tasks-container .btn-add {
-    margin-top: 0.8em !important; 
-    margin-bottom: 0.8em; 
-    margin-left: 0.5em !important;
-    display: inline-block;
-    background-color: #6c757d; /* Color secundario para botón de tarea */
-}
-.tasks-container .btn-add:hover {
-    background-color: #5a6268;
-}
-.task-item {
-    padding: 0.3em 0.5em; /* Aumentado padding */
-    border-bottom: 1px dashed rgba(255, 255, 255, 0.3); /* Cambiado a blanco semi-transparente */
-    margin-top: 0.15em;
-    font-size: 0.8em; /* Ligeramente más grande */
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-.task-item:last-child {
-    border-bottom: none;
-}
-.phases-scroll-container {
-    max-height: 60vh;
-    overflow-y: auto;
-}
-.phases-scroll-container::-webkit-scrollbar {
-    width: 8px;
-}
-.phases-scroll-container::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 4px;
-}
-.phases-scroll-container::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.4);
-}
-
-/* ========== ESTILOS DEL MODAL (Alineados con el estilo de Formulario) =========== */
-.modal {
-    display: none; 
-    position: fixed; 
-    z-index: 100; 
-    left: 0;
-    top: 0;
-    width: 100%; 
-    height: 100%; 
-    overflow: auto; 
-    /* Fondo con alto desenfoque para oscurecer y desenfocar la vista de fondo */
-    background-color: rgba(0,0,0,0.5); 
-    padding-top: 60px;
-    backdrop-filter: blur(8px); /* Desenfoque del fondo */
-}
-
-.modal-content {
-    /* Usamos las propiedades de .container para el glassmorphism */
-    max-width: 550px;
-    width: 80%;
-    margin: 5% auto; 
-    padding: 25px 30px; /* Padding del formulario */
-    
-    /* Glassmorphism Copiado de .container */
-    background-color: rgba(255,255,255,0.13); 
-    border-radius: 10px;
-    backdrop-filter: blur(10px);              
-    border: 2px solid rgba(255,255,255,0.1); 
-    box-shadow: 0 0 40px rgba(8,7,16,0.6);   
-    
-    color: #ffffff; 
-}
-/* Asegura que los elementos dentro del modal usen el estilo de .container */
-.modal-content * {
-    font-family: 'Poppins', sans-serif;
-    color: #ffffff;
-    letter-spacing: 0.5px;
-}
-
-
-.modal-content h3 {
-    /* Estilo para el título del modal */
-    font-size: 28px;
-    font-weight: 450;
-    line-height: 42px;
-    text-align: center;
-    color: #ffffff; 
-    margin-top: 0;
-}
-
-.close-btn {
-    color: #fff; 
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-    opacity: 0.8;
-    transition: opacity 0.3s;
-}
-
-.close-btn:hover,
-.close-btn:focus {
-    color: #fff;
-    opacity: 1;
-    text-decoration: none;
-    cursor: pointer;
-}
-
-/* Usamos los estilos de input existentes */
-.modal-content .user-details {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    margin: 20px 0 12px 0; /* Margen del formulario */
-}
-
-.modal-content .input-box {
-    margin-bottom: 15px;
-    width: 100%; /* Forzado a 100% para modals pequeños */
-}
-
-.modal-content .user-details-two-columns .input-box {
-    width: calc(100% / 2 - 20px) !important; /* Devuelve a 2 columnas con margen */
-}
-
-.modal-content .details {
-    /* Coincide con .input-box span.details */
-    display: block;
-    font-weight: 500;
-    margin-bottom: 5px;
-}
-
-.modal-content input[type="text"],
-.modal-content input[type="number"] {
-    /* Coincide con .user-details .input-box input */
-    height: 45px;
-    width: 100%;
-    outline: none;
-    font-size: 16px;
-    border-radius: 5px;
-    padding-left: 15px;
-    background-color: rgba(255,255,255,0.07); 
-    border: none; 
-    color: #fff; 
-    transition: all 0.3s ease;
-}
-.modal-content input[type="text"]:focus,
-.modal-content input[type="number"]:focus {
-    box-shadow: 0 0 5px rgba(255, 255, 255, 0.4);
-}
-
-
-/* Paleta de colores para los botones */
-.modal-content .button {
-    margin-top: 35px; /* Margen del botón de formulario */
-    height: 45px;
-    display: flex;
-    gap: 10px;
-}
-
-.modal-content .button input[type="submit"],
-.modal-content .button button {
-    height: 100%;
-    flex: 1; /* Ocupa el espacio disponible */
-    border-radius: 5px;
-    border: none;
-    cursor: pointer;
-    text-decoration: none;
-    font-size: 18px;
-    font-weight: 600;
-    letter-spacing: 1px;
-    transition: all 0.3s ease;
-}
-
-.modal-content .button input[type="submit"] {
-    background: #ffffff; /* Color de botón primario (blanco) */
-    color: #080710;
-}
-.modal-content .button input[type="submit"]:hover {
-    background-color: #e0e0e0;
-}
-
-.modal-content .button button {
-    background: #6c757d; /* Color secundario (Gris) */
-    color: white;
-}
-.modal-content .button button:hover {
-    background-color: #5a6268;
-}
-
-/* ================= DROPDOWN PERSONALIZADO ================= */
-
-/* Contenedor del Dropdown */
-.custom-dropdown {
-    position: relative; /* Es crucial para posicionar el menú hijo */
-    list-style: none;
-    /* Esto es para asegurar que el contenido se muestre encima de otros elementos */
-    z-index: 10; 
-}
-
-/* Enlace principal que abre el menú */
-.dropdown-toggle-custom {
-    /* Mantiene los estilos de un nav-link */
-    cursor: pointer;
-    text-decoration: none;
-    display: block;
-    padding: .5rem 1rem; /* Ajusta según tu padding de navbar */
-}
-
-/* El menú desplegable en sí */
-.dropdown-menu-custom {
-    display: none; /* Oculto por defecto */
-    position: absolute;
-    z-index: 9999;
-    /* Posicionamiento: debajo del elemento padre */
-    top: 100%; 
-    left: 0;
-    
-    /* Estilos del menú */
-    background-color: #fff; /* Fondo blanco */
-    border: 1px solid rgba(0, 0, 0, 0.15); /* Borde sutil */
-    min-width: 10rem;
-    padding: .5rem 0;
-    margin: 0;
-    list-style: none;
-    text-align: left;
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.175);
-    border-radius: 0.25rem;
-}
-
-/* Clase para mostrar el menú (se añade con JavaScript) */
-.dropdown-menu-custom.open {
-    display: block;
-}
-
-/* Estilo de los ítems del menú */
-.dropdown-menu-custom li {
-    padding: 0;
-    margin: 0;
-}
-
-.dropdown-item-custom {
-    color: #212529; /* Color de texto oscuro */
-    padding: .25rem 1rem;
-    display: block;
-    width: 100%;
-    text-decoration: none;
-    clear: both;
-    font-weight: 400;
-    background-color: transparent;
-    border: 0;
-}
-
-.dropdown-item-custom:hover,
-.dropdown-item-custom:focus {
-    color: #1e2125;
-    background-color: #e9ecef; /* Color de fondo al pasar el ratón */
-}
-
-/* Estilo para la flecha indicadora (opcional) */
-.dropdown-toggle-custom .arrow {
-    margin-left: 5px;
-    font-size: 0.8em;
-}
-
-/* Opcional: Rotar la flecha al abrir (si quieres un estilo más dinámico) */
-.dropdown-menu-custom.open + .dropdown-toggle-custom .arrow {
-    transform: rotate(180deg);
-}
-
-.obra-link {
-    color: #fff !important;
-    font-family: 'Poppins', sans-serif !important;
-    text-decoration: none;
-    font-size: inherit;
-    font-weight: inherit;
-    transition: color 0.2s;
-}
-.obra-link:hover {
-    color: #007bff !important;
-    text-decoration: underline;
 }
