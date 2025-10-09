@@ -1,7 +1,7 @@
 {% extends 'project_app/base.html' %}
 {% load static %}
 
-{% block title %}Calculadora de Rollos de Velumoide{% endblock %}
+{% block title %}Calculadora de Empacaduras{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -195,8 +195,8 @@
     
     <div class="calculadora-card">
         
-        <h1 class="calculadora-title">Calculadora de Rollos de Velumoide</h1>
-        <p class="calculadora-small-text">Cálculo de área de Velumoide para bridas ANSI/ASME B16.5</p>
+        <h1 class="calculadora-title">Calculadora de Empacaduras (Velumoide)</h1>
+        <p class="calculadora-small-text">Cálculo de área de Papel Velumoide requerido para empacaduras de bridas ANSI/ASME B16.5</p>
 
         <div class="user-details" style="justify-content: center;">
             <div class="input-box" style="width: auto; margin-bottom: 10px;">
@@ -238,7 +238,9 @@
 
         <div class="calculadora-card-sec">
             <h2 class="calculadora-result-title">Resultado Final</h2>
-            <p class="calculadora-result-p">Rollos Calculados (Matemático): 
+            <p class="calculadora-result-p">Metros Lineales Requeridos:
+                <span id="metros-lineales" class="resultado" style="font-weight: 700; color: #e5e5e5 !important;">0.00</span>
+            </p> <p class="calculadora-result-p">Rollos Calculados (Matemático): 
                 <span id="rollos-calculado" class="resultado" style="font-weight: 700; color: #e5e5e5 !important;">0.00</span>
             </p>
             <p class="calculadora-result-p">**Rollos a Comprar (Redondeo al alza):** <span id="rollos-final" class="resultado calculadora-result-final" style="color: #ffffff !important;">0</span>
@@ -331,16 +333,23 @@
 
         let rollosCalculado = 0.0;
         let rollosFinal = 0;
+        let metrosLineales = 0.0; // NUEVA VARIABLE
 
         if (areaNetaTotal > 0) {
+            // CÁLCULO DE METROS LINEALES
+            // Metros Lineales = Área con Pérdida / Ancho del Rollo (1.0m)
+            metrosLineales = areaConPerdida / ANCHO_ROLLO; 
+
             rollosCalculado = areaConPerdida / AREA_ROLLO;
             rollosFinal = Math.ceil(rollosCalculado);
         }
 
+        // ACTUALIZACIÓN DEL NUEVO CAMPO EN EL RESULTADO FINAL
+        document.getElementById('metros-lineales').textContent = metrosLineales.toFixed(2); 
         document.getElementById('rollos-calculado').textContent = rollosCalculado.toFixed(2);
         document.getElementById('rollos-final').textContent = rollosFinal;
     }
-
+    
     window.onload = initTable;
 </script>
 {% endblock %}

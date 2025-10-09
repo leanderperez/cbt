@@ -161,13 +161,13 @@ select {
     display: inline-block;
     padding: 10px 5px;
     background-color: #bbb7b7;
-    color: #080710;
+    color: #080710 !important;
     text-decoration: none;
     border-radius: 3px;
     border: none;
     cursor: pointer;
     font-family: 'Poppins', sans-serif;
-    font-size: 12px; /* Se usa el último valor definido */
+    font-size: 10px; 
     font-weight: 400;
 }
 
@@ -179,7 +179,6 @@ select {
 .navbar {
     /* Glassmorphism */
     background: rgba(255, 255, 255, 0.15);
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     border-radius: 5px;

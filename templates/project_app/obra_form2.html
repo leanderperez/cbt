@@ -6,11 +6,24 @@
     <meta charset="UTF-8">
     <title>Selección de Fases</title>
     <link rel="stylesheet" href="{% static 'css/style_cards.css' %}"> 
+
+    <style>
+    body {
+        background-image: url("{% static 'img/cover.jpeg' %}");
+        background-size: 100% auto;
+        background-position: top;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+
+    }
+    </style>
+
   </head>
     
 <body>
+
+{% include 'project_app/navbar.html' %}
   <div class="container">
-    <h3>Paso 2: Seleccione las Fases de la Obra</h3>
     <div class="content">
       <form method="post" id="card-selection-form">
         {% csrf_token %}
@@ -25,7 +38,6 @@
                     <img src="{% static 'img/transporte.png' %}" alt="Card 1 Image">
                     <h2>Transporte</h2>
                     <p>Incluye el transporte e izaje de los equipos de ser contratados por el cliente</p>
-                    <br><br>
                     <div class="accents"><div class="top-light"></div></div>
                   </div>
               </label>
@@ -36,9 +48,8 @@
               <label for="id_fase_Electricidad_y_Control">
                   <div class="card" data-card-name="Electricidad y Control">
                     <img src="{% static 'img/electricidad.png' %}" alt="Card 2 Image">
-                    <h2>Electricidad y Control</h2>
+                    <h2>Electricidad</h2>
                     <p>Incluye la conexión eléctrica, la instalacion de protecciones y control</p>
-                    <br>
                     <div class="accents"><div class="top-light"></div></div>
                   </div>
               </label>
@@ -51,7 +62,7 @@
                     <img src="{% static 'img/midea1.png' %}" alt="Card 3 Image">
                     <h2>Mecánica</h2>
                     <p>Comprende toda la instalación mecánica de los equipos</p>
-                    <br><br><br>
+                    <br>
                     <div class="accents"><div class="top-light"></div></div>
                   </div>
               </label>
@@ -63,7 +74,7 @@
                   <div class="card" data-card-name="Ventilación">
                     <img src="{% static 'img/ventilacion.png' %}" alt="Card 4 Image">
                     <h2>Ventilación</h2>
-                    <p>instalación de ductos de ventilación y extracción según requerimientos del cliente.</p>
+                    <p>instalación de ductos de ventilación y extracción</p>
                     <br>
                     <div class="accents"><div class="top-light"></div></div>
                   </div>
@@ -77,7 +88,6 @@
                     <img src="{% static 'img/entrega.png' %}" alt="Card 5 Image">
                     <h2>Puesta en marcha</h2>
                     <p>Arranque y monitoreo de parámetros de operación de los equipos</p>
-                    <br><br>
                     <div class="accents"><div class="top-light"></div></div>
                   </div>
               </label>
@@ -86,8 +96,8 @@
         </div>
         
         <div class="button">
-          <button type="submit" name="wizard_goto_step" value="{{ wizard.steps.prev }}">Anterior</button>
-          <button type="submit" id="submit-button">Crear Obra</button>
+          <button type="submit" name="wizard_goto_step" value="{{ wizard.steps.prev }}" class="btn">Anterior</button>
+          <button type="submit" id="submit-button" class="btn">Crear Obra</button>
         </div>
       </form>
     </div>

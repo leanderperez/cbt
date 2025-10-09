@@ -1,21 +1,28 @@
 @import url("https://fonts.cdnfonts.com/css/mona-sans");
-*{ box-sizing: border-box; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; scroll-behavior: smooth;}
-html, body { overflow: auto; }
-body {
-    min-height: 100vh;
-    display: flex; flex-direction: row; flex-wrap: wrap;
-    justify-content: center; align-items: center; margin: 0;
-    background: #343434;
-    background: linear-gradient(
-        180deg,
-        #343434 0%,
-        #252525 100%
-    );
-    font-family: "Mona-Sans", sans-serif;
-	font-family: "Mona Sans", sans-serif;
-    padding: 20px;
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap');
+
+
+*,
+*:before,
+*:after {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
 }
 
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #000000;
+    overflow: hidden;
+}
+
+.container{
+    display: flex; flex-direction: row; flex-wrap: wrap;
+    justify-content: center; align-items: center; margin: 0;
+    width: 100vw; height: 90vh;
+    overflow: auto;
+    padding: 10px 0;
+}
 .card-container {
     display: flex;
     gap: 20px; /* Reducido para 5 tarjetas */
@@ -24,6 +31,7 @@ body {
     width: 100%;
     max-width: 1300px; /* Aumentado para 5 tarjetas */
     flex-wrap: wrap; /* Permitir que se envuelvan si la pantalla es muy pequeña */
+    
 }
 
 /* NUEVA ESTRUCTURA PARA EL CHECKBOX */
@@ -45,11 +53,11 @@ body {
 .card-wrapper input[type="checkbox"]:checked + label .card img {
     filter: grayscale(0%);
 }
-/* Enciende la luz en el estado seleccionado */
+/* Enciende la luz en el estado seleccionado 
 .card-wrapper input[type="checkbox"]:checked + label .card .accents .top-light {
     opacity: 1;
 }
-
+*/
 
 .card {
     position: relative;
@@ -213,4 +221,182 @@ body {
     .acc-card{
       height: 180px !important; 
     }
+}
+
+
+/* ========================================================================= */
+/* ======================== 06. GLASSMORPHISM NAVBAR ======================= */
+/* ========================================================================= */
+
+.navbar {
+    /* Glassmorphism */
+    background: rgba(255, 255, 255, 0.15);;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: 5px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    /* Layout */
+    margin: 20px 40px;
+    padding: 10px 30px;
+    /* Bootstrap variables override */
+    --bs-navbar-color: #222;
+    --bs-navbar-active-color: rgba(255, 255, 255, 0.3);
+    --bs-navbar-brand-color: #222;
+    --bs-navbar-brand-hover-color: rgba(255, 255, 255, 0.3);
+}
+
+.navbar .navbar-brand,
+.navbar .nav-link,
+.navbar .logout-button {
+    font-family: 'Poppins', sans-serif;
+    color: #ffffff;
+    letter-spacing: 0.5px;
+    outline: none;
+    border: none;
+    font-weight: 500;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+    transition: color 0.2s;
+}
+
+.navbar .nav-link:hover,
+.navbar .logout-button:hover {
+    color: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Forzar navbar en una sola fila (Override de Bootstrap) */
+.navbar .container-fluid {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    flex-wrap: nowrap !important;
+}
+
+.navbar .navbar-nav {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+    gap: 1.5rem;
+}
+
+.navbar .nav-item {
+    display: flex !important;
+    align-items: center !important;
+}
+
+/* Anula estilos globales para el formulario de logout */
+.logout-form {
+    all: unset;
+    display: inline;
+}
+
+.logout-form * {
+    all: unset;
+    font-family: inherit;
+    color: inherit;
+    background: none;
+    box-shadow: none;
+    padding: 0;
+    margin: 0;
+    border: none;
+    cursor: pointer;
+}
+
+.logout-form button {
+    color: #222 !important;
+    background: none;
+    font-weight: 500;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+    transition: color 0.2s;
+    border-radius: 0;
+    padding: 0;
+}
+
+.logout-form button:hover {
+    color: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* ========================================================================= */
+/* ==================== 12. DROPDOWN PERSONALIZADO ========================= */
+/* ========================================================================= */
+
+.custom-dropdown {
+    position: relative;
+    list-style: none;
+    z-index: 10;
+}
+
+.dropdown-toggle-custom {
+    cursor: pointer;
+    text-decoration: none;
+    display: block;
+    padding: .5rem 1rem;
+}
+
+.dropdown-menu-custom {
+    display: none;
+    position: absolute;
+    z-index: 9999;
+    top: 100%;
+    left: 0;
+    /* Estilos */
+    background-color: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    min-width: 10rem;
+    padding: .5rem 0;
+    margin: 0;
+    list-style: none;
+    text-align: left;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.175);
+    border-radius: 0.25rem;
+}
+
+.dropdown-menu-custom.open {
+    display: block;
+}
+
+.dropdown-menu-custom li {
+    padding: 0;
+    margin: 0;
+}
+
+.dropdown-item-custom {
+    color: #212529;
+    padding: .25rem 1rem;
+    display: block;
+    width: 100%;
+    text-decoration: none;
+    clear: both;
+    font-weight: 400;
+    background-color: transparent;
+    border: 0;
+}
+
+.dropdown-item-custom:hover,
+.dropdown-item-custom:focus {
+    color: #1e2125;
+    background-color: #e9ecef;
+}
+
+.dropdown-toggle-custom .arrow {
+    margin-left: 5px;
+    font-size: 0.8em;
+}
+
+/* ========================================================================= */
+/* ======================== 13. BOTÓN PERSONALIZADO ======================== */
+/* ========================================================================= */
+.btn {
+    display: inline-block;
+    padding: 10px 5px;
+    background-color: #bbb7b7;
+    color: #080710 !important;
+    text-decoration: none;
+    border-radius: 3px;
+    border: none;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    font-size: 10px; 
+    font-weight: 400;
 }
