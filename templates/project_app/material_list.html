@@ -8,7 +8,7 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
 
-<form method="post" action="{% url 'material-list' %}">
+<form method="post" action="{% url 'material-list-filter' sistema=sistema_actual %}">
     {% csrf_token %}
     <div class="datatable-container">
         <table id="materialTable" class="obra-table">
@@ -18,8 +18,8 @@
                     <th>NOMBRE</th>
                     <th>UNIDAD</th>
                     <th>CATEGORIA</th>
+                    <th>STOCK</th>
                     <th>PRECIO</th>
-                    <th>NUEVO PRECIO</th>
                 </tr>
             </thead>
             <tbody>
@@ -29,9 +29,13 @@
                     <td>{{ material.nombre }}</td>
                     <td>{{ material.unidad }}</td>
                     <td>{{ material.familia }}</td>
-                    <td>$ {{ material.costo_unitario|default_if_none:'0.00'|floatformat:'2' }}</td>
                     <td>
-                        <input type="number" step="0.1" name="cost-{{ material.pk }}" class="cost-input">
+                        <input type="number" step="1" name="stock-{{ material.pk }}" value="{{ material.stock }}" class="cost-input">
+                    </td>
+                    <td>
+                        <input type="number" step="0.10" name="cost-{{ material.pk }}"
+                            value="{{ material.costo_unitario|default_if_none:'0.00'|floatformat:'2' }}"
+                            class="cost-input">
                     </td>
                 </tr>
                 {% endfor %}
@@ -40,6 +44,7 @@
     </div>
     <div style="margin-left: 15px;">
         <button type="button" onclick="openModal('materialModal')" class="btn">Crear Material</button>
+        <button type="submit" name="update_stock" class="btn">Guardar Stock</button>
         <button type="submit" name="update_costs" class="btn">Guardar Costos</button>
     </div>
 

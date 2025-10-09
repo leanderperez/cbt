@@ -149,6 +149,7 @@ class Material(models.Model):
     unidad = models.CharField(max_length=50, verbose_name="Unidad de Medida")
     sistema = models.CharField(max_length=3, choices=SISTEMA_CHOICES, default='VRF', verbose_name='Tipo de Sistema')
     costo_unitario = models.DecimalField(max_digits=8, decimal_places=2, verbose_name="Costo Unitario")
+    stock = models.IntegerField(default=0, verbose_name="Stock Disponible")
     
     def __str__(self):
         return f"{self.nombre} ({self.unidad})"

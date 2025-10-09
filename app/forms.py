@@ -53,8 +53,6 @@ class ObraPage2Form(forms.Form):
     # porque los datos serán enviados directamente por los checkboxes HTML
     pass 
 
-
-
 class FaseForm(forms.ModelForm):
     class Meta:
         model = Fase
@@ -114,7 +112,7 @@ AsignacionMaterialFormSet = inlineformset_factory(
 class MaterialForm(forms.ModelForm):
     class Meta:
         model = Material
-        fields = ['codigo', 'familia', 'nombre', 'unidad', 'sistema', 'costo_unitario']
+        fields = ['codigo', 'familia', 'nombre', 'unidad', 'sistema', 'costo_unitario', 'stock']
         
 class PersonalForm(forms.ModelForm):
     class Meta:

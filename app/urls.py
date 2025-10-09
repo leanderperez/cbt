@@ -3,7 +3,8 @@ from django.contrib.auth.views import LogoutView
 from .views import (
     ObraListView, ObraCreateView, ObraUpdateView, ObraDetailView,
     FaseCreateView, TareaCreateView, TareaUpdateView, ObraMedicionesView,
-    MaterialListView, MaterialCreateView, PersonalCreateView, PersonalListView, CalculoWizard, ObraWizard, 
+    MaterialListView, MaterialCreateView, PersonalCreateView, 
+    PersonalListView, CalculoWizard, ObraWizard, 
     editar_proyecto, gantt_data_view, gantt_chart_view, calculadora_view, confirmacion_guardado,
     FORMS, FASES_WIZARD_FORMS
 )
