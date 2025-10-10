@@ -455,9 +455,13 @@ def gantt_chart_view(request, pk):
 
         return redirect('obra-detail', pk=self.object.fase.obra.pk)
     
-def calculadora_view(request):
+def calculadora_velumoide(request):
     # No se necesita lógica de servidor, solo renderizar el template.
-    return render(request, 'project_app/calculadora.html', {})
+    return render(request, 'project_app/calculadora_velumoide.html', {})
+
+def calculadora_tornilleria(request):
+    # No se necesita lógica de servidor, solo renderizar el template.
+    return render(request, 'project_app/calculadora_tornilleria.html', {})
 
 FORMS = [("1", Pagina1Form), ("2", Pagina2Form), ("3", Pagina3Form)]
 TEMPLATES = {

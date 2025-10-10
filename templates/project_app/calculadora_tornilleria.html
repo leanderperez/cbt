@@ -1,0 +1,412 @@
+{% extends 'project_app/base.html' %}
+{% load static %}
+
+{% block title %}Calculadora de Tornillos{% endblock %}
+
+{% block extra_css %}
+    <style>
+        /* ========== Estilo Adaptado de Calculadora de Empacaduras (calculadora1.html) ========== */
+
+        /* Letras blancas en toda la calculadora */
+        .calculadora-container-adaptada *,
+        .calculadora-title,
+        .calculadora-small-text,
+        .calculadora-result-title,
+        .calculadora-result-p,
+        .calculadora-result-final,
+        #tabla-calculo,
+        #tabla-calculo th,
+        #tabla-calculo td,
+        #tabla-calculo tfoot td,
+        .input-cantidad {
+            font-family: 'Poppins', sans-serif;
+            color: #fff !important;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Contenedor principal y Glassmorphism */
+        .calculadora-container-adaptada {
+            /* Mismos límites de tamaño que calculadora1.html */
+            max-width: 85vw; 
+            width: 80vw;
+            max-height: 80vh; 
+            height: 88vh; 
+            margin: 50px auto; /* Centrado con margen */
+            position: static;
+            transform: none;
+            overflow-y: hidden; /* El scroll lo maneja el área interior */
+
+            /* Replicamos el estilo Glassmorphism de base.html y style.css */
+            background-color: rgba(255, 255, 255, 0.13);
+            padding: 30px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 40px rgba(8, 7, 16, 0.6);
+            
+            display: flex;
+            flex-direction: column; 
+        }
+
+        /* Estilo de la tarjeta secundaria (Resumen), similar a calculadora1.html */
+        .calculadora-card-sec {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(8px);
+            border-radius: 10px;
+            border: 2px solid rgba(255, 255, 255, 0.2); 
+            padding: 15px;
+            margin-top: 30px;
+        }
+
+        /* Títulos */
+        .calculadora-title {
+            font-size: 28px;
+            font-weight: 500;
+            line-height: 42px;
+            text-align: center;
+            margin-bottom: 5px;
+        }
+        .calculadora-small-text {
+             font-size: 14px;
+             text-align: center;
+             margin-bottom: 20px;
+        }
+        .calculadora-result-title {
+            font-size: 20px;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+
+        /* SCROLL PRINCIPAL: Área de contenido para scroll vertical */
+        .calculadora-scroll-area {
+            overflow-y: auto; 
+            flex-grow: 1;
+            padding-right: 15px; /* Espacio para el scrollbar */
+        }
+        /* Heredando estilos de scrollbar de style.css */
+        .calculadora-scroll-area::-webkit-scrollbar {
+            width: 10px;
+            height: 8px;
+            background: transparent;
+        }
+        .calculadora-scroll-area::-webkit-scrollbar-thumb {
+            background: rgba(131, 131, 131, 0.3);
+            border-radius: 6px;
+            border: 2px solid transparent;
+            background-clip: padding-box;
+        }
+
+        /* Estilos de la Tabla */
+        .datatable-container {
+            flex-grow: 1; 
+            overflow-x: auto; 
+        }
+        #tabla-calculo {
+            width: 100% !important;
+            min-width: 750px; 
+            border-collapse: collapse !important; 
+        }
+        
+        #tabla-calculo thead th {
+            background: rgba(255, 255, 255, 0.18) !important;
+            backdrop-filter: blur(6px);
+            padding: 10px 15px !important;
+            text-align: center !important;
+            font-weight: 600 !important;
+            color: #fff !important;
+            border: none !important;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+        }
+        
+        #tabla-calculo tbody tr td {
+            background-color: rgba(255, 255, 255, 0.07) !important; 
+            padding: 10px 15px !important;
+            text-align: center !important; 
+            border: none !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+            vertical-align: middle;
+        }
+        
+        #tabla-calculo tbody tr:hover td {
+            background-color: rgba(255, 255, 255, 0.12) !important; 
+        }
+
+        #tabla-calculo tbody tr td:first-child {
+            text-align: left !important;
+        }
+        
+        /* Inputs dentro de la tabla */
+        #tabla-calculo tbody input[type="number"] {
+            height: 30px !important; 
+            width: 70px !important; 
+            text-align: center !important; 
+            padding: 0 5px !important; 
+            background-color: rgba(255, 255, 255, 0.07) !important;
+            border: none !important;
+            color: #ffffff !important;
+            border-radius: 3px !important;
+            outline: none !important;
+            /* Eliminadas las etiquetas Django, el input es puro HTML/JS */
+        }
+        
+        /* Pie de Tabla (Footer) */
+        #tabla-calculo tfoot td {
+            background: rgba(255, 255, 255, 0.18) !important; 
+            border-top: 2px solid rgba(255, 255, 255, 0.2) !important;
+            font-weight: 600 !important;
+            padding: 12px 20px !important;
+            font-size: 15px !important;
+        }
+        #tabla-calculo tfoot tr td:first-child {
+            text-align: right !important;
+        }
+        .calculadora-result-final {
+            font-size: 1.2em; 
+            font-weight: 700;
+        }
+
+        /* Estilos del Resumen - Columnas y Visibilidad Condicional */
+        #resumen-tornillos {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr); 
+            gap: 10px 20px; 
+            padding-right: 0; 
+        }
+        .calculadora-result-p {
+            margin: 0; 
+            text-align: left; 
+            transition: opacity 0.3s ease;
+            font-size: 14px;
+        }
+        .resumen-oculto {
+            opacity: 0.4;
+        }
+
+        /* Media Query para menos columnas en pantallas pequeñas */
+        @media (max-width: 1200px) {
+            #resumen-tornillos {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        @media (max-width: 800px) {
+            #resumen-tornillos {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="calculadora-container-adaptada">
+    
+    <div class="calculadora-scroll-area">
+        <h1 class="calculadora-title">Calculadora de Tornillos para Bridas</h1>
+        <p class="calculadora-small-text">Cálculo de tornillos para uniones bridadas con o sin válvula tipo Wafer.</p>
+
+        <div class="datatable-container">
+            <div style="overflow: auto;">
+                <table id="tabla-calculo"> 
+                    <thead>
+                        <tr>
+                            <th rowspan="2">DN (pulgadas)</th>
+                            <th rowspan="2">Ø Tornillo</th>
+                            <th rowspan="2">N° Tornillos/Brida</th>
+                            <th colspan="2">Cantidad de Elementos Bridados</th>
+                            </tr>
+                        <tr>
+                            <th>Solo Bridas</th>
+                            <th>Solo Válvulas</th>
+                            </tr>
+                    </thead>
+                    <tbody>
+                        </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="3" style="text-align: right; padding-right: 20px;">TOTAL GENERAL DE TORNILLOS:</td>
+                            <td id="total-brida-final" class="calculadora-result-final">0</td>
+                            <td id="total-valvula-final" class="calculadora-result-final">0</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+
+        <div class="calculadora-card-sec">
+            <h2 class="calculadora-result-title">Resumen de Cantidades por Medida</h2>
+            <div id="resumen-tornillos">
+                </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Estructura de datos (SIN CAMBIOS)
+    const TORNILLOS_DATA = [
+        { dn: "1 1/2\"", diametro: "1/2\"", num_tornillos: 4, largo_brida: "3 1/4\"", largo_valvula: "4 1/4\"" },
+        { dn: "2\"", diametro: "5/8\"", num_tornillos: 4, largo_brida: "3 3/4\"", largo_valvula: "5\"" },
+        { dn: "2 1/2\"", diametro: "5/8\"", num_tornillos: 4, largo_brida: "4\"", largo_valvula: "5 1/2\"" },
+        { dn: "3\"", diametro: "5/8\"", num_tornillos: 4, largo_brida: "4\"", largo_valvula: "5 1/2\"" },
+        { dn: "4\"", diametro: "5/8\"", num_tornillos: 8, largo_brida: "4\"", largo_valvula: "5 3/4\"" },
+        { dn: "5\"", diametro: "3/4\"", num_tornillos: 8, largo_brida: "4 1/4\"", largo_valvula: "6 1/4\"" },
+        { dn: "6\"", diametro: "3/4\"", num_tornillos: 8, largo_brida: "4 1/2\"", largo_valvula: "6 1/2\"" },
+        { dn: "8\"", diametro: "3/4\"", num_tornillos: 8, largo_brida: "4 3/4\"", largo_valvula: "7\"" },
+        { dn: "10\"", diametro: "7/8\"", num_tornillos: 12, largo_brida: "5\"", largo_valvula: "7 1/2\"" },
+        { dn: "12\"", diametro: "7/8\"", num_tornillos: 12, largo_brida: "5 1/4\"", largo_valvula: "8\"" },
+        { dn: "14\"", diametro: "1\"", num_tornillos: 12, largo_brida: "5 3/4\"", largo_valvula: "8 3/4\"" },
+    ];
+
+    /** Crea un elemento de entrada de número para la tabla. */
+    function createInput(index, type) {
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.value = ''; 
+        input.min = '0';
+        input.placeholder = '0';
+        input.className = 'input-cantidad'; 
+        input.oninput = calcularTornillos;
+        input.dataset.index = index; 
+        input.dataset.type = type;
+        // NOTA: El input se genera puro con JS, sin etiquetas Django.
+        return input;
+    }
+
+    /** Inicializa la tabla con los datos del array TORNILLOS_DATA. */
+    function initTable() {
+        const tbody = document.getElementById('tabla-calculo').getElementsByTagName('tbody')[0];
+        tbody.innerHTML = '';
+        
+        TORNILLOS_DATA.forEach((data, index) => {
+            const tr = tbody.insertRow();
+            
+            tr.insertCell().textContent = data.dn; 
+            tr.cells[0].style.textAlign = 'left';
+
+            tr.insertCell().textContent = data.diametro;
+            tr.insertCell().textContent = data.num_tornillos;
+
+            // Columna Input Brida
+            const cellCantidadBrida = tr.insertCell();
+            cellCantidadBrida.appendChild(createInput(index, 'brida'));
+
+            // Columna Input Válvula
+            const cellCantidadValvula = tr.insertCell();
+            cellCantidadValvula.appendChild(createInput(index, 'valvula'));
+        });
+        
+        calcularTornillos();
+    }
+
+    /** Realiza los cálculos de tornillos y actualiza la tabla y el resumen. */
+    function calcularTornillos() {
+        let totalGeneralBrida = 0;
+        let totalGeneralValvula = 0;
+        
+        const resumenTornillos = {};
+
+        TORNILLOS_DATA.forEach((data, index) => {
+            const inputBrida = document.querySelector(`input[data-index="${index}"][data-type="brida"]`);
+            const inputValvula = document.querySelector(`input[data-index="${index}"][data-type="valvula"]`);
+            
+            // Usar parseInt(value) || 0 para manejar valores nulos o vacíos como 0
+            const cantidadBrida = parseInt(inputBrida ? inputBrida.value : 0) || 0;
+            const cantidadValvula = parseInt(inputValvula ? inputValvula.value : 0) || 0;
+            const numTornillos = data.num_tornillos;
+
+            // Cálculos de totales generales
+            const totalItemBrida = cantidadBrida * numTornillos;
+            totalGeneralBrida += totalItemBrida;
+
+            const totalItemValvula = cantidadValvula * numTornillos;
+            totalGeneralValvula += totalItemValvula;
+
+            // Agrupación para el Resumen (Diámetro x Largo)
+            const keyBrida = `${data.diametro} x ${data.largo_brida}`;
+            resumenTornillos[keyBrida] = (resumenTornillos[keyBrida] || 0) + totalItemBrida;
+
+            const keyValvula = `${data.diametro} x ${data.largo_valvula}`;
+            resumenTornillos[keyValvula] = (resumenTornillos[keyValvula] || 0) + totalItemValvula;
+        });
+
+        // Actualizar totales generales en el tfoot
+        document.getElementById('total-brida-final').textContent = totalGeneralBrida;
+        document.getElementById('total-valvula-final').textContent = totalGeneralValvula;
+        
+        // Generar Resumen Final
+        updateResumenFinal(resumenTornillos);
+    }
+    
+    /** Actualiza la sección de resumen con visibilidad condicional. */
+    function updateResumenFinal(resumen) {
+        const resumenDiv = document.getElementById('resumen-tornillos');
+        resumenDiv.innerHTML = '';
+        
+        // --- Lógica de Medidas y Ordenamiento ---
+        const todasLasMedidas = new Set();
+        TORNILLOS_DATA.forEach(data => {
+            todasLasMedidas.add(`${data.diametro} x ${data.largo_brida}`);
+            todasLasMedidas.add(`${data.diametro} x ${data.largo_valvula}`);
+        });
+
+        const resumenCompleto = {};
+        todasLasMedidas.forEach(key => {
+            resumenCompleto[key] = resumen[key] || 0;
+        });
+
+        // Función para parsear fracciones (para el ordenamiento)
+        const parseFraction = (s) => {
+            s = s.replace(/"/g, '').trim(); 
+            if (s.includes(' ')) {
+                const parts = s.split(' ');
+                const whole = parseInt(parts[0]) || 0;
+                // Manejo seguro de fracciones como '1/2'
+                if (parts[1].includes('/')) {
+                    const fraction = parts[1].split('/');
+                    return whole + (parseInt(fraction[0]) / parseInt(fraction[1]));
+                }
+                return whole; 
+            }
+            if (s.includes('/')) {
+                const fraction = s.split('/');
+                return parseInt(fraction[0]) / parseInt(fraction[1]);
+            }
+            return parseFloat(s) || 0; 
+        };
+
+        const extractParts = (key) => {
+            const parts = key.split(' x ');
+            return { diametro: parseFraction(parts[0]), largo: parseFraction(parts[1]) };
+        };
+
+        const sortedKeys = Object.keys(resumenCompleto).sort((a, b) => {
+            const pA = extractParts(a);
+            const pB = extractParts(b);
+            
+            if (pA.diametro !== pB.diametro) return pA.diametro - pB.diametro;
+            return pA.largo - pB.largo;
+        });
+
+        // --- Renderizado con formato y visibilidad condicional ---
+        sortedKeys.forEach(key => {
+            const total = resumenCompleto[key];
+            const p = document.createElement('p');
+            p.className = 'calculadora-result-p';
+            
+            // Lógica de visibilidad
+            if (total === 0) {
+                p.classList.add('resumen-oculto');
+            }
+            
+            // Formato: diametro x largo: cantidad calculada
+            p.innerHTML = `<span style="font-weight: 700; color: inherit;">${key}</span>: <span class="calculadora-result-final" style="color: inherit;">${total}</span>`;
+            resumenDiv.appendChild(p);
+        });
+    }
+
+    window.onload = initTable;
+</script>
+{% endblock %}

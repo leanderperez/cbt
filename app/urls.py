@@ -5,7 +5,8 @@ from .views import (
     FaseCreateView, TareaCreateView, TareaUpdateView, ObraMedicionesView,
     MaterialListView, MaterialCreateView, PersonalCreateView, 
     PersonalListView, CalculoWizard, ObraWizard, 
-    editar_proyecto, gantt_data_view, gantt_chart_view, calculadora_view, confirmacion_guardado,
+    editar_proyecto, gantt_data_view, gantt_chart_view, confirmacion_guardado,
+    calculadora_tornilleria, calculadora_velumoide,
     FORMS, FASES_WIZARD_FORMS
 )
 
@@ -43,8 +44,9 @@ urlpatterns = [
     # URL de la API que recibe el ID de la obra
     path('api/gantt_data/<int:pk>/', gantt_data_view, name='gantt_data'),
 
-    # Calculadora de papel de empacaduras
-    path('calculadora/', calculadora_view, name='calculadora'),
+    # Herramientas
+    path('calculadora/velumoide', calculadora_velumoide, name='calculadora_velumoide'),
+    path('calculadora/tornilleria', calculadora_tornilleria, name='calculadora_tornilleria'),
 
     # Cotizaciones 
     path('calculo/', CalculoWizard.as_view(FORMS), name='calculo_wizard'),

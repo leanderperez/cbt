@@ -15,7 +15,19 @@
         </ul>
       </li>
       <li class="nav-item"><a class="nav-link" href="{% url 'personal-list' %}">Centros de Servicio</a></li>
-      <li class="nav-item"><a class="nav-link" href="{% url 'calculadora' %}">Herramientas</a></li>
+      
+
+      <li class="nav-item custom-dropdown" id="herramientasDropdownToggle">
+        <a class="nav-link dropdown-toggle-custom" href="#">
+          Herramientas <span class="arrow">▼</span>
+        </a>
+        
+        <ul class="dropdown-menu-custom" id="herramientasDropdownMenu">
+          <li><a class="dropdown-item-custom" href="{% url 'calculadora_velumoide' %}">Calc. Velumoide</a></li>
+          <li><a class="dropdown-item-custom" href="{% url 'calculadora_tornilleria' %}">Calc. Tornilleria</a></li>
+        </ul>
+      </li>
+      
       <li class="nav-item">
         <form id="logout-form" class="logout-form" action="{% url 'logout' %}" method="post" style="display: inline;">
           {% csrf_token %}
@@ -27,29 +39,39 @@
 </nav>
 
 <script>
-  // Script para manejar el desplegable
+  // Script para manejar los desplegables
   document.addEventListener('DOMContentLoaded', function() {
-      const toggleItem = document.getElementById('materialDropdownToggle');
-      const menu = document.getElementById('materialDropdownMenu');
+      // Función genérica para inicializar un desplegable
+      function initializeDropdown(toggleId, menuId) {
+          const toggleItem = document.getElementById(toggleId);
+          const menu = document.getElementById(menuId);
 
-      // Función para alternar la visibilidad
-      toggleItem.addEventListener('click', function(e) {
-          // Evita que el enlace superior se active al hacer clic en el contenedor (li)
-          // pero permite la navegación si se hace clic en el <a> si se desea.
-          // Si quieres que el clic en el <a> también abra/cierre el menú:
-          if (e.target.closest('.dropdown-toggle-custom')) {
-              e.preventDefault();
-          }
+          if (!toggleItem || !menu) return; // Salir si los elementos no existen
 
-          // Alternar la clase 'open' para mostrar/ocultar
-          menu.classList.toggle('open');
-      });
+          // Función para alternar la visibilidad
+          toggleItem.addEventListener('click', function(e) {
+              // Evita la navegación del <a> si es clic en el contenedor o el enlace
+              if (e.target.closest('.dropdown-toggle-custom')) {
+                  e.preventDefault();
+              }
+              // Alternar la clase 'open' para mostrar/ocultar
+              menu.classList.toggle('open');
+          });
 
-      // Cerrar el menú si se hace clic fuera de él
-      document.addEventListener('click', function(e) {
-          if (!toggleItem.contains(e.target) && menu.classList.contains('open')) {
-              menu.classList.remove('open');
-          }
-      });
+          // Cerrar el menú si se hace clic fuera de él
+          document.addEventListener('click', function(e) {
+              // Si el clic no fue dentro del contenedor del desplegable (li) 
+              // y el menú está abierto, ciérralo.
+              if (!toggleItem.contains(e.target) && menu.classList.contains('open')) {
+                  menu.classList.remove('open');
+              }
+          });
+      }
+
+      // Inicializar el desplegable de Materiales
+      initializeDropdown('materialDropdownToggle', 'materialDropdownMenu');
+
+      // Inicializar el desplegable de Herramientas (AÑADIDO)
+      initializeDropdown('herramientasDropdownToggle', 'herramientasDropdownMenu');
   });
 </script>
