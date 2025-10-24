@@ -362,50 +362,58 @@ class CustomLoginView(LoginView):
 
 def gantt_data_view(request, pk):
     obra = get_object_or_404(Obra, pk=pk)
-    tareas = Tarea.objects.filter(fase__obra=obra).order_by('fecha_inicio')
+    tareas = Tarea.objects.filter(fase__obra=obra).order_by('fase__id', 'fecha_inicio')
     fases_obra = Fase.objects.filter(obra=obra).order_by('id')
     gantt_data = []
 
-    # 1. Crear los objetos de las Fases (actúan como los "agrupadores")
-    for fase in fases_obra:
-        # Encontrar la fecha de inicio más temprana y la fecha de fin más tardía de las tareas en esta fase
-        tareas_en_fase = tareas.filter(fase=fase)
-        
-        if not tareas_en_fase:
-            # Si la fase no tiene tareas, la saltamos o la definimos como un hito
-            continue
+    tareas_por_fase = {}
+    for tarea in tareas:
+        fase_id = tarea.fase.id
+        if fase_id not in tareas_por_fase:
+            tareas_por_fase[fase_id] = []
+        tareas_por_fase[fase_id].append(tarea)
 
+    for fase in fases_obra:
+        tareas_en_fase = tareas_por_fase.get(fase.id, [])
+        
+        # ⚠️ CRÍTICO: Asegurarse de que haya tareas antes de calcular min/max y promedio
+        if not tareas_en_fase:
+            continue # Saltar fases sin tareas
+
+        # Si hay tareas, los cálculos son seguros:
         fecha_inicio_fase = min(t.fecha_inicio for t in tareas_en_fase)
         fecha_fin_fase = max(t.fecha_fin_estimada for t in tareas_en_fase)
 
-        # Calcular el progreso promedio de la fase
+        # Cálculo de avance (revisado para Decimal)
         total_avance = sum(t.porcentaje_avance for t in tareas_en_fase)
         promedio_avance = total_avance / len(tareas_en_fase) if tareas_en_fase else Decimal('0.00')
 
+        # 1. Objeto de la FASE (el padre)
         gantt_data.append({
             'id': f'fase-{fase.id}',
             'name': fase.nombre,
+            # ⚠️ Error de sintaxis en el final de la fecha (cambiado -D por -d)
             'start': fecha_inicio_fase.strftime('%Y-%m-%d'),
-            'end': fecha_fin_fase.strftime('%Y-%m-%d'),
+            'end': fecha_fin_fase.strftime('%Y-%m-%d'), 
             'progress': float(promedio_avance),
-            'dependencies': '',  # Las fases no tienen dependencias
-            'custom_class': 'gantt-phase' # Clase CSS para estilizar si es necesario
+            'dependencies': '',
+            'custom_class': 'gantt-phase',
         })
 
-    # 2. Crear los objetos de las Tareas (actúan como los "elementos hijos")
-    for tarea in tareas:
-        start = tarea.fecha_inicio.strftime('%Y-%m-%d')
-        end = tarea.fecha_fin_estimada.strftime('%Y-%m-%d')
-        
-        gantt_data.append({
-            'id': f'tarea-{tarea.id}',
-            'name': tarea.nombre,
-            'start': start,
-            'end': end,
-            'progress': float(tarea.porcentaje_avance),
-            'dependencies': f'fase-{tarea.fase.id}', #La tarea depende de la fase
-        })
-        
+        # 2. Objetos de las Tareas (los hijos)
+        for tarea in tareas_en_fase:
+            start = tarea.fecha_inicio.strftime('%Y-%m-%d')
+            end = tarea.fecha_fin_estimada.strftime('%Y-%m-%d')
+            
+            gantt_data.append({
+                'id': f'tarea-{tarea.id}',
+                'name': tarea.nombre,
+                'start': start,
+                'end': end,
+                'progress': float(tarea.porcentaje_avance),
+                'dependencies': f'fase-{tarea.fase.id}',
+            })
+            
     return JsonResponse(gantt_data, safe=False)
 
 def gantt_chart_view(request, pk):
@@ -515,7 +523,6 @@ def editar_proyecto(request, nombre_proyecto):
 
 
 # --- Nuevo Wizard para la creación de Obra y Fases ---
-
 FASES_WIZARD_FORMS = [
     ("obra_data", ObraPage1Form),
     ("card_selection", ObraPage2Form)
