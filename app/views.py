@@ -362,9 +362,17 @@ class CustomLoginView(LoginView):
 
 def gantt_data_view(request, pk):
     obra = get_object_or_404(Obra, pk=pk)
-    tareas = Tarea.objects.filter(fase__obra=obra).order_by('fase__id', 'fecha_inicio')
+    
+    # 1. Obtener y ordenar las tareas por fecha de inicio
+    # (ya lo tienes correctamente)
+    tareas = Tarea.objects.filter(fase__obra=obra).order_by('fecha_inicio', 'fase__id',)
+    
+    # Obtener las fases de la obra, el orden inicial no es crítico aquí
     fases_obra = Fase.objects.filter(obra=obra).order_by('id')
-    gantt_data = []
+    
+    # Lista para almacenar los objetos del diagrama de Gantt
+    gantt_data_fases = [] # Usaremos una lista temporal para fases
+    gantt_data_tareas = [] # Usaremos una lista temporal para tareas
 
     tareas_por_fase = {}
     for tarea in tareas:
@@ -376,28 +384,26 @@ def gantt_data_view(request, pk):
     for fase in fases_obra:
         tareas_en_fase = tareas_por_fase.get(fase.id, [])
         
-        # ⚠️ CRÍTICO: Asegurarse de que haya tareas antes de calcular min/max y promedio
         if not tareas_en_fase:
-            continue # Saltar fases sin tareas
+            continue
 
-        # Si hay tareas, los cálculos son seguros:
+        # Calcular la fecha de inicio y fin de la FASE
         fecha_inicio_fase = min(t.fecha_inicio for t in tareas_en_fase)
         fecha_fin_fase = max(t.fecha_fin_estimada for t in tareas_en_fase)
 
-        # Cálculo de avance (revisado para Decimal)
         total_avance = sum(t.porcentaje_avance for t in tareas_en_fase)
         promedio_avance = total_avance / len(tareas_en_fase) if tareas_en_fase else Decimal('0.00')
 
         # 1. Objeto de la FASE (el padre)
-        gantt_data.append({
+        gantt_data_fases.append({
             'id': f'fase-{fase.id}',
             'name': fase.nombre,
-            # ⚠️ Error de sintaxis en el final de la fecha (cambiado -D por -d)
             'start': fecha_inicio_fase.strftime('%Y-%m-%d'),
             'end': fecha_fin_fase.strftime('%Y-%m-%d'), 
             'progress': float(promedio_avance),
             'dependencies': '',
             'custom_class': 'gantt-phase',
+            'fecha_inicio_orden': fecha_inicio_fase # Clave temporal para ordenar
         })
 
         # 2. Objetos de las Tareas (los hijos)
@@ -405,7 +411,7 @@ def gantt_data_view(request, pk):
             start = tarea.fecha_inicio.strftime('%Y-%m-%d')
             end = tarea.fecha_fin_estimada.strftime('%Y-%m-%d')
             
-            gantt_data.append({
+            gantt_data_tareas.append({
                 'id': f'tarea-{tarea.id}',
                 'name': tarea.nombre,
                 'start': start,
@@ -413,8 +419,31 @@ def gantt_data_view(request, pk):
                 'progress': float(tarea.porcentaje_avance),
                 'dependencies': f'fase-{tarea.fase.id}',
             })
+
+    # 3. ORDENAR CRONOLÓGICAMENTE las fases
+    # Las fases se ordenan por la 'fecha_inicio_orden' temporal
+    gantt_data_fases.sort(key=lambda x: x['fecha_inicio_orden'])
+    
+    # 4. Combinar las fases y las tareas.
+    # El diagrama de Gantt (como el JSGanttImproved) generalmente espera 
+    # que la tarea vaya inmediatamente después de su fase padre en la lista 
+    # para asegurar la correcta anidación en la interfaz.
+    gantt_data_final = []
+    
+    # Volvemos a iterar sobre las fases ya ORDENADAS
+    for fase_data in gantt_data_fases:
+        # Eliminar la clave temporal de ordenamiento antes de añadir al JSON
+        fecha_inicio_orden = fase_data.pop('fecha_inicio_orden')
+        gantt_data_final.append(fase_data)
+
+        # Buscar y añadir las tareas que dependen de esta fase
+        fase_id = fase_data['id']
+        tareas_de_esta_fase = [t for t in gantt_data_tareas if t['dependencies'] == fase_id]
+        
+        # Las tareas ya estaban ordenadas cronológicamente en la consulta inicial
+        gantt_data_final.extend(tareas_de_esta_fase)
             
-    return JsonResponse(gantt_data, safe=False)
+    return JsonResponse(gantt_data_final, safe=False)
 
 def gantt_chart_view(request, pk):
     obra = get_object_or_404(Obra, pk=pk)
@@ -520,7 +549,6 @@ def editar_proyecto(request, nombre_proyecto):
         form = TuFormularioCompleto(initial=form_data)
         
     return render(request, 'tu_app/editar_proyecto.html', {'form': form, 'proyecto': proyecto})
-
 
 # --- Nuevo Wizard para la creación de Obra y Fases ---
 FASES_WIZARD_FORMS = [
