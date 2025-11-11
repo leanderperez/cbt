@@ -117,7 +117,7 @@ class MaterialForm(forms.ModelForm):
 class PersonalForm(forms.ModelForm):
     class Meta:
         model = Personal
-        fields = ['empresa', 'nombre', 'telefono', 'telefono_alternativo', 'email', 'direccion']
+        fields = ['rif','empresa', 'nombre', 'especialidad', 'telefono', 'telefono_alternativo', 'email', 'direccion']
 
 # Formulario Multi-step para cotizaciones
 class Pagina1Form(forms.Form):

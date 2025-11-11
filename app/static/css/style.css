@@ -346,6 +346,13 @@ form .input-box span.details {
     transition: all 0.3s ease;
 }
 
+.user-details .input-box select option {
+    /* Color de fondo para las opciones del desplegable */
+    background-color: #1a1a1a !important; 
+    /* Color de texto para las opciones */
+    color: #ffffff !important;
+}
+
 .user-details .input-box input:focus,
 .user-details .input-box textarea:focus,
 .user-details .input-box select:focus {

@@ -6,8 +6,20 @@ from django.contrib.auth.models import User
 
 
 class Personal(models.Model):
+    ESPECIALIDAD_CHOICES = [
+    ('Instalación VRF', 'Instalación VRF'),
+    ('Instalación CHW', 'Instalación CHW'),
+    ('Mantenimiento', 'Mantenimiento'),
+    ('Ductería P3', 'Ductería P3'),
+    ('Ductería Galvanizada', 'Ductería Galvanizada'),
+    ('Obra Civil', 'Obra Civil'),
+    ('Eléctricidad', 'Electricidad'),
+    ('Izaje', 'Izaje')
+    ]
+    rif = models.CharField(max_length=20, unique=True, verbose_name="RIF")
     empresa = models.CharField(max_length=200, verbose_name="Empresa")
     nombre = models.CharField(max_length=200, verbose_name="Nombre")
+    especialidad = models.CharField(max_length=50, choices=ESPECIALIDAD_CHOICES, verbose_name="Especialidad")
     telefono = models.CharField(max_length=20, verbose_name="Teléfono")
     telefono_alternativo = models.CharField(max_length=20, blank=True, verbose_name="Teléfono Alternativo")
     email = models.EmailField(verbose_name="Correo Electrónico")
