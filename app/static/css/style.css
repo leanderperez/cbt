@@ -191,6 +191,8 @@ select {
     --bs-navbar-active-color: rgba(255, 255, 255, 0.3);
     --bs-navbar-brand-color: #222;
     --bs-navbar-brand-hover-color: rgba(255, 255, 255, 0.3);
+    position: relative;
+    z-index: 1000;
 }
 
 .navbar .navbar-brand,
