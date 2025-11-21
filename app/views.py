@@ -500,56 +500,6 @@ def calculadora_tornilleria(request):
     # No se necesita lógica de servidor, solo renderizar el template.
     return render(request, 'project_app/calculadora_tornilleria.html', {})
 
-FORMS = [("1", Pagina1Form), ("2", Pagina2Form), ("3", Pagina3Form)]
-TEMPLATES = {
-    "1": "project_app/pagina1.html",
-    "2": "project_app/pagina2.html",
-    "3": "project_app/pagina3.html",
-}
-
-class CalculoWizard(SessionWizardView):
-    def get_template_names(self):
-        return [TEMPLATES[self.steps.current]]
-
-    def done(self, form_list, **kwargs):
-        # Cuando el formulario se completa, procesa los datos
-        form_data = [form.cleaned_data for form in form_list]
-        
-        # Unifica los datos en un solo diccionario
-        data = {}
-        for d in form_data:
-            data.update(d)
-        
-        # Guarda los datos en la base de datos con un nombre específico
-        # Usa el nombre_proyecto para identificar el registro
-        nombre = data.pop('nombre_proyecto', 'Proyecto sin nombre')
-        Cotizacion.objects.create(nombre=nombre, datos=data) # 'datos' es un campo JSONField
-        
-        return redirect('confirmacion') # Redirecciona a una página de confirmación
-
-def confirmacion_guardado(request):
-    return render(request, 'project_app/confirmacion.html')
-    
-def editar_proyecto(request, nombre_proyecto):
-    proyecto = get_object_or_404(Cotizacion, nombre=nombre_proyecto)
-    
-    # Supongamos que tienes un solo formulario para la edición
-    # que contiene todos los campos
-    
-    # Combina los datos guardados con los datos del formulario (si aplica)
-    form_data = proyecto.datos
-    
-    if request.method == 'POST':
-        form = TuFormularioCompleto(request.POST)
-        if form.is_valid():
-            proyecto.datos.update(form.cleaned_data)
-            proyecto.save()
-            return redirect('confirmacion_edicion')
-    else:
-        form = TuFormularioCompleto(initial=form_data)
-        
-    return render(request, 'tu_app/editar_proyecto.html', {'form': form, 'proyecto': proyecto})
-
 # --- Nuevo Wizard para la creación de Obra y Fases ---
 FASES_WIZARD_FORMS = [
     ("obra_data", ObraPage1Form),
@@ -617,3 +567,54 @@ class ObraWizard(SessionWizardView):
             print(f"Error al crear Obra/Fases: {e}")
             return redirect('obra-list')
 
+FORMS = [("1", Pagina1Form), ("2", Pagina2Form), ("3", Pagina3Form)]
+TEMPLATES = {
+    "1": "project_app/pagina1.html",
+    "2": "project_app/pagina2.html",
+    "3": "project_app/pagina3.html",
+}
+
+# --- Nuevo Wizard para el cálculo y guardado de Cotizaciones ---
+
+class CalculoWizard(SessionWizardView):
+    def get_template_names(self):
+        return [TEMPLATES[self.steps.current]]
+
+    def done(self, form_list, **kwargs):
+        # Cuando el formulario se completa, procesa los datos
+        form_data = [form.cleaned_data for form in form_list]
+        
+        # Unifica los datos en un solo diccionario
+        data = {}
+        for d in form_data:
+            data.update(d)
+        
+        # Guarda los datos en la base de datos con un nombre específico
+        # Usa el nombre_proyecto para identificar el registro
+        nombre = data.pop('nombre_proyecto', 'Proyecto sin nombre')
+        Cotizacion.objects.create(nombre=nombre, datos=data) # 'datos' es un campo JSONField
+        
+        return redirect('confirmacion') # Redirecciona a una página de confirmación
+
+def confirmacion_guardado(request):
+    return render(request, 'project_app/confirmacion.html')
+    
+def editar_proyecto(request, nombre_proyecto):
+    proyecto = get_object_or_404(Cotizacion, nombre=nombre_proyecto)
+    
+    # Supongamos que tienes un solo formulario para la edición
+    # que contiene todos los campos
+    
+    # Combina los datos guardados con los datos del formulario (si aplica)
+    form_data = proyecto.datos
+    
+    if request.method == 'POST':
+        form = TuFormularioCompleto(request.POST)
+        if form.is_valid():
+            proyecto.datos.update(form.cleaned_data)
+            proyecto.save()
+            return redirect('confirmacion_edicion')
+    else:
+        form = TuFormularioCompleto(initial=form_data)
+        
+    return render(request, 'tu_app/editar_proyecto.html', {'form': form, 'proyecto': proyecto})
