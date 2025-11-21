@@ -576,7 +576,7 @@ TEMPLATES = {
 
 # --- Nuevo Wizard para el cálculo y guardado de Cotizaciones ---
 
-class CalculoWizard(SessionWizardView):
+class CotizacionWizard(SessionWizardView):
     def get_template_names(self):
         return [TEMPLATES[self.steps.current]]
 
