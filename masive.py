@@ -25,13 +25,14 @@ def cargar_datos_masivos_sqlite(nombre_archivo_csv, ruta_bd, nombre_tabla, codif
                 
                 # Se limpia el espacio en blanco al final de algunos campos.
                 fila = [x.strip() for x in fila]
+                fila.append(0)  # Agregar stock inicial como 0
                 datos_para_insertar.append(fila)
 
             # Prepara la consulta SQL para la inserción
             placeholders = ', '.join(['?'] * len(datos_para_insertar[0]))
             
             # La consulta de inserción especifica las 5 columnas del CSV.
-            consulta_insert = f"INSERT INTO {nombre_tabla} (codigo, nombre, unidad, familia, sistema, costo_unitario) VALUES ({placeholders})"
+            consulta_insert = f"INSERT INTO {nombre_tabla} (codigo, nombre, unidad, familia, sistema, costo_unitario, stock) VALUES ({placeholders})"
             
             # Usar `executemany` para una carga masiva eficiente
             cursor.executemany(consulta_insert, datos_para_insertar)
