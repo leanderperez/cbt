@@ -50,5 +50,5 @@ urlpatterns = [
 
     # Cotizaciones 
     path('cotizacion/', CotizacionWizard.as_view(FORMS), name='cotizacion_wizard'),
-    path('corridas/', CorridaListView.as_view(), name='corrida-list'),
+    path('corridas/', CorridaListView.as_view(), name='corrida-list')
 ]

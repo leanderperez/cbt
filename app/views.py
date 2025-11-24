@@ -8,9 +8,9 @@ from decimal import Decimal
 from django.contrib.auth.views import LoginView
 from django.db import transaction
 from django.db.models import F
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.views.generic import (
     ListView,
     CreateView,
