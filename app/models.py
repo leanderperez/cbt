@@ -166,6 +166,25 @@ class Material(models.Model):
     def __str__(self):
         return f"{self.nombre} ({self.unidad})"
 
+class Equipo(models.Model):
+    SISTEMA_CHOICES = [
+    ('VRF', 'VRF'),
+    ('Compacto', 'Compacto'),
+    ('Chiller', 'Chiller'),
+    ('fancoil', 'Fan Coil'),
+    ('UMA', 'Unidad Manejadora de Aire'),
+    ]
+    nombre = models.CharField(max_length=200, verbose_name="Nombre del Equipo")
+    modelo = models.CharField(max_length=50, unique=True, verbose_name="Código del Equipo")
+    descripcion = models.TextField(blank=True, verbose_name="Descripción del Equipo")
+    sistema = models.CharField(max_length=10, choices=SISTEMA_CHOICES, default='VRF', verbose_name='Tipo de Sistema')
+    capacidad = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Capacidad del Equipo")
+    mca = models.DecimalField(max_digits=3, decimal_places=2, verbose_name="mca")
+    mcc = models.DecimalField(max_digits=3, decimal_places=2, verbose_name="mcc")
+
+    def __str__(self):
+        return self.nombre
+
 class RequerimientoMaterial(models.Model):
     tarea = models.ForeignKey(Tarea, on_delete=models.CASCADE, verbose_name="Tarea")
     material = models.ForeignKey(Material, on_delete=models.CASCADE, verbose_name="Material")

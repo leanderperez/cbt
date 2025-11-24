@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Obra, Fase, Tarea, Personal, AsignacionPersonal, Material, RequerimientoMaterial
+from .models import Obra, Fase, Tarea, Personal, AsignacionPersonal, Material, Equipo, RequerimientoMaterial
 
 @admin.register(Obra)
 class ObraAdmin(admin.ModelAdmin):
@@ -45,3 +45,8 @@ class AsignacionPersonalAdmin(admin.ModelAdmin):
 class MaterialAdmin(admin.ModelAdmin):
     list_display = ('nombre', 'unidad', 'costo_unitario')
     search_fields = ('nombre',)
+
+@admin.register(Equipo)
+class EquipoAdmin(admin.ModelAdmin):
+    list_display = ('nombre', 'modelo', 'sistema', 'capacidad', 'mca', 'mcc')
+    search_fields = ('nombre', 'modelo')
