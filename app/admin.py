@@ -48,5 +48,5 @@ class MaterialAdmin(admin.ModelAdmin):
 
 @admin.register(Equipo)
 class EquipoAdmin(admin.ModelAdmin):
-    list_display = ('nombre', 'modelo', 'sistema', 'capacidad', 'mca', 'mcc')
+    list_display = ('nombre', 'modelo', 'sistema', 'capacidad', 'mca', 'mfa')
     search_fields = ('nombre', 'modelo')

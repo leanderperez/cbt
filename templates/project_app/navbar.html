@@ -2,7 +2,19 @@
   <div class="container-fluid d-flex align-items-center justify-content-between">
     <a class="navbar-brand" href="{% url 'obra-list' %}">CBT</a>
     <ul class="navbar-nav flex-row flex-nowrap align-items-center" style="gap: 1.5rem;">
+
       <li class="nav-item"><a class="nav-link" href="{% url 'obra-list' %}">Gestión de Obras</a></li>
+
+      <li class="nav-item custom-dropdown" id="cotizacionesDropdownToggle">
+        <a class="nav-link dropdown-toggle-custom" href="#">
+          Cotizaciones <span class="arrow">▼</span>
+        </a>
+        
+        <ul class="dropdown-menu-custom" id="cotizacionesDropdownMenu">
+          <li><a class="dropdown-item-custom" href="{% url 'corrida-list' %}">Corridas</a></li>
+          <li><a class="dropdown-item-custom" href="{% url 'corrida-list' %}">Cotizaciones</a></li>
+        </ul>
+      </li>
       
       <li class="nav-item custom-dropdown" id="materialDropdownToggle">
         <a class="nav-link dropdown-toggle-custom" href="{% url 'material-list' %}">
@@ -14,6 +26,7 @@
           <li><a class="dropdown-item-custom" href="{% url 'material-list-filter' sistema='CHW' %}">Agua Helada</a></li>
         </ul>
       </li>
+
       <li class="nav-item"><a class="nav-link" href="{% url 'personal-list' %}">Centros de Servicio</a></li>
       
 
@@ -68,10 +81,13 @@
           });
       }
 
+      // Inicializar el desplegable de Cotizaciones
+      initializeDropdown('cotizacionesDropdownToggle', 'cotizacionesDropdownMenu');
+
       // Inicializar el desplegable de Materiales
       initializeDropdown('materialDropdownToggle', 'materialDropdownMenu');
 
-      // Inicializar el desplegable de Herramientas (AÑADIDO)
+      // Inicializar el desplegable de Herramientas 
       initializeDropdown('herramientasDropdownToggle', 'herramientasDropdownMenu');
   });
 </script>

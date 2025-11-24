@@ -1,6 +1,6 @@
-# Estándar de Python
 import datetime
 import json
+import re
 from datetime import datetime
 from decimal import Decimal
 
@@ -33,7 +33,7 @@ from .models import (
     MedicionMaterial,
     Material,
     Personal,
-    Cotizacion
+    Corrida
 )
 from .forms import (
     ObraForm,
@@ -567,6 +567,7 @@ class ObraWizard(SessionWizardView):
             print(f"Error al crear Obra/Fases: {e}")
             return redirect('obra-list')
 
+# --- Nuevo Wizard para el cálculo y guardado de Cotizaciones ---
 FORMS = [("1", Pagina1Form), ("2", Pagina2Form), ("3", Pagina3Form)]
 TEMPLATES = {
     "1": "project_app/pagina1.html",
@@ -574,7 +575,16 @@ TEMPLATES = {
     "3": "project_app/pagina3.html",
 }
 
-# --- Nuevo Wizard para el cálculo y guardado de Cotizaciones ---
+def to_snake_case(name):
+    """Convierte una cadena a formato snake_case (e.g., 'Mi Proyecto' -> 'mi_proyecto')."""
+    # 1. Reemplazar cualquier cosa que no sea letra o número por un espacio
+    s1 = re.sub(r'[^a-zA-Z0-9]', ' ', name)
+    # 2. Convertir a Mayúsculas
+    s2 = s1.upper()
+    # 3. Reemplazar grupos de espacios por un solo guion bajo y limpiar guiones iniciales/finales
+    s3 = re.sub(r'\s+', '_', s2).strip('_')
+    return s3
+
 class CotizacionWizard(SessionWizardView):
     def get_template_names(self):
         return [TEMPLATES[self.steps.current]]
@@ -588,32 +598,18 @@ class CotizacionWizard(SessionWizardView):
         for d in form_data:
             data.update(d)
         
-        # Guarda los datos en la base de datos con un nombre específico
-        # Usa el nombre_proyecto para identificar el registro
-        nombre = data.pop('nombre_proyecto', 'Proyecto sin nombre')
-        Cotizacion.objects.create(nombre=nombre, datos=data) # 'datos' es un campo JSONField
-        
-        return redirect('confirmacion') # Redirecciona a una página de confirmación
+        # Genera el nombre único para la Corrida
+        original_name = data.pop('nombre_proyecto', 'sin nombre')
+        date_str = datetime.now().strftime("%y%m%d")
+        snake_case_name = to_snake_case(original_name)
+        final_name = f"CORR-{date_str}-{snake_case_name}"
 
-def confirmacion_guardado(request):
-    return render(request, 'project_app/confirmacion.html')
-    
-def editar_proyecto(request, nombre_proyecto):
-    proyecto = get_object_or_404(Cotizacion, nombre=nombre_proyecto)
-    
-    # Supongamos que tienes un solo formulario para la edición
-    # que contiene todos los campos
-    
-    # Combina los datos guardados con los datos del formulario (si aplica)
-    form_data = proyecto.datos
-    
-    if request.method == 'POST':
-        form = TuFormularioCompleto(request.POST)
-        if form.is_valid():
-            proyecto.datos.update(form.cleaned_data)
-            proyecto.save()
-            return redirect('confirmacion_edicion')
-    else:
-        form = TuFormularioCompleto(initial=form_data)
+        # 'datos' es un campo JSONField
+        Corrida.objects.create(nombre=final_name, datos=data)
         
-    return render(request, 'tu_app/editar_proyecto.html', {'form': form, 'proyecto': proyecto})
+        return redirect('corrida-list') # Redirecciona a una página de confirmación
+
+class CorridaListView(ListView):
+    model = Corrida
+    template_name = 'project_app/corrida_list.html'
+    context_object_name = 'corridas'

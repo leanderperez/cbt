@@ -58,3 +58,9 @@ cargar_datos_masivos_sqlite(
     ruta_bd=ruta_db_django,
     nombre_tabla='app_material'
 )
+
+cargar_datos_masivos_sqlite(
+    nombre_archivo_csv='materiales_CHW.csv',
+    ruta_bd=ruta_db_django,
+    nombre_tabla='app_material'
+)

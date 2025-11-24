@@ -1,0 +1,67 @@
+{% extends 'project_app/base.html' %}
+{% load static %}
+{% block title %}Lista de Corridas{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
+
+<div class="datatable-container">
+    <table id="obraTable" class="obra-table">
+        <thead>
+            <tr>
+                <th>Código</th>
+                <th>Descripción</th>
+                <th>Acciones</th>
+                
+            </tr>
+        </thead>
+        <tbody>
+            {% for corrida in corridas %}
+            <tr class="glass-row">
+                <td>{{ corrida.nombre }}</td>
+                <td>{{ corrida.datos.descripcion}}</td>
+                <td>
+                    <a href="{% url 'obra-detail' corrida.pk %}" class="obra-link">Detalles</a> |
+                    <a href="{% url 'gantt_chart' corrida.pk %}" class="obra-link">Project</a> |
+                    <a href="{% url 'obra-mediciones' corrida.pk %}" class="obra-link">Mediciones</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<div style="margin-left: 15px;">
+    <a href="{% url 'cotizacion_wizard' %}" class="btn">Iniciar Nueva Cotización</a>
+</div>
+
+
+<script>
+    $(document).ready(function() {
+        var table = $('#obraTable').DataTable({
+            "language": {
+                "url": "https://cdn.datatables.net/plug-ins/1.11.5/i18n/es-ES.json"
+            },
+            "scrollY": "55vh",
+            "scrollCollapse": true,
+            "paging": false, 
+            "info": false,
+            "deferRender": true
+        });
+
+        table.columns().every(function() {
+            var that = this;
+
+            $('input', this.header()).on('keyup change', function() {
+                if (that.search() !== this.value) {
+                    that
+                        .search(this.value)
+                        .draw();
+                }
+            });
+        });
+    });
+</script>
+
+{% endblock %}
