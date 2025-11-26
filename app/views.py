@@ -33,7 +33,8 @@ from .models import (
     MedicionMaterial,
     Material,
     Personal,
-    Corrida
+    Corrida, 
+    Equipo
 )
 from .forms import (
     ObraForm,
@@ -613,3 +614,119 @@ class CorridaListView(ListView):
     model = Corrida
     template_name = 'project_app/corrida_list.html'
     context_object_name = 'corridas'
+
+
+
+
+
+# --- Vista para generar Cotización desde una Corrida ---
+from collections import defaultdict
+from .models import Corrida, Cotizacion, CotizacionEquipo, CotizacionMaterial, ReglaEquipoMaterial, ReglaMaterialMaterial
+
+class GenerarCotizacionView(View):
+    def post(self, request, corrida_id):
+        corrida = get_object_or_404(Corrida, pk=corrida_id)
+        datos = corrida.datos # El JSON de la corrida
+        
+        # 1. Preparar el cálculo de materiales
+        # Usamos defaultdict para consolidar las cantidades por código de material.
+        materiales_totales = defaultdict(float)
+        
+        # Guardar equipos solicitados para la cotización
+        equipos_solicitados = {} 
+        
+        # --- Lógica de la Cotización en una Transacción ---
+        with transaction.atomic():
+            # Crear la Cotizacion (se actualizará el costo_total al final)
+            cotizacion = Cotizacion.objects.create(
+                corrida=corrida,
+                nombre=f"Cotización {corrida.nombre}",
+                datos_corrida_historico=datos
+            )
+
+            # 2. Procesar Equipos de la Corrida
+            for codigo_equipo, cantidad_equipo in datos.get('equipos', {}).items():
+                try:
+                    equipo = Equipo.objects.get(modelo=codigo_equipo)
+                    equipos_solicitados[equipo.pk] = cantidad_equipo
+                    
+                    # 2.1. Guardar el detalle de Equipo en la Cotización
+                    CotizacionEquipo.objects.create(
+                        cotizacion=cotizacion,
+                        equipo=equipo,
+                        cantidad=cantidad_equipo,
+                        costo_unitario=0.00, # Asume un campo de costo unitario si el Equipo lo tiene
+                        costo_total_linea=0.00
+                    )
+                    
+                    # 2.2. Aplicar Reglas Equipo -> Material
+                    reglas_em = ReglaEquipoMaterial.objects.filter(equipo_origen=equipo)
+                    for regla in reglas_em:
+                        materiales_totales[regla.material_requerido.codigo] += \
+                            regla.cantidad_requerida * cantidad_equipo
+                except Equipo.DoesNotExist:
+                    # Manejar error si el equipo no existe
+                    pass
+
+            # 3. Procesar Materiales Directos de la Corrida
+            for codigo_material, cantidad_material in datos.get('tuberias', {}).items():
+                # Agregar a los materiales totales para el siguiente paso (Reglas Material -> Material)
+                materiales_totales[codigo_material] += cantidad_material 
+            
+            
+            # 4. Aplicar Reglas Material -> Material a los materiales base (directos + los de equipo)
+            materiales_adicionales = defaultdict(float)
+            for codigo_origen, cantidad_origen in materiales_totales.items():
+                try:
+                    material_origen = Material.objects.get(codigo=codigo_origen)
+                    reglas_mm = ReglaMaterialMaterial.objects.filter(material_origen=material_origen)
+                    for regla in reglas_mm:
+                        # Se usa materiales_adicionales para evitar aplicar reglas 
+                        # sobre los materiales que se acaban de generar en esta iteración.
+                        materiales_adicionales[regla.material_requerido.codigo] += \
+                            regla.cantidad_requerida * cantidad_origen
+                except Material.DoesNotExist:
+                    pass
+            
+            # 5. Consolidar y Guardar Materiales en la Cotización
+            materiales_totales_final = materiales_totales
+            
+            # Agregar los materiales adicionales
+            for codigo_add, cantidad_add in materiales_adicionales.items():
+                 materiales_totales_final[codigo_add] += cantidad_add
+            
+            costo_total_cotizacion = 0.00
+
+            for codigo_material, cantidad_total in materiales_totales_final.items():
+                try:
+                    material = Material.objects.get(codigo=codigo_material)
+                    costo_linea = material.costo_unitario * cantidad_total
+                    costo_total_cotizacion += costo_linea
+                    
+                    # Guardar el detalle de Material en la Cotización
+                    CotizacionMaterial.objects.create(
+                        cotizacion=cotizacion,
+                        material=material,
+                        cantidad=cantidad_total,
+                        costo_unitario=material.costo_unitario,
+                        costo_total_linea=costo_linea,
+                        origen_regla='Compilado' # Origen es el resultado de la compilación
+                    )
+                except Material.DoesNotExist:
+                    pass
+
+            # 6. Actualizar Costo Total de la Cotización (Incluye Equipos y Materiales)
+            # Nota: Debes replicar la lógica de costo para los CotizacionEquipo si lo requieres.
+            cotizacion.costo_total = costo_total_cotizacion 
+            cotizacion.save()
+
+        # Redirigir a la página de detalle de la cotización
+        return redirect('detalle_cotizacion', pk=cotizacion.pk)
+
+
+# En 'urls.py' de tu aplicación
+# from .views import GenerarCotizacionView
+# urlpatterns = [
+#     path('cotizar/<int:corrida_id>/', GenerarCotizacionView.as_view(), name='generar_cotizacion'),
+#     path('cotizacion/<int:pk>/', DetalleCotizacionView.as_view(), name='detalle_cotizacion'),
+# ]

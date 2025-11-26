@@ -232,3 +232,155 @@ class Corrida(models.Model):
 
     def __str__(self):
         return self.nombre
+    
+
+# --- Modelos de Reglas de Materiales ---
+# Estas reglas definen las relaciones entre Equipos y Materiales, y entre Materiales y otros Materiales.
+    
+class ReglaEquipoMaterial(models.Model):
+    """Regla: Un Equipo requiere ciertos Materiales."""
+    equipo_origen = models.ForeignKey(
+        'Equipo', 
+        on_delete=models.CASCADE, 
+        related_name='reglas_materiales',
+        verbose_name="Equipo de Origen"
+    )
+    material_requerido = models.ForeignKey(
+        'Material', 
+        on_delete=models.CASCADE, 
+        related_name='reglas_equipos',
+        verbose_name="Material Requerido"
+    )
+    cantidad_requerida = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        verbose_name="Cantidad por Equipo"
+    )
+    
+    class Meta:
+        unique_together = ('equipo_origen', 'material_requerido')
+        verbose_name = "Regla Equipo a Material"
+        verbose_name_plural = "Reglas Equipo a Materiales"
+
+    def __str__(self):
+        return f"Equipo {self.equipo_origen.modelo} requiere {self.cantidad_requerida} de {self.material_requerido.codigo}"
+
+
+class ReglaMaterialMaterial(models.Model):
+    """Regla: Un Material (Origen) requiere otros Materiales (Requeridos)."""
+    material_origen = models.ForeignKey(
+        'Material', 
+        on_delete=models.CASCADE, 
+        related_name='reglas_materiales_origen',
+        verbose_name="Material de Origen"
+    )
+    material_requerido = models.ForeignKey(
+        'Material', 
+        on_delete=models.CASCADE, 
+        related_name='reglas_materiales_requerido',
+        verbose_name="Material Requerido"
+    )
+    cantidad_requerida = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        verbose_name="Cantidad por Material de Origen"
+    )
+    
+    class Meta:
+        unique_together = ('material_origen', 'material_requerido')
+        verbose_name = "Regla Material a Material"
+        verbose_name_plural = "Reglas Material a Materiales"
+
+    def __str__(self):
+        return f"Material {self.material_origen.codigo} requiere {self.cantidad_requerida} de {self.material_requerido.codigo}"
+
+# --- Modelo de Cotización ---
+
+class Cotizacion(models.Model):
+    """Modelo para guardar la cotización generada."""
+    corrida = models.OneToOneField(
+        'Corrida', 
+        on_delete=models.CASCADE, 
+        verbose_name="Corrida Origen"
+    )
+    nombre = models.CharField(max_length=255, unique=True, verbose_name="Nombre de la Cotización")
+    fecha_generacion = models.DateTimeField(auto_now_add=True)
+    costo_total = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+
+    # Opcional: Podrías usar este JSONField para guardar el JSON de la corrida 
+    # en el momento de la cotización para historial.
+    datos_corrida_historico = models.JSONField(
+        null=True, blank=True, 
+        verbose_name="Datos de la Corrida al momento de cotizar"
+    ) 
+
+    def __str__(self):
+        return self.nombre
+
+# --- Modelos de Detalle de Cotización (Productos finales) ---
+# Usamos dos modelos intermedios para guardar los detalles de la cotización generada, 
+# separando Equipos y Materiales para claridad y fácil consulta.
+
+class CotizacionEquipo(models.Model):
+    """Detalle de los Equipos incluidos en la Cotización."""
+    cotizacion = models.ForeignKey(
+        Cotizacion, 
+        on_delete=models.CASCADE, 
+        related_name='equipos_cotizados'
+    )
+    equipo = models.ForeignKey(
+        'Equipo', 
+        on_delete=models.PROTECT, 
+        verbose_name="Equipo"
+    )
+    cantidad = models.IntegerField(verbose_name="Cantidad Solicitada")
+    costo_unitario = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        verbose_name="Costo Unitario (al momento de cotizar)"
+    )
+    costo_total_linea = models.DecimalField(
+        max_digits=15, 
+        decimal_places=2, 
+        verbose_name="Costo Total de Línea"
+    )
+
+    def __str__(self):
+        return f"{self.cantidad} x {self.equipo.nombre} en {self.cotizacion.nombre}"
+
+class CotizacionMaterial(models.Model):
+    """Detalle de Materiales (directos e indirectos por reglas) en la Cotización."""
+    cotizacion = models.ForeignKey(
+        Cotizacion, 
+        on_delete=models.CASCADE, 
+        related_name='materiales_cotizados'
+    )
+    material = models.ForeignKey(
+        'Material', 
+        on_delete=models.PROTECT, 
+        verbose_name="Material"
+    )
+    cantidad = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        verbose_name="Cantidad Total Requerida"
+    )
+    costo_unitario = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        verbose_name="Costo Unitario (al momento de cotizar)"
+    )
+    costo_total_linea = models.DecimalField(
+        max_digits=15, 
+        decimal_places=2, 
+        verbose_name="Costo Total de Línea"
+    )
+    origen_regla = models.CharField(
+        max_length=50, 
+        blank=True, 
+        null=True, 
+        verbose_name="Origen (Directo, Equipo, Material)"
+    ) 
+
+    def __str__(self):
+        return f"{self.cantidad} x {self.material.nombre} en {self.cotizacion.nombre}"

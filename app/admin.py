@@ -1,5 +1,28 @@
 from django.contrib import admin
-from .models import Obra, Fase, Tarea, Personal, AsignacionPersonal, Material, Equipo, RequerimientoMaterial
+from .models import (
+    Obra, Fase, Tarea, Personal, AsignacionPersonal, Material, Equipo, 
+    RequerimientoMaterial, ReglaEquipoMaterial, ReglaMaterialMaterial # Añadido Reglas
+)
+
+# --- INLINES ---
+
+class RequerimientoMaterialInline(admin.TabularInline):
+    model = RequerimientoMaterial
+    extra = 1
+
+# Definición del Inline para las nuevas reglas
+class ReglaEquipoMaterialInline(admin.TabularInline):
+    model = ReglaEquipoMaterial
+    fk_name = 'equipo_origen'
+    extra = 1
+
+class ReglaMaterialMaterialInline(admin.TabularInline):
+    model = ReglaMaterialMaterial
+    fk_name = 'material_origen'
+    extra = 1
+
+
+# --- MODELOS ADMIN ---
 
 @admin.register(Obra)
 class ObraAdmin(admin.ModelAdmin):
@@ -7,19 +30,8 @@ class ObraAdmin(admin.ModelAdmin):
     list_filter = ('fecha_inicio', 'fecha_fin_estimada')
     search_fields = ('nombre', 'direccion')
 
-class RequerimientoMaterialInline(admin.TabularInline):
-    model = RequerimientoMaterial
-    extra = 1
-
-"""
-class AsignacionMaterialInline(admin.TabularInline):
-    model = AsignacionMaterial
-    extra = 1
-"""
-
 @admin.register(Fase)
 class FaseAdmin(admin.ModelAdmin):
-    # Se agregó el nuevo campo a la vista de lista
     list_display = ('nombre', 'obra', 'presupuesto_asignado', 'costo_mano_de_obra')
     list_filter = ('obra',)
     search_fields = ('nombre',)
@@ -43,10 +55,20 @@ class AsignacionPersonalAdmin(admin.ModelAdmin):
 
 @admin.register(Material)
 class MaterialAdmin(admin.ModelAdmin):
+    # Asume que quieres mantener la lista simple, pero podrías agregar inlines de ReglaMaterialMaterial aquí.
     list_display = ('nombre', 'unidad', 'costo_unitario')
     search_fields = ('nombre',)
+    inlines = [ReglaMaterialMaterialInline]
+    
 
+# DEFINICIÓN UNIFICADA Y CORREGIDA DE EQUIPOADMIN
 @admin.register(Equipo)
 class EquipoAdmin(admin.ModelAdmin):
-    list_display = ('nombre', 'modelo', 'sistema', 'capacidad', 'mca', 'mfa')
+    list_display = ('nombre', 'modelo', 'sistema', 'capacidad', 'mca', 'mfa') 
     search_fields = ('nombre', 'modelo')
+    # Añadimos el nuevo inline de reglas
+    inlines = [ReglaEquipoMaterialInline] 
+
+# Opcional: Registra los modelos de Regla (si no quieres gestionarlos como inline)
+admin.site.register(ReglaEquipoMaterial)
+admin.site.register(ReglaMaterialMaterial)
