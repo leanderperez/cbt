@@ -727,6 +727,6 @@ class GenerarCotizacionView(View):
 # En 'urls.py' de tu aplicación
 # from .views import GenerarCotizacionView
 # urlpatterns = [
-#     path('cotizar/<int:corrida_id>/', GenerarCotizacionView.as_view(), name='generar_cotizacion'),
+#     path('cotizar/<int:corrida_id>/',  GenerarCotizacionView.as_view(), name='generar_cotizacion'),
 #     path('cotizacion/<int:pk>/', DetalleCotizacionView.as_view(), name='detalle_cotizacion'),
 # ]
