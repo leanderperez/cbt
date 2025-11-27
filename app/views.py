@@ -571,9 +571,9 @@ class ObraWizard(SessionWizardView):
 # --- Nuevo Wizard para el cálculo y guardado de Cotizaciones ---
 FORMS = [("1", Pagina1Form), ("2", Pagina2Form), ("3", Pagina3Form)]
 TEMPLATES = {
-    "1": "project_app/pagina1.html",
-    "2": "project_app/pagina2.html",
-    "3": "project_app/pagina3.html",
+    "1": "project_app/corrida1.html",
+    "2": "project_app/corrida2.html",
+    "3": "project_app/corrida3.html",
 }
 
 def to_snake_case(name):
@@ -605,8 +605,31 @@ class CotizacionWizard(SessionWizardView):
         snake_case_name = to_snake_case(original_name)
         final_name = f"CORR-{date_str}-{snake_case_name}"
 
+
+        KEYS_TO_EXCLUDE = ['nombre_proyecto', 'descripcion']
+        codigos_equipos = list(Equipo.objects.values_list('modelo', flat=True))
+        codigos_tuberias = list(Material.objects.values_list('codigo', flat=True))
+
+        datos_finales = {
+            "equipos": {},
+            "tuberias": {}
+        }
+
+        # Itera sobre los datos unificados y agrúpalos
+        for key, value in data.items():
+            if key in KEYS_TO_EXCLUDE:
+                continue
+            num_value = int(value)
+            # Solo guarda valores mayores a cero, si quieres omitir los ceros
+            if value is not None and value > 0:
+                if key in codigos_equipos:
+                    datos_finales["equipos"][key] = num_value
+                elif key in codigos_tuberias:
+                    datos_finales["tuberias"][key] = num_value
+
         # 'datos' es un campo JSONField
         Corrida.objects.create(nombre=final_name, datos=data)
+        print(f"Corrida '{final_name}' creada con datos: {data}")
         
         return redirect('corrida-list') # Redirecciona a una página de confirmación
 

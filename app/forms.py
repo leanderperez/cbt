@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.models import User
 from django.forms import inlineformset_factory
 from .models import (
-    Obra, Fase, Tarea, RequerimientoMaterial, Material, Personal
+    Obra, Fase, Tarea, RequerimientoMaterial, Material, Personal, Equipo
 )
 
 class ObraForm(forms.ModelForm):
@@ -84,13 +84,6 @@ class RequerimientoMaterialForm(forms.ModelForm):
         model = RequerimientoMaterial
         fields = ['material', 'cantidad_requerida']
 
-"""
-class AsignacionMaterialForm(forms.ModelForm):
-    class Meta:
-        model = AsignacionMaterial
-        fields = ['material', 'cantidad']
-"""
-
 RequerimientoMaterialFormSet = inlineformset_factory(
     Tarea,
     RequerimientoMaterial,
@@ -98,16 +91,6 @@ RequerimientoMaterialFormSet = inlineformset_factory(
     extra=1,
     can_delete=True
 )
-
-"""
-AsignacionMaterialFormSet = inlineformset_factory(
-    Tarea,
-    AsignacionMaterial,
-    form=AsignacionMaterialForm,
-    extra=1,
-    can_delete=True
-)
-"""
 
 class MaterialForm(forms.ModelForm):
     class Meta:
@@ -124,10 +107,48 @@ class Pagina1Form(forms.Form):
     nombre_proyecto = forms.CharField(max_length=100)
     descripcion = forms.CharField(widget=forms.Textarea)
 
+# --- Paso 2: Equipos (Dinámico) ---
 class Pagina2Form(forms.Form):
-    variable_a = forms.IntegerField()
-    variable_b = forms.IntegerField()
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # Obtiene todos los equipos de la base de datos
+        equipos = Equipo.objects.all()
+        
+        # Agrega un campo IntegerField para la cantidad de cada equipo
+        for equipo in equipos:
+            # Usamos el código o ID como nombre del campo (ej: 'MT51255')
+            field_name = equipo.modelo # Asume que tienes un campo 'codigo' en tu modelo Equipo
+            
+            self.fields[field_name] = forms.IntegerField(
+                required=False,
+                initial=0,
+                min_value=0,
+                # Usa una etiqueta descriptiva para el template
+                label=f"Cantidad de {equipo.nombre} ({equipo.modelo})", 
+                widget=forms.NumberInput(attrs={'class': 'form-control'})
+            )
 
+# --- Paso 3: Tuberías (Dinámico) ---
 class Pagina3Form(forms.Form):
-    variable_c = forms.FloatField()
-    variable_d = forms.FloatField()
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # Obtiene todas las tuberías de la base de datos
+        codigos_deseados = ['TCF0014','TCF0038','TCF0012','TCF0058','TCF0034','TCF0078','TCR0038','TCR0012',
+                            'TCR0058','TCR0034','TCR0078','TCR0118','TCR0138','TCR0158','TCR0218']
+        tuberias = Material.objects.filter(codigo__in=codigos_deseados)
+
+        # Agrega un campo IntegerField para la cantidad de cada tubería
+        for tuberia in tuberias:
+            # Usamos el código o ID como nombre del campo (ej: 'TCR0038')
+            field_name = tuberia.codigo # Asume que tienes un campo 'codigo' en tu modelo Tuberia
+
+            self.fields[field_name] = forms.IntegerField(
+                required=False,
+                initial=0,
+                min_value=0,
+                # Usa una etiqueta descriptiva para el template
+                label=f"Longitud de {tuberia.nombre} (Código: {tuberia.codigo})",
+                widget=forms.NumberInput(attrs={'class': 'form-control'})
+            )

@@ -193,24 +193,6 @@ class RequerimientoMaterial(models.Model):
     def __str__(self):
         return f"Requerimiento para {self.tarea.nombre}: {self.cantidad_requerida} {self.material.unidad} de {self.material.nombre}"
 
-''' Modelo AsignacionMaterial eliminado
-# El modelo AsignacionMaterial ahora no se usa para el cálculo de avance
-# sino para el registro de materiales consumidos de forma general.
-class AsignacionMaterial(models.Model):
-    tarea = models.ForeignKey(Tarea, on_delete=models.CASCADE, verbose_name="Tarea")
-    material = models.ForeignKey(Material, on_delete=models.CASCADE, verbose_name="Material")
-    cantidad = models.DecimalField(max_digits=8, decimal_places=2, verbose_name="Cantidad Utilizada")
-    fecha_asignacion = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de Asignación")
-
-    def __str__(self):
-        return f"{self.cantidad} {self.material.unidad} de {self.material.nombre} utilizado en {self.tarea.nombre}"
-
-    @property
-    def costo_total(self):
-        return self.cantidad * self.material.costo_unitario
-
-'''
-
 class MedicionMaterial(models.Model):
     tarea = models.ForeignKey(Tarea, on_delete=models.CASCADE, verbose_name="Tarea")
     material = models.ForeignKey(Material, on_delete=models.CASCADE, verbose_name="Material")
@@ -232,10 +214,6 @@ class Corrida(models.Model):
 
     def __str__(self):
         return self.nombre
-    
-
-# --- Modelos de Reglas de Materiales ---
-# Estas reglas definen las relaciones entre Equipos y Materiales, y entre Materiales y otros Materiales.
     
 class ReglaEquipoMaterial(models.Model):
     """Regla: Un Equipo requiere ciertos Materiales."""
@@ -264,7 +242,6 @@ class ReglaEquipoMaterial(models.Model):
 
     def __str__(self):
         return f"Equipo {self.equipo_origen.modelo} requiere {self.cantidad_requerida} de {self.material_requerido.codigo}"
-
 
 class ReglaMaterialMaterial(models.Model):
     """Regla: Un Material (Origen) requiere otros Materiales (Requeridos)."""
