@@ -586,52 +586,67 @@ def to_snake_case(name):
     s3 = re.sub(r'\s+', '_', s2).strip('_')
     return s3
 
-class CotizacionWizard(SessionWizardView):
+class CorridaWizard(SessionWizardView):
     def get_template_names(self):
         return [TEMPLATES[self.steps.current]]
 
     def done(self, form_list, **kwargs):
-        # Cuando el formulario se completa, procesa los datos
         form_data = [form.cleaned_data for form in form_list]
         
-        # Unifica los datos en un solo diccionario
+        # Unifica los datos COMPLETOS, limpios y validados
         data = {}
         for d in form_data:
             data.update(d)
         
-        # Genera el nombre único para la Corrida
-        original_name = data.pop('nombre_proyecto', 'sin nombre')
-        date_str = datetime.now().strftime("%y%m%d")
-        snake_case_name = to_snake_case(original_name)
-        final_name = f"CORR-{date_str}-{snake_case_name}"
-
-
-        KEYS_TO_EXCLUDE = ['nombre_proyecto', 'descripcion']
-        codigos_equipos = list(Equipo.objects.values_list('modelo', flat=True))
-        codigos_tuberias = list(Material.objects.values_list('codigo', flat=True))
-
+        # 1. Generación del nombre de la Corrida
+        # Extrae el nombre del proyecto para el nombre de la instancia (y lo quita de 'data')
+        original_name = data.pop('nombre_proyecto', 'sin nombre') 
+        
+        # --- Estructura para el JSONField 'datos' ---
         datos_finales = {
+            "descripcion": data.pop('descripcion', ''), # Extrae la descripción y la coloca en el JSON final
             "equipos": {},
             "tuberias": {}
         }
 
-        # Itera sobre los datos unificados y agrúpalos
+        # 2. Obtener Códigos de Referencia (¡Asegúrate de que estos modelos estén importados!)
+        codigos_equipos = list(Equipo.objects.values_list('modelo', flat=True))
+        codigos_tuberias = list(Material.objects.values_list('codigo', flat=True))
+
+        # 3. Iterar sobre los datos restantes para clasificar y convertir
+        
+        # En este punto, 'data' solo contiene las claves de equipos y tuberías.
         for key, value in data.items():
-            if key in KEYS_TO_EXCLUDE:
-                continue
-            num_value = int(value)
-            # Solo guarda valores mayores a cero, si quieres omitir los ceros
-            if value is not None and value > 0:
+            
+            # Conversión y validación robusta (soluciona el error 'invalid literal for int')
+            try:
+                # Convierte el valor a entero. Si se intenta convertir una clave string, se ignora.
+                num_value = int(value) 
+            except (TypeError, ValueError):
+                # Ignora si no es un número válido (ej: si se cuela algún otro campo no manejado)
+                continue 
+
+            # Si el valor es mayor que cero, clasifica y guarda
+            if num_value > 0:
                 if key in codigos_equipos:
+                    # El campo corresponde a un equipo
                     datos_finales["equipos"][key] = num_value
                 elif key in codigos_tuberias:
+                    # El campo corresponde a una tubería
                     datos_finales["tuberias"][key] = num_value
 
-        # 'datos' es un campo JSONField
-        Corrida.objects.create(nombre=final_name, datos=data)
-        print(f"Corrida '{final_name}' creada con datos: {data}")
+        # 4. Finaliza el guardado
+        date_str = datetime.now().strftime("%y%m%d")
+        # Usa 'original_name' (ya extraído) para generar el nombre
+        snake_case_name = to_snake_case(original_name) 
+        final_name = f"CORR-{date_str}-{snake_case_name}"
+
+        # Guarda la Corrida
+        # NOTA: Los datos a guardar son 'datos_finales'
+        Corrida.objects.create(nombre=final_name, datos=datos_finales)
+        print(f"Corrida '{final_name}' creada con datos: {datos_finales}")
         
-        return redirect('corrida-list') # Redirecciona a una página de confirmación
+        return redirect('corrida-list')
 
 class CorridaListView(ListView):
     model = Corrida

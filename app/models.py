@@ -274,7 +274,6 @@ class ReglaMaterialMaterial(models.Model):
 # --- Modelo de Cotización ---
 
 class Cotizacion(models.Model):
-    """Modelo para guardar la cotización generada."""
     corrida = models.OneToOneField(
         'Corrida', 
         on_delete=models.CASCADE, 
