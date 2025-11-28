@@ -6,6 +6,7 @@ from decimal import Decimal
 from collections import defaultdict
 
 # Django
+from django.conf import settings
 from django.contrib.auth.views import LoginView
 from django.db import transaction
 from django.db.models import F
@@ -25,6 +26,12 @@ from django.contrib.auth.decorators import login_required
 
 # Terceros
 from formtools.wizard.views import SessionWizardView
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.units import inch
+
+from io import BytesIO
 
 # Locales (tu app)
 from .models import (
@@ -657,9 +664,6 @@ class CorridaListView(ListView):
     template_name = 'project_app/corrida_list.html'
     context_object_name = 'corridas'
 
-
-
-
 def aplicar_reglas_equipo_material(equipos_dict):
     """Aplica las reglas de equipo a material y retorna un diccionario de materiales."""
     materiales_requeridos = defaultdict(Decimal)
@@ -668,18 +672,6 @@ def aplicar_reglas_equipo_material(equipos_dict):
     codigos_equipo = equipos_dict.keys()
 
     # 2. Obtener todas las reglas relevantes en una sola consulta
-    # Asume que tienes un modelo llamado 'Equipo' que tiene un campo 'modelo' o similar
-    # que coincide con las claves en 'equipos_dict'.
-    # Si las claves son el 'id' o la 'pk' del Equipo, ajusta el 'filter'
-    # Usaremos 'modelo' como ejemplo.
-    
-    # Nota: Si el modelo 'Equipo' no está disponible, esta parte necesitará una adaptación
-    # para obtener los IDs o PKs de los equipos a partir de sus códigos.
-    # Por simplicidad, asumiremos que existe un campo 'codigo' o 'modelo' en 'Equipo'
-    # que corresponde a las claves del JSON (ej. 'MVC-850WV2WN1').
-    
-    # Para que funcione esta consulta, necesitas tener un modelo 'Equipo' y 'Material'
-    # con campos que correspondan a las claves y los campos de las reglas.
     
     # Ejemplo de consulta:
     reglas = ReglaEquipoMaterial.objects.filter(
@@ -712,7 +704,6 @@ def aplicar_reglas_material_material(materiales_base_dict):
         # Obtener las reglas para este material_origen
         # Asume que existe un modelo 'Material' con un campo 'codigo'
         # Esta parte puede requerir una consulta más compleja para obtener el material_origen por su código
-        
         # Para simplificar, usaremos un enfoque de consulta por código directamente en el campo del modelo
         reglas = ReglaMaterialMaterial.objects.filter(
             material_origen__codigo=material_origen_codigo 
@@ -742,11 +733,31 @@ def aplicar_reglas_material_material(materiales_base_dict):
     # Retorna un diccionario simple, asegurando que los Decimal se conviertan a str para el JSON
     return {k: float(v) for k, v in materiales_requeridos.items() if v > 0}
 
+def obtener_costos_materiales(materiales_dict):
+    """
+    Obtiene los costos unitarios de los materiales requeridos.
+    Retorna un diccionario mapeando código de material a su costo unitario.
+    """
+    codigos_materiales = materiales_dict.keys()
+    
+    # Realiza una sola consulta para obtener los costos de todos los materiales
+    # Asume que 'Material' tiene un campo 'codigo' que coincide con las claves del JSON
+    materiales_info = Material.objects.filter(
+        codigo__in=codigos_materiales
+    ).values('codigo', 'costo_unitario')
+    
+    costos_map = {
+        item['codigo']: Decimal(str(item['costo_unitario'])) 
+        for item in materiales_info
+    }
+    return costos_map
+
 @require_http_methods(["GET"])
 def CotizacionCreateView(request, corrida_id):
     """
     Toma una Corrida por su ID, aplica las reglas y genera una Cotizacion.
     """
+    # ... (Manejo de errores inicial) ...
     try:
         corrida = get_object_or_404(Corrida, id=corrida_id)
     except Exception as e:
@@ -756,6 +767,7 @@ def CotizacionCreateView(request, corrida_id):
     datos_corrida = corrida.datos
     
     # Inicializar el total de materiales con las tuberías (que son materiales)
+    # **IMPORTANTE: Mantenemos el resultado como Decimal hasta el final.**
     materiales_totales = defaultdict(Decimal, {
         k: Decimal(str(v)) for k, v in datos_corrida.get('tuberias', {}).items()
     })
@@ -763,32 +775,48 @@ def CotizacionCreateView(request, corrida_id):
     # 2. Aplicar Reglas Equipo a Material
     equipos_corrida = datos_corrida.get('equipos', {})
     if equipos_corrida:
+        # Asumimos que esta función ha sido modificada para retornar {codigo: Decimal(cantidad)}
         materiales_por_equipo = aplicar_reglas_equipo_material(equipos_corrida)
         for codigo, cantidad in materiales_por_equipo.items():
             materiales_totales[codigo] += cantidad
 
     # 3. Aplicar Reglas Material a Material
-    # Se aplica a todos los materiales reunidos hasta ahora (tuberías + materiales de equipos)
-    materiales_expandidos = aplicar_reglas_material_material(materiales_totales)
+    # Asumimos que esta función ha sido modificada para retornar {codigo: Decimal(cantidad)}
+    materiales_requeridos_con_decimales = aplicar_reglas_material_material(materiales_totales)
 
-    # 4. Preparar el JSON de salida y la Cotización
+    # --- NUEVA LÓGICA PARA OBTENER COSTOS Y REESTRUCTURAR EL JSON ---
+
+    # 4. Obtener Costos Unitarios
+    costos_unitarios = obtener_costos_materiales(materiales_requeridos_con_decimales)
     
+    materiales_finales = {}
+    
+    # 5. Reestructurar el JSON final y calcular totales (opcional)
+    for codigo, cantidad_dec in materiales_requeridos_con_decimales.items():
+        costo_unitario = costos_unitarios.get(codigo, Decimal('0.00')) # Usa 0 si no se encuentra el material
+
+        # Convertir Decimal a float para el JSON final que se guarda/retorna
+        materiales_finales[codigo] = {
+            'cantidad': float(cantidad_dec),
+            'costo_unitario': float(costo_unitario)
+        }
+
+    # 6. Preparar el JSON de salida y la Cotización
     # El JSON de la Cotización debe ser solo de materiales
-    datos_cotizacion = {'materiales': materiales_expandidos}
+    datos_cotizacion = {'materiales': materiales_finales}
     
-    # Generar el nombre de la cotización
+    # ... (Generar el nombre de la cotización - se mantiene igual) ...
     fecha_str = datetime.now().strftime("%y%m%d")
     nombre_base = corrida.nombre.replace('CORR-', '')
     partes = nombre_base.split('-', 1)
     if len(partes) > 1 and partes[0].isdigit() and len(partes[0]) == 6:
-        sufijo_nombre = partes[1] # 'MODIFICACION_DE_VISTA'
+        sufijo_nombre = partes[1]
     else:
         sufijo_nombre = nombre_base
     nombre_cotizacion = f"COT-{fecha_str}-{sufijo_nombre}"
 
-
     try:
-        # 5. Guardar la Cotización (o actualizar si ya existe para esta Corrida)
+        # 7. Guardar la Cotización
         cotizacion, created = Cotizacion.objects.update_or_create(
             corrida=corrida,
             defaults={
@@ -797,19 +825,92 @@ def CotizacionCreateView(request, corrida_id):
             }
         )
         
-        # 6. Preparar la respuesta JSON
+        # 8. Preparar la respuesta JSON (usando el nuevo formato)
         return JsonResponse({
-            "status": "success",
-            "message": f"Cotización '{cotizacion.nombre}' generada/actualizada con éxito.",
-            "cotizacion_id": cotizacion.id,
-            "materiales_requeridos": materiales_expandidos
+                'nombre': nombre_cotizacion,
+                'datos': datos_cotizacion,
         })
 
     except Exception as e:
-        # Manejo de errores al guardar o por cualquier otra excepción
+        # ... (Manejo de errores al guardar, se mantiene igual) ...
         return JsonResponse({
             "status": "error",
             "message": f"Error al generar o guardar la Cotización: {e}",
             "nombre_propuesto": nombre_cotizacion,
             "datos_generados": datos_cotizacion
         }, status=500)
+    
+class CotizacionListView(ListView):
+    model = Cotizacion
+    template_name = 'project_app/cotizacion_list.html'
+    context_object_name = 'cotizaciones'
+
+
+def detalle_cotizacion(request, pk):
+    from reportlab.lib import colors
+
+    cotizacion = get_object_or_404(Cotizacion, pk=pk)
+    datos = cotizacion.datos  # {'materiales': {codigo: {cantidad, costo_unitario}}}
+
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=letter, leftMargin=50, rightMargin=50, topMargin=160, bottomMargin=50)
+    elements = []
+    styles = getSampleStyleSheet()
+    style_normal = styles['Normal']
+
+    def membrete(canvas, doc):
+        logo_path = f"{settings.BASE_DIR}/app/static/img/cover.jpeg"
+        canvas.drawImage(logo_path, 50, 710, width=100, height=50, preserveAspectRatio=True, mask='auto')
+        canvas.setFont("Helvetica-Bold", 16)
+        canvas.drawString(200, 730, f"Cotización #{cotizacion.id}")
+        canvas.setFont("Helvetica-Bold", 10)
+        canvas.drawString(500, 730, f"{cotizacion.created_at.strftime('%Y-%m-%d') if hasattr(cotizacion, 'created_at') else ''}")
+        canvas.setFont("Helvetica-Bold", 14)
+        canvas.drawString(60, 680, f"{cotizacion.nombre}")
+        canvas.setFont("Helvetica", 10)
+        canvas.drawString(60, 665, f"Corrida: {cotizacion.corrida.nombre if cotizacion.corrida else ''}")
+
+    # Tabla de materiales con columna Precio
+    data = [["Código", "Material", "Cantidad", "Costo Unitario", "Precio"]]
+    materiales_json = datos.get('materiales', {})
+
+    codigos_materiales = list(materiales_json.keys())
+    materiales_objs = Material.objects.filter(codigo__in=codigos_materiales)
+    materiales_dict = {m.codigo: m for m in materiales_objs}
+
+    for codigo, info in materiales_json.items():
+        nombre = materiales_dict.get(codigo).nombre if codigo in materiales_dict else "Desconocido"
+        cantidad = info.get('cantidad', 0)
+        costo_unitario = info.get('costo_unitario', 0)
+        try:
+            precio = float(cantidad) * float(costo_unitario)
+        except Exception:
+            precio = 0
+        data.append([
+            codigo,
+            nombre,
+            cantidad,
+            costo_unitario,
+            f"{precio:.2f}"
+        ])
+
+    col_widths = [100, 220, 70, 90, 90]
+    table = Table(data, colWidths=col_widths, repeatRows=1)
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('LINEBELOW', (0, 0), (-1, 0), 1, colors.black),
+        ('LINEBELOW', (0, 1), (-1, -1), 0.5, colors.black),
+    ]))
+    elements.append(table)
+
+    doc.build(elements, onFirstPage=membrete, onLaterPages=membrete)
+
+    buffer.seek(0)
+    response = HttpResponse(buffer, content_type='application/pdf')
+    response['Content-Disposition'] = f'inline; filename="Cotizacion_{cotizacion.id}.pdf"'
+    return response
