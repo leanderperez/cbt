@@ -4,7 +4,7 @@ from .views import (
     ObraListView, ObraCreateView, ObraUpdateView, ObraDetailView,
     FaseCreateView, TareaCreateView, TareaUpdateView, ObraMedicionesView,
     MaterialListView, MaterialCreateView, PersonalCreateView, 
-    PersonalListView, CorridaWizard, ObraWizard, CorridaListView,
+    PersonalListView, CorridaWizard, ObraWizard, CorridaListView, CotizacionCreateView,
     gantt_data_view, gantt_chart_view,
     calculadora_tornilleria, calculadora_velumoide,
     FORMS, FASES_WIZARD_FORMS
@@ -45,6 +45,7 @@ urlpatterns = [
     path('calculadora/tornilleria', calculadora_tornilleria, name='calculadora_tornilleria'),
 
     # Cotizaciones 
-    path('cotizacion/', CorridaWizard.as_view(FORMS), name='cotizacion_wizard'),
-    path('corridas/', CorridaListView.as_view(), name='corrida-list')
+    path('cotizacion/', CorridaWizard.as_view(FORMS), name='corrida_wizard'),
+    path('corridas/', CorridaListView.as_view(), name='corrida-list'),
+    path('cotizacion/generar/<int:corrida_id>/', CotizacionCreateView, name='generar_cotizacion'),
 ]

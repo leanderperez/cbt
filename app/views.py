@@ -3,6 +3,7 @@ import json
 import re
 from datetime import datetime
 from decimal import Decimal
+from collections import defaultdict
 
 # Django
 from django.contrib.auth.views import LoginView
@@ -19,6 +20,7 @@ from django.views.generic import (
     View
 )
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
 from django.contrib.auth.decorators import login_required
 
 # Terceros
@@ -34,7 +36,10 @@ from .models import (
     Material,
     Personal,
     Corrida, 
-    Equipo
+    Equipo,
+    Cotizacion,
+    ReglaEquipoMaterial,
+    ReglaMaterialMaterial
 )
 from .forms import (
     ObraForm,
@@ -604,7 +609,7 @@ class CorridaWizard(SessionWizardView):
         
         # --- Estructura para el JSONField 'datos' ---
         datos_finales = {
-            "descripcion": data.pop('descripcion', ''), # Extrae la descripción y la coloca en el JSON final
+            "descripcion": data.pop('descripcion', ''),
             "equipos": {},
             "tuberias": {}
         }
@@ -637,7 +642,6 @@ class CorridaWizard(SessionWizardView):
 
         # 4. Finaliza el guardado
         date_str = datetime.now().strftime("%y%m%d")
-        # Usa 'original_name' (ya extraído) para generar el nombre
         snake_case_name = to_snake_case(original_name) 
         final_name = f"CORR-{date_str}-{snake_case_name}"
 
@@ -656,115 +660,156 @@ class CorridaListView(ListView):
 
 
 
+def aplicar_reglas_equipo_material(equipos_dict):
+    """Aplica las reglas de equipo a material y retorna un diccionario de materiales."""
+    materiales_requeridos = defaultdict(Decimal)
 
-# --- Vista para generar Cotización desde una Corrida ---
-from collections import defaultdict
-from .models import Corrida, Cotizacion, CotizacionEquipo, CotizacionMaterial, ReglaEquipoMaterial, ReglaMaterialMaterial
+    # 1. Obtener los códigos de equipos únicos
+    codigos_equipo = equipos_dict.keys()
 
-class GenerarCotizacionView(View):
-    def post(self, request, corrida_id):
-        corrida = get_object_or_404(Corrida, pk=corrida_id)
-        datos = corrida.datos # El JSON de la corrida
+    # 2. Obtener todas las reglas relevantes en una sola consulta
+    # Asume que tienes un modelo llamado 'Equipo' que tiene un campo 'modelo' o similar
+    # que coincide con las claves en 'equipos_dict'.
+    # Si las claves son el 'id' o la 'pk' del Equipo, ajusta el 'filter'
+    # Usaremos 'modelo' como ejemplo.
+    
+    # Nota: Si el modelo 'Equipo' no está disponible, esta parte necesitará una adaptación
+    # para obtener los IDs o PKs de los equipos a partir de sus códigos.
+    # Por simplicidad, asumiremos que existe un campo 'codigo' o 'modelo' en 'Equipo'
+    # que corresponde a las claves del JSON (ej. 'MVC-850WV2WN1').
+    
+    # Para que funcione esta consulta, necesitas tener un modelo 'Equipo' y 'Material'
+    # con campos que correspondan a las claves y los campos de las reglas.
+    
+    # Ejemplo de consulta:
+    reglas = ReglaEquipoMaterial.objects.filter(
+        equipo_origen__modelo__in=codigos_equipo
+    ).select_related('material_requerido', 'equipo_origen')
+
+    for regla in reglas:
+        codigo_material = regla.material_requerido.codigo # Asume que 'Material' tiene un campo 'codigo'
+        cantidad_equipo = equipos_dict.get(regla.equipo_origen.modelo) # Asume que 'Equipo' tiene un campo 'codigo'
         
-        # 1. Preparar el cálculo de materiales
-        # Usamos defaultdict para consolidar las cantidades por código de material.
-        materiales_totales = defaultdict(float)
+        # Si el equipo está en la corrida, se calcula el requerimiento
+        if cantidad_equipo is not None:
+            cantidad_total = regla.cantidad_requerida * Decimal(cantidad_equipo)
+            materiales_requeridos[codigo_material] += cantidad_total
+
+    return materiales_requeridos
+
+def aplicar_reglas_material_material(materiales_base_dict):
+    """Aplica las reglas de material a material de forma recursiva (o iterativa)."""
+    materiales_requeridos = defaultdict(Decimal, {k: Decimal(str(v)) for k, v in materiales_base_dict.items()})
+    
+    # Usaremos un set para rastrear los materiales pendientes de expansión
+    materiales_pendientes = set(materiales_requeridos.keys())
+    
+    # Usaremos un ciclo para expandir los requerimientos de forma iterativa
+    # (similar a una recursión, pero evita el límite de profundidad)
+    while materiales_pendientes:
+        material_origen_codigo = materiales_pendientes.pop()
         
-        # Guardar equipos solicitados para la cotización
-        equipos_solicitados = {} 
+        # Obtener las reglas para este material_origen
+        # Asume que existe un modelo 'Material' con un campo 'codigo'
+        # Esta parte puede requerir una consulta más compleja para obtener el material_origen por su código
         
-        # --- Lógica de la Cotización en una Transacción ---
-        with transaction.atomic():
-            # Crear la Cotizacion (se actualizará el costo_total al final)
-            cotizacion = Cotizacion.objects.create(
-                corrida=corrida,
-                nombre=f"Cotización {corrida.nombre}",
-                datos_corrida_historico=datos
-            )
+        # Para simplificar, usaremos un enfoque de consulta por código directamente en el campo del modelo
+        reglas = ReglaMaterialMaterial.objects.filter(
+            material_origen__codigo=material_origen_codigo 
+        ).select_related('material_requerido')
 
-            # 2. Procesar Equipos de la Corrida
-            for codigo_equipo, cantidad_equipo in datos.get('equipos', {}).items():
-                try:
-                    equipo = Equipo.objects.get(modelo=codigo_equipo)
-                    equipos_solicitados[equipo.pk] = cantidad_equipo
-                    
-                    # 2.1. Guardar el detalle de Equipo en la Cotización
-                    CotizacionEquipo.objects.create(
-                        cotizacion=cotizacion,
-                        equipo=equipo,
-                        cantidad=cantidad_equipo,
-                        costo_unitario=0.00, # Asume un campo de costo unitario si el Equipo lo tiene
-                        costo_total_linea=0.00
-                    )
-                    
-                    # 2.2. Aplicar Reglas Equipo -> Material
-                    reglas_em = ReglaEquipoMaterial.objects.filter(equipo_origen=equipo)
-                    for regla in reglas_em:
-                        materiales_totales[regla.material_requerido.codigo] += \
-                            regla.cantidad_requerida * cantidad_equipo
-                except Equipo.DoesNotExist:
-                    # Manejar error si el equipo no existe
-                    pass
-
-            # 3. Procesar Materiales Directos de la Corrida
-            for codigo_material, cantidad_material in datos.get('tuberias', {}).items():
-                # Agregar a los materiales totales para el siguiente paso (Reglas Material -> Material)
-                materiales_totales[codigo_material] += cantidad_material 
+        for regla in reglas:
+            codigo_material_req = regla.material_requerido.codigo
             
+            # Cantidad del material de origen en la corrida (o ya expandida)
+            cantidad_origen = materiales_requeridos[material_origen_codigo]
             
-            # 4. Aplicar Reglas Material -> Material a los materiales base (directos + los de equipo)
-            materiales_adicionales = defaultdict(float)
-            for codigo_origen, cantidad_origen in materiales_totales.items():
-                try:
-                    material_origen = Material.objects.get(codigo=codigo_origen)
-                    reglas_mm = ReglaMaterialMaterial.objects.filter(material_origen=material_origen)
-                    for regla in reglas_mm:
-                        # Se usa materiales_adicionales para evitar aplicar reglas 
-                        # sobre los materiales que se acaban de generar en esta iteración.
-                        materiales_adicionales[regla.material_requerido.codigo] += \
-                            regla.cantidad_requerida * cantidad_origen
-                except Material.DoesNotExist:
-                    pass
+            # Cantidad a agregar del material requerido
+            cantidad_a_agregar = regla.cantidad_requerida * cantidad_origen
             
-            # 5. Consolidar y Guardar Materiales en la Cotización
-            materiales_totales_final = materiales_totales
-            
-            # Agregar los materiales adicionales
-            for codigo_add, cantidad_add in materiales_adicionales.items():
-                 materiales_totales_final[codigo_add] += cantidad_add
-            
-            costo_total_cotizacion = 0.00
+            # Si el material requerido es nuevo, o su cantidad cambia, se agrega/mantiene
+            # en el set de pendientes para su posible expansión posterior (si también tiene reglas)
+            if cantidad_a_agregar > 0:
+                if codigo_material_req not in materiales_requeridos or \
+                   materiales_requeridos[codigo_material_req] != materiales_requeridos[codigo_material_req] + cantidad_a_agregar:
+                    # Solo agregamos a pendientes si es un nuevo material o si la cantidad del material_origen
+                    # es mayor a cero para evitar ciclos infinitos si la cantidad requerida es 0
+                    if cantidad_origen > 0:
+                        materiales_pendientes.add(codigo_material_req) 
 
-            for codigo_material, cantidad_total in materiales_totales_final.items():
-                try:
-                    material = Material.objects.get(codigo=codigo_material)
-                    costo_linea = material.costo_unitario * cantidad_total
-                    costo_total_cotizacion += costo_linea
-                    
-                    # Guardar el detalle de Material en la Cotización
-                    CotizacionMaterial.objects.create(
-                        cotizacion=cotizacion,
-                        material=material,
-                        cantidad=cantidad_total,
-                        costo_unitario=material.costo_unitario,
-                        costo_total_linea=costo_linea,
-                        origen_regla='Compilado' # Origen es el resultado de la compilación
-                    )
-                except Material.DoesNotExist:
-                    pass
+                materiales_requeridos[codigo_material_req] += cantidad_a_agregar
 
-            # 6. Actualizar Costo Total de la Cotización (Incluye Equipos y Materiales)
-            # Nota: Debes replicar la lógica de costo para los CotizacionEquipo si lo requieres.
-            cotizacion.costo_total = costo_total_cotizacion 
-            cotizacion.save()
+    # Retorna un diccionario simple, asegurando que los Decimal se conviertan a str para el JSON
+    return {k: float(v) for k, v in materiales_requeridos.items() if v > 0}
 
-        # Redirigir a la página de detalle de la cotización
-        return redirect('detalle_cotizacion', pk=cotizacion.pk)
+@require_http_methods(["GET"])
+def CotizacionCreateView(request, corrida_id):
+    """
+    Toma una Corrida por su ID, aplica las reglas y genera una Cotizacion.
+    """
+    try:
+        corrida = get_object_or_404(Corrida, id=corrida_id)
+    except Exception as e:
+        return JsonResponse({"error": f"Corrida no encontrada o error: {e}"}, status=404)
+
+    # 1. Obtener los datos de la Corrida
+    datos_corrida = corrida.datos
+    
+    # Inicializar el total de materiales con las tuberías (que son materiales)
+    materiales_totales = defaultdict(Decimal, {
+        k: Decimal(str(v)) for k, v in datos_corrida.get('tuberias', {}).items()
+    })
+    
+    # 2. Aplicar Reglas Equipo a Material
+    equipos_corrida = datos_corrida.get('equipos', {})
+    if equipos_corrida:
+        materiales_por_equipo = aplicar_reglas_equipo_material(equipos_corrida)
+        for codigo, cantidad in materiales_por_equipo.items():
+            materiales_totales[codigo] += cantidad
+
+    # 3. Aplicar Reglas Material a Material
+    # Se aplica a todos los materiales reunidos hasta ahora (tuberías + materiales de equipos)
+    materiales_expandidos = aplicar_reglas_material_material(materiales_totales)
+
+    # 4. Preparar el JSON de salida y la Cotización
+    
+    # El JSON de la Cotización debe ser solo de materiales
+    datos_cotizacion = {'materiales': materiales_expandidos}
+    
+    # Generar el nombre de la cotización
+    fecha_str = datetime.now().strftime("%y%m%d")
+    nombre_base = corrida.nombre.replace('CORR-', '')
+    partes = nombre_base.split('-', 1)
+    if len(partes) > 1 and partes[0].isdigit() and len(partes[0]) == 6:
+        sufijo_nombre = partes[1] # 'MODIFICACION_DE_VISTA'
+    else:
+        sufijo_nombre = nombre_base
+    nombre_cotizacion = f"COT-{fecha_str}-{sufijo_nombre}"
 
 
-# En 'urls.py' de tu aplicación
-# from .views import GenerarCotizacionView
-# urlpatterns = [
-#     path('cotizar/<int:corrida_id>/',  GenerarCotizacionView.as_view(), name='generar_cotizacion'),
-#     path('cotizacion/<int:pk>/', DetalleCotizacionView.as_view(), name='detalle_cotizacion'),
-# ]
+    try:
+        # 5. Guardar la Cotización (o actualizar si ya existe para esta Corrida)
+        cotizacion, created = Cotizacion.objects.update_or_create(
+            corrida=corrida,
+            defaults={
+                'nombre': nombre_cotizacion,
+                'datos': datos_cotizacion,
+            }
+        )
+        
+        # 6. Preparar la respuesta JSON
+        return JsonResponse({
+            "status": "success",
+            "message": f"Cotización '{cotizacion.nombre}' generada/actualizada con éxito.",
+            "cotizacion_id": cotizacion.id,
+            "materiales_requeridos": materiales_expandidos
+        })
+
+    except Exception as e:
+        # Manejo de errores al guardar o por cualquier otra excepción
+        return JsonResponse({
+            "status": "error",
+            "message": f"Error al generar o guardar la Cotización: {e}",
+            "nombre_propuesto": nombre_cotizacion,
+            "datos_generados": datos_cotizacion
+        }, status=500)
