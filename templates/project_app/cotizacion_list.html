@@ -21,9 +21,7 @@
             <tr class="glass-row">
                 <td>{{ cotizacion.nombre }}</td>
                 <td>
-                    <a href="{% url 'detalle_cotizacion' cotizacion.pk %}" class="obra-link" target="_blank">Detalles</a> |
-                    <a href="{% url 'gantt_chart' cotizacion.pk %}" class="obra-link">Project</a> |
-                    <a href="{% url 'obra-mediciones' cotizacion.pk %}" class="obra-link">Mediciones</a>
+                    <a href="{% url 'detalle_cotizacion' cotizacion.pk %}" class="obra-link" target="_blank">Detalles</a>
                 </td>
             </tr>
             {% endfor %}
@@ -31,7 +29,7 @@
     </table>
 </div>
 <div style="margin-left: 15px;">
-    <a href="{% url 'corrida_wizard' %}" class="btn">Iniciar Nueva Cotización</a>
+    <a href="{% url 'corrida_wizard' %}" class="btn">Iniciar Corrida</a>
 </div>
 
 

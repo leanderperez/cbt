@@ -23,9 +23,7 @@
                 <td>{{ corrida.nombre }}</td>
                 <td>{{ corrida.datos.descripcion}}</td>
                 <td>
-                    <a href="{% url 'obra-detail' corrida.pk %}" class="obra-link">Detalles</a> |
-                    <a href="{% url 'gantt_chart' corrida.pk %}" class="obra-link">Project</a> |
-                    <a href="{% url 'obra-mediciones' corrida.pk %}" class="obra-link">Mediciones</a>
+                    <a href="{% url 'generar_cotizacion' corrida.pk %}" class="obra-link">Generar Cotizacion</a>
                 </td>
             </tr>
             {% endfor %}
@@ -33,7 +31,7 @@
     </table>
 </div>
 <div style="margin-left: 15px;">
-    <a href="{% url 'corrida_wizard' %}" class="btn">Iniciar Nueva Cotización</a>
+    <a href="{% url 'corrida_wizard' %}" class="btn">Iniciar Corrida</a>
 </div>
 
 
