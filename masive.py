@@ -51,7 +51,7 @@ def cargar_datos_masivos_sqlite(nombre_archivo_csv, ruta_bd, nombre_tabla, codif
         if conexion:
             conexion.close()
 
-# Ejemplo de uso:
+
 ruta_db_django = 'db.sqlite3'
 cargar_datos_masivos_sqlite(
     nombre_archivo_csv='materiales_VRF.csv',

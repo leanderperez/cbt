@@ -221,13 +221,15 @@ class ReglaEquipoMaterial(models.Model):
         'Equipo', 
         on_delete=models.CASCADE, 
         related_name='reglas_materiales',
-        verbose_name="Equipo de Origen"
+        verbose_name="Equipo de Origen",
+        to_field='modelo'
     )
     material_requerido = models.ForeignKey(
         'Material', 
         on_delete=models.CASCADE, 
         related_name='reglas_equipos',
-        verbose_name="Material Requerido"
+        verbose_name="Material Requerido",
+        to_field='codigo'
     )
     cantidad_requerida = models.DecimalField(
         max_digits=10, 
@@ -249,13 +251,15 @@ class ReglaMaterialMaterial(models.Model):
         'Material', 
         on_delete=models.CASCADE, 
         related_name='reglas_materiales_origen',
-        verbose_name="Material de Origen"
+        verbose_name="Material de Origen",
+        to_field='codigo'
     )
     material_requerido = models.ForeignKey(
         'Material', 
         on_delete=models.CASCADE, 
         related_name='reglas_materiales_requerido',
-        verbose_name="Material Requerido"
+        verbose_name="Material Requerido",
+        to_field='codigo'
     )
     cantidad_requerida = models.DecimalField(
         max_digits=10, 
