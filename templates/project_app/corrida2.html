@@ -1,8 +1,63 @@
 {% extends "project_app/base_wizard.html" %}
+{% load static %}
+
 
 {% block wizard_content %}
-    <h2>Paso 2: Variables de Entrada A/B</h2>
-    <p>Introduce los valores enteros para las variables principales de tu cálculo.</p>
+    <style>
+      /* Imágenes de esquina (detrás del glass) */
+      .corner-img {
+        position: absolute;
+        z-index: 1;
+        pointer-events: none;
+        opacity: 0.5; /* ajustar visibilidad */
+        height: auto;
+      }
+      .corner-img.bottom-left { left: -200px; bottom: -60px; width: 450px;}
+      .corner-img.top-right { right: -80px; top: -10px; transform: scaleX(-1); width: 280px; }
 
-    {{ form.as_p }}
+      /* Asegurar que el contenido del formulario quede por encima del glass */
+      .form-content { position: relative; z-index: 3; padding: 24px; }
+
+      /* Ajustes responsivos */
+      @media (max-width: 768px) {
+        .corner-img { max-width: 120px; opacity: 0.2; left: -12px; bottom: -12px; right: -12px; top: -12px; }
+      }
+    </style>
+
+    <div class="container">
+            <!-- Imágenes de fondo en las esquinas (están detrás del glass gracias a z-index y al ::before) -->
+            <img src="{% static 'img/vcpro.png' %}" alt="vcpro" class="corner-img bottom-left">
+            <img src="{% static 'img/casette.png' %}" alt="casette" class="corner-img top-right">
+
+        <div class="form-content">
+            <h3>Paso 2: Equipos</h3>
+            <p>Selecciona el modelo y numero de unidades condensadoras y evaporadoras a instalar</p>
+
+            <div class="content">
+                <div class="user-details user-details-two-columns" style="overflow-y: auto; max-height: 400px;"> 
+                    {% for field in form %}
+                        <div class="input-box">
+                            <span class="details">{{ field.label_tag }}</span>
+                            {{ field }}
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="button-group" style="margin-top: 20px; display: flex; justify-content: space-between;">
+                    
+                    {% if wizard.steps.prev %}
+                    <button name="wizard_goto_step" type="submit" value="{{ wizard.steps.prev }}" class="btn btn-secondary">
+                        &laquo; Atrás
+                    </button>
+                    {% else %}
+                    <div></div> {# Espacio para mantener la alineación si no hay botón Atrás #}
+                    {% endif %}
+
+                    <button type="submit" class="btn btn-primary">
+                        {% if wizard.steps.next %}Siguiente &raquo;{% else %}Finalizar y Guardar Proyecto{% endif %}
+                    </button>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}

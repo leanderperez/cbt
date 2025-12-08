@@ -1,8 +1,68 @@
 {% extends "project_app/base_wizard.html" %}
+{% load static %}
 
 {% block wizard_content %}
-    <h2>Paso 1: Identificación del Proyecto</h2>
-    <p>Introduce el nombre y la descripción para identificar tu proyecto.</p>
 
-    {{ form.as_p }}
+    <style>
+
+      /* Imágenes de esquina (detrás del glass) */
+      .corner-img {
+        position: absolute;
+        z-index: 1;
+        pointer-events: none;
+        opacity: 0.08; /* ajustar visibilidad */
+        height: auto;
+      }
+     /* Centrar el centro de la imagen con el centro del .container */
+     .corner-img.bottom-left {
+       left: 50%;
+       top: 50%;
+       bottom: auto;
+       transform: translate(-50%, -50%);
+       width: 100vw;
+     }
+
+      /* Asegurar que el contenido del formulario quede por encima del glass */
+      .form-content { position: relative; z-index: 3; padding: 24px; }
+
+      /* Ajustes responsivos */
+      @media (max-width: 768px) {
+        .corner-img { max-width: 120px; opacity: 0.2; left: -12px; bottom: -12px; right: -12px; top: -12px; }
+       .corner-img.bottom-left { left: 50%; top: 50%; transform: translate(-50%,-50%); width: 220px; }
+      }
+    </style>
+
+
+    <div class="container">
+            <img src="{% static 'img/proyecto.jpg' %}" alt="proyecto" class="corner-img bottom-left">
+
+        <h3>Paso 1: Identificación del Proyecto</h3>
+        <p>Introduce el nombre y la descripción del proyecto.</p>
+
+        <div class="content">
+            <div class="user-details user-details-one-column" style="overflow-y: auto; max-height: 400px;"> 
+                {% for field in form %}
+                    <div class="input-box">
+                        <span class="details">{{ field.label_tag }}</span>
+                        {{ field }}
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="button-group" style="margin-top: 20px; display: flex; justify-content: space-between;">
+                
+                {% if wizard.steps.prev %}
+                <button name="wizard_goto_step" type="submit" value="{{ wizard.steps.prev }}" class="btn btn-secondary">
+                    &laquo; Atrás
+                </button>
+                {% else %}
+                <div></div> {# Espacio para mantener la alineación si no hay botón Atrás #}
+                {% endif %}
+
+                <button type="submit" class="btn btn-primary">
+                    {% if wizard.steps.next %}Siguiente &raquo;{% else %}Finalizar y Guardar{% endif %}
+                </button>
+                
+            </div>
+        </div>
+    </div>
 {% endblock %}

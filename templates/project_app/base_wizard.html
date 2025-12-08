@@ -1,38 +1,20 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Formulario Multi-Paso</title>
-</head>
-<body>
+{% extends 'project_app/base.html' %}
+{% load static %}
 
-    <h1>Registro de Proyecto - Paso {{ wizard.steps.step1 }} de {{ wizard.steps.count }}</h1>
-    <hr>
-    
-    <form action="" method="post">
-        {% csrf_token %}
+{% block extra_css %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/form_style.css' %}">
+{% endblock %}
 
-        {{ wizard.management_form }}
-
-        {% block wizard_content %}
-        {% endblock %}
-
-        <hr>
+{% block content %}
+    <div class="content wizard-content"> 
         
-        <div style="margin-top: 20px;">
-            
-            {% if wizard.steps.prev %}
-            <button name="wizard_goto_step" type="submit" value="{{ wizard.steps.prev }}" class="btn btn-secondary">
-                &laquo; Atrás
-            </button>
-            {% endif %}
+        <form action="" method="post" id="wizardForm">
+            {% csrf_token %}
 
-            <button type="submit" class="btn btn-primary">
-                {% if wizard.steps.next %}Siguiente &raquo;{% else %}Finalizar y Guardar Proyecto{% endif %}
-            </button>
-            
-        </div>
-    </form>
+            {{ wizard.management_form }}
+            {% block wizard_content %}
+            {% endblock %}
 
-</body>
-</html>
+        </form>
+    </div>
+{% endblock %}
