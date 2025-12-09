@@ -1,24 +1,29 @@
 import sqlite3
 import csv
 import os
+import json # Necesario para manejar la cadena JSON si fuera necesario
 
 def cargar_reglas_em_sqlite(nombre_archivo_csv, ruta_bd, nombre_tabla, codificacion='utf-8'):
     """
     Carga datos masivamente desde un archivo CSV (reglas Equipo-Material)
     a una tabla en una base de datos SQLite.
     
-    El archivo CSV tiene el formato: cantidad;equipo_origen_id;material_requerido_id
+    El archivo CSV tiene el formato: equipo_origen_id;materiales_requeridos (JSON)
+    
+    NOTA: El nombre de la columna FK en la tabla de Django/SQLite es 'equipo_origen_id',
+          el valor es el string del modelo del equipo.
     """
     conexion = None
     cursor = None
     try:
-        # 1. Conexión a la base de datos SQLite
+        # 1. Conexión a la base de datos SQLite y habilitar Foreign Keys (opcional, pero buena práctica)
         conexion = sqlite3.connect(ruta_bd)
         cursor = conexion.cursor()
+        cursor.execute("PRAGMA foreign_keys = ON;") # Habilitar la verificación de FKs
 
         # 2. Leer el archivo CSV
         with open(nombre_archivo_csv, 'r', encoding=codificacion) as archivo_csv:
-            # Usamos el delimitador ';' como en tu archivo de reglas
+            # Usamos el delimitador ';'
             lector_csv = csv.reader(archivo_csv, delimiter=';')
             next(lector_csv)  # Omitir la primera fila (encabezados)
 
@@ -27,26 +32,32 @@ def cargar_reglas_em_sqlite(nombre_archivo_csv, ruta_bd, nombre_tabla, codificac
                 # Asegurarse de que no haya espacios en blanco alrededor de los campos
                 fila_limpia = [x.strip() for x in fila]
                 
-                # El orden en la lista limpia es:
-                # [0] = cantidad (int/str)
-                # [1] = equipo_origen_id (str)
-                # [2] = material_requerido_id (str)
+                # El orden de los campos en el CSV es:
+                # [0] = equipo_origen_id (str)
+                # [1] = materiales_requeridos (str JSON)
                 
-                # Si 'cantidad' viene como cadena, convertirla a entero o flotante si es necesario,
-                # aunque para este caso simple, SQLite suele manejar la inserción de texto en campos numéricos.
-                # Aquí simplemente insertamos la lista de 3 elementos tal cual.
-                datos_para_insertar.append(fila_limpia)
+                # Para la inserción en SQLite:
+                # El campo equipo_origen (ForeignKey con to_field='modelo') se mapea a 'equipo_origen_id'
+                # El campo JSONField de Django se almacena como TEXT en SQLite.
+                
+                # La estructura para insertar será: (equipo_origen_id, materiales_requeridos_json_string)
+                if len(fila_limpia) == 2:
+                    datos_para_insertar.append((fila_limpia[0], fila_limpia[1]))
+                else:
+                    print(f"Advertencia: Fila con formato incorrecto omitida: {fila}")
 
             # 3. Preparar la consulta SQL para la inserción
-            # La tabla de reglas debe tener 3 columnas para estos datos:
-            # cantidad, equipo_origen_id, material_requerido_id
+            # Las columnas en la tabla 'app_reglaequipomaterial' son:
+            # 1. equipo_origen_id (para el ForeignKey al campo 'modelo' del Equipo)
+            # 2. materiales_requeridos (para el JSONField, que es TEXT en SQLite)
             
-            # Usamos 3 placeholders, uno para cada columna
-            placeholders = ', '.join(['?'] * 3)
+            # Usamos 2 placeholders
+            placeholders = ', '.join(['?'] * 2)
             
             # La consulta de inserción
+            # Importante: Reemplazar 'equipo_origen_id' por el nombre real de la columna FK
             consulta_insert = f"""
-                INSERT INTO {nombre_tabla} (cantidad_requerida, equipo_origen_id, material_requerido_id) 
+                INSERT INTO {nombre_tabla} (equipo_origen_id, materiales_requeridos) 
                 VALUES ({placeholders})
             """
             
@@ -75,14 +86,7 @@ ruta_db_django = 'db.sqlite3' # Asegúrate de que esta ruta sea correcta para tu
 
 # Llama a la función para cargar las reglas VRF
 cargar_reglas_em_sqlite(
-    nombre_archivo_csv='reglas_em_VRF.csv',
+    nombre_archivo_csv='reglas_em_VRF_t.csv', # Cambiado al nuevo nombre de archivo
     ruta_bd=ruta_db_django,
     nombre_tabla='app_reglaequipomaterial' # Usamos el nombre de la tabla de reglas
 )
-
-# Si tuvieras más archivos de reglas, podrías añadirlos aquí:
-# cargar_reglas_em_sqlite(
-#     nombre_archivo_csv='reglas_em_CHW.csv',
-#     ruta_bd=ruta_db_django,
-#     nombre_tabla='app_reglaequipomaterial'
-# )

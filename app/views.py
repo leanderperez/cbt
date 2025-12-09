@@ -668,69 +668,42 @@ def aplicar_reglas_equipo_material(equipos_dict):
     """Aplica las reglas de equipo a material y retorna un diccionario de materiales."""
     materiales_requeridos = defaultdict(Decimal)
 
-    # 1. Obtener los códigos de equipos únicos
     codigos_equipo = equipos_dict.keys()
-
-    # 2. Obtener todas las reglas relevantes en una sola consulta
-    
-    # Ejemplo de consulta:
     reglas = ReglaEquipoMaterial.objects.filter(
         equipo_origen__modelo__in=codigos_equipo
-    ).select_related('material_requerido', 'equipo_origen')
+    ).select_related('equipo_origen')
 
     for regla in reglas:
-        codigo_material = regla.material_requerido.codigo # Asume que 'Material' tiene un campo 'codigo'
-        cantidad_equipo = equipos_dict.get(regla.equipo_origen.modelo) # Asume que 'Equipo' tiene un campo 'codigo'
-        
-        # Si el equipo está en la corrida, se calcula el requerimiento
+        cantidad_equipo = equipos_dict.get(regla.equipo_origen.modelo)
         if cantidad_equipo is not None:
-            cantidad_total = regla.cantidad_requerida * Decimal(cantidad_equipo)
-            materiales_requeridos[codigo_material] += cantidad_total
+            for item in regla.materiales_requeridos:
+                codigo_material = item['codigo']
+                cantidad_por_equipo = Decimal(str(item['cantidad']))
+                cantidad_total = cantidad_por_equipo * Decimal(str(cantidad_equipo))
+                materiales_requeridos[codigo_material] += cantidad_total
 
     return materiales_requeridos
 
 def aplicar_reglas_material_material(materiales_base_dict):
-    """Aplica las reglas de material a material de forma recursiva (o iterativa)."""
     materiales_requeridos = defaultdict(Decimal, {k: Decimal(str(v)) for k, v in materiales_base_dict.items()})
-    
-    # Usaremos un set para rastrear los materiales pendientes de expansión
     materiales_pendientes = set(materiales_requeridos.keys())
-    
-    # Usaremos un ciclo para expandir los requerimientos de forma iterativa
-    # (similar a una recursión, pero evita el límite de profundidad)
+
     while materiales_pendientes:
         material_origen_codigo = materiales_pendientes.pop()
-        
-        # Obtener las reglas para este material_origen
-        # Asume que existe un modelo 'Material' con un campo 'codigo'
-        # Esta parte puede requerir una consulta más compleja para obtener el material_origen por su código
-        # Para simplificar, usaremos un enfoque de consulta por código directamente en el campo del modelo
         reglas = ReglaMaterialMaterial.objects.filter(
-            material_origen__codigo=material_origen_codigo 
-        ).select_related('material_requerido')
+            material_origen__codigo=material_origen_codigo
+        )
 
         for regla in reglas:
-            codigo_material_req = regla.material_requerido.codigo
-            
-            # Cantidad del material de origen en la corrida (o ya expandida)
             cantidad_origen = materiales_requeridos[material_origen_codigo]
-            
-            # Cantidad a agregar del material requerido
-            cantidad_a_agregar = regla.cantidad_requerida * cantidad_origen
-            
-            # Si el material requerido es nuevo, o su cantidad cambia, se agrega/mantiene
-            # en el set de pendientes para su posible expansión posterior (si también tiene reglas)
-            if cantidad_a_agregar > 0:
-                if codigo_material_req not in materiales_requeridos or \
-                   materiales_requeridos[codigo_material_req] != materiales_requeridos[codigo_material_req] + cantidad_a_agregar:
-                    # Solo agregamos a pendientes si es un nuevo material o si la cantidad del material_origen
-                    # es mayor a cero para evitar ciclos infinitos si la cantidad requerida es 0
-                    if cantidad_origen > 0:
-                        materiales_pendientes.add(codigo_material_req) 
+            for item in regla.materiales_requeridos:
+                codigo_material_req = item['codigo']
+                cantidad_a_agregar = Decimal(str(item['cantidad'])) * cantidad_origen
+                if cantidad_a_agregar > 0:
+                    if codigo_material_req not in materiales_requeridos:
+                        materiales_pendientes.add(codigo_material_req)
+                    materiales_requeridos[codigo_material_req] += cantidad_a_agregar
 
-                materiales_requeridos[codigo_material_req] += cantidad_a_agregar
-
-    # Retorna un diccionario simple, asegurando que los Decimal se conviertan a str para el JSON
     return {k: float(v) for k, v in materiales_requeridos.items() if v > 0}
 
 def obtener_costos_materiales(materiales_dict):
@@ -845,7 +818,6 @@ class CotizacionListView(ListView):
     template_name = 'project_app/cotizacion_list.html'
     context_object_name = 'cotizaciones'
 
-
 def detalle_cotizacion(request, pk):
     from reportlab.lib import colors
 
@@ -914,3 +886,10 @@ def detalle_cotizacion(request, pk):
     response = HttpResponse(buffer, content_type='application/pdf')
     response['Content-Disposition'] = f'inline; filename="Cotizacion_{cotizacion.id}.pdf"'
     return response
+
+    for item in regla.materiales_requeridos:
+        codigo = item['codigo']
+        cantidad = item['cantidad']
+        # Puedes buscar el Material por código si necesitas mostrar el nombre
+        material = Material.objects.get(codigo=codigo)
+        print(material.nombre, cantidad)

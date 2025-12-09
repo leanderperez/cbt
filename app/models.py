@@ -224,26 +224,17 @@ class ReglaEquipoMaterial(models.Model):
         verbose_name="Equipo de Origen",
         to_field='modelo'
     )
-    material_requerido = models.ForeignKey(
-        'Material', 
-        on_delete=models.CASCADE, 
-        related_name='reglas_equipos',
-        verbose_name="Material Requerido",
-        to_field='codigo'
+    materiales_requeridos = models.JSONField(
+        verbose_name="Materiales Requeridos",
+        help_text="Lista de dicts: [{'codigo': 'MAT001', 'cantidad': 5}, ...]"
     )
-    cantidad_requerida = models.DecimalField(
-        max_digits=10, 
-        decimal_places=2, 
-        verbose_name="Cantidad por Equipo"
-    )
-    
+
     class Meta:
-        unique_together = ('equipo_origen', 'material_requerido')
         verbose_name = "Regla Equipo a Material"
         verbose_name_plural = "Reglas Equipo a Materiales"
 
     def __str__(self):
-        return f"Equipo {self.equipo_origen.modelo} requiere {self.cantidad_requerida} de {self.material_requerido.codigo}"
+        return f"Equipo {self.equipo_origen.modelo} requiere varios materiales"
 
 class ReglaMaterialMaterial(models.Model):
     """Regla: Un Material (Origen) requiere otros Materiales (Requeridos)."""
@@ -254,26 +245,17 @@ class ReglaMaterialMaterial(models.Model):
         verbose_name="Material de Origen",
         to_field='codigo'
     )
-    material_requerido = models.ForeignKey(
-        'Material', 
-        on_delete=models.CASCADE, 
-        related_name='reglas_materiales_requerido',
-        verbose_name="Material Requerido",
-        to_field='codigo'
+    materiales_requeridos = models.JSONField(
+        verbose_name="Materiales Requeridos",
+        help_text="Lista de dicts: [{'codigo': 'MAT002', 'cantidad': 2}, ...]"
     )
-    cantidad_requerida = models.DecimalField(
-        max_digits=10, 
-        decimal_places=2, 
-        verbose_name="Cantidad por Material de Origen"
-    )
-    
+
     class Meta:
-        unique_together = ('material_origen', 'material_requerido')
         verbose_name = "Regla Material a Material"
         verbose_name_plural = "Reglas Material a Materiales"
 
     def __str__(self):
-        return f"Material {self.material_origen.codigo} requiere {self.cantidad_requerida} de {self.material_requerido.codigo}"
+        return f"Material {self.material_origen.codigo} requiere varios materiales"
 
 
 class Cotizacion(models.Model):

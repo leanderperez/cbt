@@ -1,0 +1,16 @@
+material_origen_id;materiales_requeridos
+TCF0014;"[{""codigo"": ""ANC0014"", ""cantidad"": 3}, {""codigo"": ""CDC0014"", ""cantidad"": 5}, {""codigo"": ""AMF01438"", ""cantidad"": 9}]"
+TCF0038;"[{""codigo"": ""ANC0038"", ""cantidad"": 3}, {""codigo"": ""CDC0038"", ""cantidad"": 5}, {""codigo"": ""AMF03838"", ""cantidad"": 9}]"
+TCF0012;"[{""codigo"": ""ANC0012"", ""cantidad"": 3}, {""codigo"": ""CDC0012"", ""cantidad"": 5}, {""codigo"": ""AMF01238"", ""cantidad"": 9}]"
+TCF0058;"[{""codigo"": ""ANC0058"", ""cantidad"": 3}, {""codigo"": ""CDC0058"", ""cantidad"": 5}, {""codigo"": ""AMF05812"", ""cantidad"": 9}]"
+TCF0034;"[{""codigo"": ""ANC0034"", ""cantidad"": 3}, {""codigo"": ""CDC0034"", ""cantidad"": 5}, {""codigo"": ""AMF03412"", ""cantidad"": 9}]"
+TCF0078;"[{""codigo"": ""ANC0078"", ""cantidad"": 2}, {""codigo"": ""CDC0078"", ""cantidad"": 3}, {""codigo"": ""AMF07812"", ""cantidad"": 9}]"
+TCR0038;"[{""codigo"": ""ANC0038"", ""cantidad"": 3}, {""codigo"": ""CDC0038"", ""cantidad"": 5}, {""codigo"": ""AMF03838"", ""cantidad"": 4}]"
+TCR0012;"[{""codigo"": ""ANC0012"", ""cantidad"": 3}, {""codigo"": ""CDC0012"", ""cantidad"": 5}, {""codigo"": ""AMF01238"", ""cantidad"": 4}]"
+TCR0058;"[{""codigo"": ""ANC0058"", ""cantidad"": 3}, {""codigo"": ""CDC0058"", ""cantidad"": 5}, {""codigo"": ""AMF05812"", ""cantidad"": 4}]"
+TCR0034;"[{""codigo"": ""ANC0034"", ""cantidad"": 3}, {""codigo"": ""CDC0034"", ""cantidad"": 5}, {""codigo"": ""AMF03412"", ""cantidad"": 4}]"
+TCR0078;"[{""codigo"": ""ANC0078"", ""cantidad"": 2}, {""codigo"": ""CDC0078"", ""cantidad"": 3}, {""codigo"": ""AMF07812"", ""cantidad"": 4}]"
+TCR0118;
+TCR0138;
+TCR0158;
+TCR0218;
