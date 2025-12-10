@@ -10,7 +10,7 @@ TCR0012;"[{""codigo"": ""ANC0012"", ""cantidad"": 3}, {""codigo"": ""CDC0012"", 
 TCR0058;"[{""codigo"": ""ANC0058"", ""cantidad"": 3}, {""codigo"": ""CDC0058"", ""cantidad"": 5}, {""codigo"": ""AMF05812"", ""cantidad"": 4}]"
 TCR0034;"[{""codigo"": ""ANC0034"", ""cantidad"": 3}, {""codigo"": ""CDC0034"", ""cantidad"": 5}, {""codigo"": ""AMF03412"", ""cantidad"": 4}]"
 TCR0078;"[{""codigo"": ""ANC0078"", ""cantidad"": 2}, {""codigo"": ""CDC0078"", ""cantidad"": 3}, {""codigo"": ""AMF07812"", ""cantidad"": 4}]"
-TCR0118;
-TCR0138;
-TCR0158;
-TCR0218;
+TCR0118;"[{""codigo"": ""ANC00118"", ""cantidad"": 2}, {""codigo"": ""CDC00118"", ""cantidad"": 3}, {""codigo"": ""AMF11812"", ""cantidad"": 4}]"
+TCR0138;"[{""codigo"": ""ANC00138"", ""cantidad"": 2}, {""codigo"": ""CDC00138"", ""cantidad"": 3}, {""codigo"": ""AMF11312"", ""cantidad"": 4}]"
+TCR0158;"[{""codigo"": ""ANC00158"", ""cantidad"": 2}, {""codigo"": ""CDC00158"", ""cantidad"": 3}, {""codigo"": ""AMF11512"", ""cantidad"": 4}]"
+TCR0218;"[{""codigo"": ""ANC00218"", ""cantidad"": 2}, {""codigo"": ""CDC00218"", ""cantidad"": 3}, {""codigo"": ""AMF21812"", ""cantidad"": 4}]"
