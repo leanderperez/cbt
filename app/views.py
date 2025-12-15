@@ -748,16 +748,12 @@ def CotizacionCreateView(request, corrida_id):
     # 2. Aplicar Reglas Equipo a Material
     equipos_corrida = datos_corrida.get('equipos', {})
     if equipos_corrida:
-        # Asumimos que esta función ha sido modificada para retornar {codigo: Decimal(cantidad)}
         materiales_por_equipo = aplicar_reglas_equipo_material(equipos_corrida)
         for codigo, cantidad in materiales_por_equipo.items():
             materiales_totales[codigo] += cantidad
 
     # 3. Aplicar Reglas Material a Material
-    # Asumimos que esta función ha sido modificada para retornar {codigo: Decimal(cantidad)}
     materiales_requeridos_con_decimales = aplicar_reglas_material_material(materiales_totales)
-
-    # --- NUEVA LÓGICA PARA OBTENER COSTOS Y REESTRUCTURAR EL JSON ---
 
     # 4. Obtener Costos Unitarios
     costos_unitarios = obtener_costos_materiales(materiales_requeridos_con_decimales)
@@ -799,13 +795,9 @@ def CotizacionCreateView(request, corrida_id):
         )
         
         # 8. Preparar la respuesta JSON (usando el nuevo formato)
-        return JsonResponse({
-                'nombre': nombre_cotizacion,
-                'datos': datos_cotizacion,
-        })
+        return redirect('cotizacion-list')
 
     except Exception as e:
-        # ... (Manejo de errores al guardar, se mantiene igual) ...
         return JsonResponse({
             "status": "error",
             "message": f"Error al generar o guardar la Cotización: {e}",
