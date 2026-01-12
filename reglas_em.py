@@ -86,7 +86,7 @@ ruta_db_django = 'db.sqlite3' # Asegúrate de que esta ruta sea correcta para tu
 
 # Llama a la función para cargar las reglas VRF
 cargar_reglas_em_sqlite(
-    nombre_archivo_csv='reglas_em_VRF_t.csv', # Cambiado al nuevo nombre de archivo
+    nombre_archivo_csv='reglas_em_VRF_json.csv', # Cambiado al nuevo nombre de archivo
     ruta_bd=ruta_db_django,
     nombre_tabla='app_reglaequipomaterial' # Usamos el nombre de la tabla de reglas
 )
