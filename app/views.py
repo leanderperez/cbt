@@ -26,10 +26,12 @@ from django.contrib.auth.decorators import login_required
 
 # Terceros
 from formtools.wizard.views import SessionWizardView
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak
+from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
-from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.lib.units import inch
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.enums import TA_LEFT
+
 
 from io import BytesIO
 
@@ -811,77 +813,115 @@ class CotizacionListView(ListView):
     context_object_name = 'cotizaciones'
 
 def detalle_cotizacion(request, pk):
-    from reportlab.lib import colors
-
     cotizacion = get_object_or_404(Cotizacion, pk=pk)
     datos = cotizacion.datos  # {'materiales': {codigo: {cantidad, costo_unitario}}}
 
     buffer = BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=letter, leftMargin=50, rightMargin=50, topMargin=160, bottomMargin=50)
+    # Definimos márgenes y tamaño de página
+    doc = SimpleDocTemplate(
+        buffer, 
+        pagesize=letter, 
+        leftMargin=50, 
+        rightMargin=50, 
+        topMargin=160, 
+        bottomMargin=50
+    )
+    
     elements = []
     styles = getSampleStyleSheet()
-    style_normal = styles['Normal']
+    
+    # Estilo personalizado para el texto que debe hacer salto de línea (Wrap)
+    style_material = ParagraphStyle(
+        'MaterialStyle',
+        parent=styles['Normal'],
+        fontSize=10,
+        leading=12,       # Espacio entre líneas
+        alignment=TA_LEFT, # Alineación a la izquierda
+        wordWrap='LTR'    # Ajuste de palabra estándar
+    )
 
     def membrete(canvas, doc):
         logo_path = f"{settings.BASE_DIR}/app/static/img/cover.jpeg"
-        canvas.drawImage(logo_path, 50, 710, width=100, height=50, preserveAspectRatio=True, mask='auto')
+        # Dibujar logo
+        try:
+            canvas.drawImage(logo_path, 50, 710, width=100, height=50, preserveAspectRatio=True, mask='auto')
+        except:
+            pass # Si la imagen no existe, continúa sin error
+            
         canvas.setFont("Helvetica-Bold", 16)
         canvas.drawString(200, 730, f"Cotización #{cotizacion.id}")
+        
         canvas.setFont("Helvetica-Bold", 10)
-        canvas.drawString(500, 730, f"{cotizacion.created_at.strftime('%Y-%m-%d') if hasattr(cotizacion, 'created_at') else ''}")
+        fecha = cotizacion.created_at.strftime('%Y-%m-%d') if hasattr(cotizacion, 'created_at') else ''
+        canvas.drawString(500, 730, fecha)
+        
         canvas.setFont("Helvetica-Bold", 14)
         canvas.drawString(60, 680, f"{cotizacion.nombre}")
+        
         canvas.setFont("Helvetica", 10)
-        canvas.drawString(60, 665, f"Corrida: {cotizacion.corrida.nombre if cotizacion.corrida else ''}")
+        corrida_nombre = cotizacion.corrida.nombre if cotizacion.corrida else ''
+        canvas.drawString(60, 665, f"Corrida: {corrida_nombre}")
 
-    # Tabla de materiales con columna Precio
+    # Encabezados de la tabla
     data = [["Código", "Material", "Cantidad", "Costo Unitario", "Precio"]]
+    
     materiales_json = datos.get('materiales', {})
-
     codigos_materiales = list(materiales_json.keys())
     materiales_objs = Material.objects.filter(codigo__in=codigos_materiales)
     materiales_dict = {m.codigo: m for m in materiales_objs}
 
     for codigo, info in materiales_json.items():
-        nombre = materiales_dict.get(codigo).nombre if codigo in materiales_dict else "Desconocido"
+        nombre_raw = materiales_dict.get(codigo).nombre if codigo in materiales_dict else "Desconocido"
+        
+        # --- SOLUCIÓN: Usar Paragraph para permitir saltos de línea ---
+        nombre_celda = Paragraph(nombre_raw, style_material)
+        
         cantidad = info.get('cantidad', 0)
         costo_unitario = info.get('costo_unitario', 0)
+        
         try:
             precio = float(cantidad) * float(costo_unitario)
-        except Exception:
+        except (ValueError, TypeError):
             precio = 0
+            
         data.append([
             codigo,
-            nombre,
+            nombre_celda,
             cantidad,
-            costo_unitario,
+            f"{float(costo_unitario):.2f}",
             f"{precio:.2f}"
         ])
 
-    col_widths = [100, 220, 70, 90, 90]
+    # Definimos los anchos de columna. El '220' es para el Material.
+    col_widths = [80, 240, 60, 80, 80]
+    
     table = Table(data, colWidths=col_widths, repeatRows=1)
+    
     table.setStyle(TableStyle([
+        # Estilo de encabezado (Fila 0)
         ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
         ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
         ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        
+        # Estilo del cuerpo de la tabla
+        ('ALIGN', (0, 1), (0, -1), 'CENTER'), # Código centrado
+        ('ALIGN', (1, 1), (1, -1), 'LEFT'),   # MATERIAL A LA IZQUIERDA
+        ('ALIGN', (2, 1), (-1, -1), 'RIGHT'), # Valores numéricos a la derecha para mejor lectura
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),  # Alineación superior para que el texto largo no se vea raro
+        
+        # Líneas
         ('LINEBELOW', (0, 0), (-1, 0), 1, colors.black),
         ('LINEBELOW', (0, 1), (-1, -1), 0.5, colors.black),
     ]))
+
     elements.append(table)
 
+    # Generar el PDF
     doc.build(elements, onFirstPage=membrete, onLaterPages=membrete)
 
     buffer.seek(0)
     response = HttpResponse(buffer, content_type='application/pdf')
     response['Content-Disposition'] = f'inline; filename="Cotizacion_{cotizacion.id}.pdf"'
     return response
-
-    for item in regla.materiales_requeridos:
-        codigo = item['codigo']
-        cantidad = item['cantidad']
-        # Puedes buscar el Material por código si necesitas mostrar el nombre
-        material = Material.objects.get(codigo=codigo)
-        print(material.nombre, cantidad)

@@ -39,7 +39,7 @@ def cargar_datos_masivos_sqlite(nombre_archivo_csv, ruta_bd, nombre_tabla, codif
 
         # Confirma los cambios
         conexion.commit()
-        print("Datos cargados correctamente en la base de datos SQLite.")
+        print(f"Datos {nombre_archivo_csv} cargados correctamente.")
 
     except (Exception, sqlite3.Error) as error:
         print("Error al cargar datos:", error)
