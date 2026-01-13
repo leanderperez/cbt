@@ -52,7 +52,7 @@ class ObraPage1Form(forms.ModelForm):
 class ObraPage2Form(forms.Form):
     # Ya no se necesitan los campos 'selected_fases' ni 'fase_names', 
     # porque los datos serán enviados directamente por los checkboxes HTML
-    pass 
+    pass
 
 class FaseForm(forms.ModelForm):
     class Meta:
@@ -106,7 +106,14 @@ class PersonalForm(forms.ModelForm):
 # Formulario Multi-step para cotizaciones
 class Pagina1Form(forms.Form):
     nombre_proyecto = forms.CharField(max_length=100)
+    direccion_proyecto = forms.CharField(max_length=200)
+    cliente = forms.CharField(max_length=100)
     descripcion = forms.CharField(widget=forms.Textarea)
+    ingeniero_encargado = forms.ModelChoiceField(
+        queryset=User.objects.all(),
+        required=False,
+        label="Ingeniero Encargado"
+    )
 
 # --- Paso 2: Equipos (Dinámico) ---
 class Pagina2Form(forms.Form):

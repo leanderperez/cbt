@@ -7,6 +7,7 @@ from collections import defaultdict
 
 # Django
 from django.conf import settings
+from django.utils import timezone
 from django.contrib.auth.views import LoginView
 from django.db import transaction
 from django.db.models import F
@@ -30,8 +31,9 @@ from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.enums import TA_LEFT
-
+from reportlab.lib.enums import TA_LEFT, TA_RIGHT
+from reportlab.pdfgen import canvas
+   
 
 from io import BytesIO
 
@@ -56,8 +58,6 @@ from .forms import (
     ObraPage2Form,
     FaseForm,
     TareaForm,
-    TareaUpdateProgressForm,
-    RequerimientoMaterialFormSet,
     MaterialForm,
     PersonalForm,
     Pagina1Form,
@@ -582,7 +582,7 @@ class ObraWizard(SessionWizardView):
             print(f"Error al crear Obra/Fases: {e}")
             return redirect('obra-list')
 
-# --- Nuevo Wizard para el cálculo y guardado de Cotizaciones ---
+# --- Wizard para el cálculo y guardado de Cotizaciones ---
 FORMS = [("1", Pagina1Form), ("2", Pagina2Form), ("3", Pagina3Form)]
 TEMPLATES = {
     "1": "project_app/corrida1.html",
@@ -611,33 +611,32 @@ class CorridaWizard(SessionWizardView):
         data = {}
         for d in form_data:
             data.update(d)
-        
+
         # 1. Generación del nombre de la Corrida
         # Extrae el nombre del proyecto para el nombre de la instancia (y lo quita de 'data')
         original_name = data.pop('nombre_proyecto', 'sin nombre') 
         
         # --- Estructura para el JSONField 'datos' ---
         datos_finales = {
+            "cliente": data.pop('cliente', ''),
+            "direccion_proyecto": data.pop('direccion_proyecto', ''),
             "descripcion": data.pop('descripcion', ''),
+            "ingeniero_encargado": str(data.pop('ingeniero_encargado', None)),
             "equipos": {},
             "tuberias": {}
         }
 
-        # 2. Obtener Códigos de Referencia (¡Asegúrate de que estos modelos estén importados!)
+        # 2. Obtener Códigos de Referencia
         codigos_equipos = list(Equipo.objects.values_list('modelo', flat=True))
         codigos_tuberias = list(Material.objects.values_list('codigo', flat=True))
 
         # 3. Iterar sobre los datos restantes para clasificar y convertir
-        
-        # En este punto, 'data' solo contiene las claves de equipos y tuberías.
         for key, value in data.items():
-            
-            # Conversión y validación robusta (soluciona el error 'invalid literal for int')
             try:
-                # Convierte el valor a entero. Si se intenta convertir una clave string, se ignora.
+                # Convierte el valor a entero.
                 num_value = int(value) 
             except (TypeError, ValueError):
-                # Ignora si no es un número válido (ej: si se cuela algún otro campo no manejado)
+                # Ignora si no es un número válido
                 continue 
 
             # Si el valor es mayor que cero, clasifica y guarda
@@ -732,7 +731,6 @@ def CotizacionCreateView(request, corrida_id):
     """
     Toma una Corrida por su ID, aplica las reglas y genera una Cotizacion.
     """
-    # ... (Manejo de errores inicial) ...
     try:
         corrida = get_object_or_404(Corrida, id=corrida_id)
     except Exception as e:
@@ -774,7 +772,13 @@ def CotizacionCreateView(request, corrida_id):
 
     # 6. Preparar el JSON de salida y la Cotización
     # El JSON de la Cotización debe ser solo de materiales
-    datos_cotizacion = {'materiales': materiales_finales}
+    datos_cotizacion = {
+        'cliente': datos_corrida.get('cliente', ''),
+        'direccion_proyecto': datos_corrida.get('direccion_proyecto', ''),
+        'descripcion': datos_corrida.get('descripcion', ''),
+        'ingeniero_encargado': datos_corrida.get('ingeniero_encargado', ''),
+        'materiales': materiales_finales
+        }
     
     # ... (Generar el nombre de la cotización - se mantiene igual) ...
     fecha_str = datetime.now().strftime("%y%m%d")
@@ -796,7 +800,7 @@ def CotizacionCreateView(request, corrida_id):
             }
         )
         
-        # 8. Preparar la respuesta JSON (usando el nuevo formato)
+        # 8. Redireccionar a la lista de cotizaciones
         return redirect('cotizacion-list')
 
     except Exception as e:
@@ -812,11 +816,37 @@ class CotizacionListView(ListView):
     template_name = 'project_app/cotizacion_list.html'
     context_object_name = 'cotizaciones'
 
+# --- Clase para manejar la numeración "X de Y" ---
+class NumberedCanvas(canvas.Canvas):
+    def __init__(self, *args, **kwargs):
+        canvas.Canvas.__init__(self, *args, **kwargs)
+        self._saved_page_states = []
+
+    def showPage(self):
+        self._saved_page_states.append(dict(self.__dict__))
+        self._startPage()
+
+    def save(self):
+        num_pages = len(self._saved_page_states)
+        for state in self._saved_page_states:
+            self.__dict__.update(state)
+            self.draw_page_number(num_pages)
+            canvas.Canvas.showPage(self)
+        canvas.Canvas.save(self)
+
+    def draw_page_number(self, page_count):
+        self.setFont("Helvetica", 9)
+        # Dibujar en la parte inferior derecha
+        text = f"Página {self._pageNumber} de {page_count}"
+        self.drawRightString(550, 30, text)
+
+# --- Función Principal del View ---
 def detalle_cotizacion(request, pk):
     cotizacion = get_object_or_404(Cotizacion, pk=pk)
-    datos = cotizacion.datos  # {'materiales': {codigo: {cantidad, costo_unitario}}}
+    datos = cotizacion.datos
 
     buffer = BytesIO()
+    
     # Definimos márgenes y tamaño de página
     doc = SimpleDocTemplate(
         buffer, 
@@ -830,52 +860,80 @@ def detalle_cotizacion(request, pk):
     elements = []
     styles = getSampleStyleSheet()
     
-    # Estilo personalizado para el texto que debe hacer salto de línea (Wrap)
     style_material = ParagraphStyle(
         'MaterialStyle',
         parent=styles['Normal'],
         fontSize=10,
-        leading=12,       # Espacio entre líneas
-        alignment=TA_LEFT, # Alineación a la izquierda
-        wordWrap='LTR'    # Ajuste de palabra estándar
+        leading=12,
+        alignment=TA_LEFT,
+        wordWrap='LTR'
     )
 
     def membrete(canvas, doc):
+        canvas.saveState()
+        
+        # --- Logo ---
         logo_path = f"{settings.BASE_DIR}/app/static/img/cover.jpeg"
-        # Dibujar logo
         try:
             canvas.drawImage(logo_path, 50, 710, width=100, height=50, preserveAspectRatio=True, mask='auto')
         except:
-            pass # Si la imagen no existe, continúa sin error
-            
-        canvas.setFont("Helvetica-Bold", 16)
-        canvas.drawString(200, 730, f"Cotización #{cotizacion.id}")
+            pass 
+
         
+        # --- Bloque superior derecha (Fechas) ---
+        canvas.setFont("Helvetica", 7)
+        fecha_gen = timezone.now().strftime('%d/%m/%Y %H:%M')
+        fecha_mod = cotizacion.updated_at.strftime('%d/%m/%Y %H:%M') if hasattr(cotizacion, 'updated_at') else 'N/A'
+        
+        canvas.drawRightString(550, 755, f"Fecha generación: {fecha_gen}")
+        canvas.drawRightString(550, 745, f"Fecha modificación: {fecha_mod}")
+        
+        # --- Información Detallada (Campos Nuevos) ---
+        y_pos = 695
+        line_height = 15 # Espaciado entre líneas
+        
+        canvas.setFont("Helvetica-Bold", 11)
+        canvas.drawString(60, y_pos, f"Cotización: ")
+        canvas.setFont("Helvetica", 11)
+        canvas.drawString(120, y_pos, f"{cotizacion.nombre}") # Usando el nombre como proyecto
+        
+        y_pos -= line_height
         canvas.setFont("Helvetica-Bold", 10)
-        fecha = cotizacion.created_at.strftime('%Y-%m-%d') if hasattr(cotizacion, 'created_at') else ''
-        canvas.drawString(500, 730, fecha)
-        
-        canvas.setFont("Helvetica-Bold", 14)
-        canvas.drawString(60, 680, f"{cotizacion.nombre}")
-        
+        canvas.drawString(60, y_pos, f"Cliente: ")
         canvas.setFont("Helvetica", 10)
-        corrida_nombre = cotizacion.corrida.nombre if cotizacion.corrida else ''
-        canvas.drawString(60, 665, f"Corrida: {corrida_nombre}")
+        # Ajusta 'cliente' al nombre del campo real en tu modelo
+        canvas.drawString(120, y_pos, f"{datos.get('cliente', 'N/A')}")
+        
+        y_pos -= line_height
+        canvas.setFont("Helvetica-Bold", 10)
+        canvas.drawString(60, y_pos, f"Dirección: ")
+        canvas.setFont("Helvetica", 10)
+        # Ajusta 'direccion' al nombre del campo real
+        canvas.drawString(120, y_pos, f"{datos.get('direccion_proyecto', 'N/A')}")
+        
+        y_pos -= line_height
+        canvas.setFont("Helvetica-Bold", 10)
+        canvas.drawString(60, y_pos, f"Ing. Asignado: ")
+        canvas.setFont("Helvetica", 10)
+        # Ajusta 'ingeniero' al nombre del campo real
+        canvas.drawString(140, y_pos, f"{datos.get('ingeniero_encargado', 'N/A')}")
+        
+        canvas.restoreState()
 
     # Encabezados de la tabla
     data = [["Código", "Material", "Cantidad", "Costo Unitario", "Precio"]]
     
     materiales_json = datos.get('materiales', {})
     codigos_materiales = list(materiales_json.keys())
+    # Importante: Asegúrate de tener el modelo Material importado
     materiales_objs = Material.objects.filter(codigo__in=codigos_materiales)
     materiales_dict = {m.codigo: m for m in materiales_objs}
 
     for codigo, info in materiales_json.items():
-        nombre_raw = materiales_dict.get(codigo).nombre if codigo in materiales_dict else "Desconocido"
+        material_obj = materiales_dict.get(codigo)
+        nombre_raw = material_obj.nombre if material_obj else "Desconocido"
         
-        # --- SOLUCIÓN: Usar Paragraph para permitir saltos de línea ---
         nombre_celda = Paragraph(nombre_raw, style_material)
-        
         cantidad = info.get('cantidad', 0)
         costo_unitario = info.get('costo_unitario', 0)
         
@@ -892,34 +950,27 @@ def detalle_cotizacion(request, pk):
             f"{precio:.2f}"
         ])
 
-    # Definimos los anchos de columna. El '220' es para el Material.
     col_widths = [80, 240, 60, 80, 80]
-    
     table = Table(data, colWidths=col_widths, repeatRows=1)
     
     table.setStyle(TableStyle([
-        # Estilo de encabezado (Fila 0)
         ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
         ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
         ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
         ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-        
-        # Estilo del cuerpo de la tabla
-        ('ALIGN', (0, 1), (0, -1), 'CENTER'), # Código centrado
-        ('ALIGN', (1, 1), (1, -1), 'LEFT'),   # MATERIAL A LA IZQUIERDA
-        ('ALIGN', (2, 1), (-1, -1), 'RIGHT'), # Valores numéricos a la derecha para mejor lectura
-        ('VALIGN', (0, 0), (-1, -1), 'TOP'),  # Alineación superior para que el texto largo no se vea raro
-        
-        # Líneas
+        ('ALIGN', (0, 1), (0, -1), 'CENTER'),
+        ('ALIGN', (1, 1), (1, -1), 'LEFT'),
+        ('ALIGN', (2, 1), (-1, -1), 'RIGHT'),
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
         ('LINEBELOW', (0, 0), (-1, 0), 1, colors.black),
         ('LINEBELOW', (0, 1), (-1, -1), 0.5, colors.black),
     ]))
 
     elements.append(table)
 
-    # Generar el PDF
-    doc.build(elements, onFirstPage=membrete, onLaterPages=membrete)
+    # Generar el PDF usando la clase NumberedCanvas para la numeración
+    doc.build(elements, onFirstPage=membrete, onLaterPages=membrete, canvasmaker=NumberedCanvas)
 
     buffer.seek(0)
     response = HttpResponse(buffer, content_type='application/pdf')

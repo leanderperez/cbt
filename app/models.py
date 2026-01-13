@@ -257,7 +257,6 @@ class ReglaMaterialMaterial(models.Model):
     def __str__(self):
         return f"Material {self.material_origen.codigo} requiere varios materiales"
 
-
 class Cotizacion(models.Model):
     corrida = models.OneToOneField(
         'Corrida', 
