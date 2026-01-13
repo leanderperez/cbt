@@ -840,14 +840,12 @@ class NumberedCanvas(canvas.Canvas):
         text = f"Página {self._pageNumber} de {page_count}"
         self.drawRightString(550, 30, text)
 
-# --- Función Principal del View ---
 def detalle_cotizacion(request, pk):
     cotizacion = get_object_or_404(Cotizacion, pk=pk)
     datos = cotizacion.datos
 
     buffer = BytesIO()
     
-    # Definimos márgenes y tamaño de página
     doc = SimpleDocTemplate(
         buffer, 
         pagesize=letter, 
@@ -860,117 +858,118 @@ def detalle_cotizacion(request, pk):
     elements = []
     styles = getSampleStyleSheet()
     
-    style_material = ParagraphStyle(
-        'MaterialStyle',
-        parent=styles['Normal'],
-        fontSize=10,
-        leading=12,
-        alignment=TA_LEFT,
-        wordWrap='LTR'
-    )
+    style_material = ParagraphStyle('MatStyle', parent=styles['Normal'], fontSize=9, leading=10)
+    style_familia = ParagraphStyle('FamStyle', parent=styles['Normal'], fontSize=10, fontName='Helvetica-Bold')
 
     def membrete(canvas, doc):
         canvas.saveState()
-        
-        # --- Logo ---
-        logo_path = f"{settings.BASE_DIR}/app/static/img/cover.jpeg"
+        logo_path = f"{settings.BASE_DIR}/app/static/img/logo.jpeg"
         try:
             canvas.drawImage(logo_path, 50, 710, width=100, height=50, preserveAspectRatio=True, mask='auto')
         except:
             pass 
 
-        
-        # --- Bloque superior derecha (Fechas) ---
         canvas.setFont("Helvetica", 7)
         fecha_gen = timezone.now().strftime('%d/%m/%Y %H:%M')
-        fecha_mod = cotizacion.updated_at.strftime('%d/%m/%Y %H:%M') if hasattr(cotizacion, 'updated_at') else 'N/A'
-        
         canvas.drawRightString(550, 755, f"Fecha generación: {fecha_gen}")
-        canvas.drawRightString(550, 745, f"Fecha modificación: {fecha_mod}")
         
-        # --- Información Detallada (Campos Nuevos) ---
         y_pos = 695
-        line_height = 15 # Espaciado entre líneas
-        
         canvas.setFont("Helvetica-Bold", 11)
-        canvas.drawString(60, y_pos, f"Cotización: ")
-        canvas.setFont("Helvetica", 11)
-        canvas.drawString(120, y_pos, f"{cotizacion.nombre}") # Usando el nombre como proyecto
-        
-        y_pos -= line_height
-        canvas.setFont("Helvetica-Bold", 10)
-        canvas.drawString(60, y_pos, f"Cliente: ")
+        canvas.drawString(60, y_pos, f"Cotización: {cotizacion.nombre}")
+        y_pos -= 15
         canvas.setFont("Helvetica", 10)
-        # Ajusta 'cliente' al nombre del campo real en tu modelo
-        canvas.drawString(120, y_pos, f"{datos.get('cliente', 'N/A')}")
-        
-        y_pos -= line_height
-        canvas.setFont("Helvetica-Bold", 10)
-        canvas.drawString(60, y_pos, f"Dirección: ")
-        canvas.setFont("Helvetica", 10)
-        # Ajusta 'direccion' al nombre del campo real
-        canvas.drawString(120, y_pos, f"{datos.get('direccion_proyecto', 'N/A')}")
-        
-        y_pos -= line_height
-        canvas.setFont("Helvetica-Bold", 10)
-        canvas.drawString(60, y_pos, f"Ing. Asignado: ")
-        canvas.setFont("Helvetica", 10)
-        # Ajusta 'ingeniero' al nombre del campo real
-        canvas.drawString(140, y_pos, f"{datos.get('ingeniero_encargado', 'N/A')}")
-        
+        canvas.drawString(60, y_pos, f"Cliente: {datos.get('cliente', 'N/A')}")
         canvas.restoreState()
 
-    # Encabezados de la tabla
-    data = [["Código", "Material", "Cantidad", "Costo Unitario", "Precio"]]
-    
+    # --- PROCESAMIENTO DE DATOS ---
     materiales_json = datos.get('materiales', {})
     codigos_materiales = list(materiales_json.keys())
-    # Importante: Asegúrate de tener el modelo Material importado
     materiales_objs = Material.objects.filter(codigo__in=codigos_materiales)
     materiales_dict = {m.codigo: m for m in materiales_objs}
 
+    materiales_por_familia = defaultdict(list)
     for codigo, info in materiales_json.items():
-        material_obj = materiales_dict.get(codigo)
-        nombre_raw = material_obj.nombre if material_obj else "Desconocido"
-        
-        nombre_celda = Paragraph(nombre_raw, style_material)
-        cantidad = info.get('cantidad', 0)
-        costo_unitario = info.get('costo_unitario', 0)
-        
-        try:
-            precio = float(cantidad) * float(costo_unitario)
-        except (ValueError, TypeError):
-            precio = 0
-            
-        data.append([
-            codigo,
-            nombre_celda,
-            cantidad,
-            f"{float(costo_unitario):.2f}",
-            f"{precio:.2f}"
-        ])
+        obj = materiales_dict.get(codigo)
+        familia_nombre = obj.familia if obj else "OTRO"
+        materiales_por_familia[familia_nombre].append({
+            'codigo': codigo,
+            'nombre': obj.nombre if obj else "Desconocido",
+            'cantidad': float(info.get('cantidad', 0)),
+            'costo': float(info.get('costo_unitario', 0))
+        })
 
-    col_widths = [80, 240, 60, 80, 80]
+    # --- LÓGICA DE ORDENAMIENTO PERSONALIZADO ---
+    # Definimos el orden de las familias (en minúsculas para comparar)
+    orden_prioridad = ['tuberia', 'anclaje', 'electricidad', 'drenaje']
+    
+    def prioridad_familia(nombre_familia):
+        nombre_normalizado = nombre_familia.lower()
+        if nombre_normalizado in orden_prioridad:
+            return orden_prioridad.index(nombre_normalizado)
+        return len(orden_prioridad) # Las que no están en la lista van al final
+
+    familias_presentes = sorted(materiales_por_familia.keys(), key=prioridad_familia)
+
+    # --- CONSTRUCCIÓN DE LA TABLA ---
+    data = [["Código", "Material", "Cantidad", "Costo Unitario ($)", "Precio ($)"]]
+    gran_total = 0
+
+    for familia in familias_presentes:
+        # Fila de Título de Familia
+        data.append(["", Paragraph(familia.upper(), style_familia), "", "", ""])
+        
+        # Ordenar materiales internamente por código
+        lista_materiales = sorted(materiales_por_familia[familia], key=lambda x: x['codigo'])
+        
+        subtotal_familia = 0
+        for mat in lista_materiales:
+            precio_linea = mat['cantidad'] * mat['costo']
+            subtotal_familia += precio_linea
+            
+            data.append([
+                mat['codigo'],
+                Paragraph(mat['nombre'], style_material),
+                f"{mat['cantidad']}",
+                f"{mat['costo']:.2f}",
+                f"{precio_linea:.2f}"
+            ])
+        
+        # Fila de Subtotal
+        data.append(["", "", "", f"SUBTOTAL {familia.upper()}", f"{subtotal_familia:.2f}"])
+        gran_total += subtotal_familia
+
+    # Espacio y Fila de Total General
+    data.append(["", "", "", "", ""]) # Separador visual
+    data.append(["", "", "", "TOTAL GENERAL", f"{gran_total:.2f}"])
+
+    # --- ESTILOS ---
+    col_widths = [70, 250, 60, 80, 80]
     table = Table(data, colWidths=col_widths, repeatRows=1)
     
-    table.setStyle(TableStyle([
+    t_style = [
         ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
         ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
         ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-        ('ALIGN', (0, 1), (0, -1), 'CENTER'),
-        ('ALIGN', (1, 1), (1, -1), 'LEFT'),
-        ('ALIGN', (2, 1), (-1, -1), 'RIGHT'),
         ('VALIGN', (0, 0), (-1, -1), 'TOP'),
         ('LINEBELOW', (0, 0), (-1, 0), 1, colors.black),
-        ('LINEBELOW', (0, 1), (-1, -1), 0.5, colors.black),
-    ]))
+        ('ALIGN', (2, 1), (-1, -1), 'RIGHT'),
+    ]
 
+    for i, row in enumerate(data):
+        # Estilo para las filas de Familia (la segunda columna tiene el Paragraph)
+        if row[1] and isinstance(row[1], Paragraph) and row[1].getPlainText() in [f.upper() for f in familias_presentes]:
+            t_style.append(('BACKGROUND', (0, i), (-1, i), colors.lightgrey))
+        
+        # Estilo para Subtotales y Total
+        if "SUBTOTAL" in str(row[3]) or "TOTAL GENERAL" in str(row[3]):
+            t_style.append(('FONTNAME', (3, i), (4, i), 'Helvetica-Bold'))
+            t_style.append(('LINEABOVE', (3, i), (4, i), 0.5, colors.black))
+
+    table.setStyle(TableStyle(t_style))
     elements.append(table)
 
-    # Generar el PDF usando la clase NumberedCanvas para la numeración
-    doc.build(elements, onFirstPage=membrete, onLaterPages=membrete, canvasmaker=NumberedCanvas)
+    doc.build(elements, onFirstPage=membrete, onLaterPages=membrete)
 
     buffer.seek(0)
     response = HttpResponse(buffer, content_type='application/pdf')
