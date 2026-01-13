@@ -873,7 +873,7 @@ def detalle_cotizacion(request, pk):
         fecha_gen = timezone.now().strftime('%d/%m/%Y %H:%M')
         canvas.drawRightString(550, 755, f"Fecha generación: {fecha_gen}")
         
-        y_pos = 695
+        y_pos = 690
         canvas.setFont("Helvetica-Bold", 11)
         canvas.drawString(60, y_pos, f"Cotización: {cotizacion.nombre}")
         y_pos -= 15
