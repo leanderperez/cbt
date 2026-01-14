@@ -7,19 +7,17 @@ from collections import defaultdict
 
 # Django
 from django.conf import settings
-from django.utils import timezone
 from django.contrib.auth.views import LoginView
 from django.db import transaction
 from django.db.models import F
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
-from django.urls import reverse_lazy, reverse
+from django.urls import reverse_lazy
 from django.views.generic import (
     ListView,
     CreateView,
     UpdateView,
-    DetailView,
-    View
+    DetailView
 )
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
@@ -515,7 +513,7 @@ def calculadora_tornilleria(request):
     # No se necesita lógica de servidor, solo renderizar el template.
     return render(request, 'project_app/calculadora_tornilleria.html', {})
 
-# --- Nuevo Wizard para la creación de Obra y Fases ---
+# --- Wizard para la creación de Obra y Fases ---
 FASES_WIZARD_FORMS = [
     ("obra_data", ObraPage1Form),
     ("card_selection", ObraPage2Form)
@@ -582,7 +580,7 @@ class ObraWizard(SessionWizardView):
             print(f"Error al crear Obra/Fases: {e}")
             return redirect('obra-list')
 
-# --- Wizard para el cálculo y guardado de Cotizaciones ---
+# --- Wizard para el cálculo de Cotizaciones ---
 FORMS = [("1", Pagina1Form), ("2", Pagina2Form), ("3", Pagina3Form)]
 TEMPLATES = {
     "1": "project_app/corrida1.html",
@@ -816,7 +814,6 @@ class CotizacionListView(ListView):
     template_name = 'project_app/cotizacion_list.html'
     context_object_name = 'cotizaciones'
 
-# --- Clase para manejar la numeración "X de Y" ---
 class NumberedCanvas(canvas.Canvas):
     def __init__(self, *args, **kwargs):
         canvas.Canvas.__init__(self, *args, **kwargs)
@@ -870,15 +867,21 @@ def detalle_cotizacion(request, pk):
             pass 
 
         canvas.setFont("Helvetica", 7)
-        fecha_gen = timezone.now().strftime('%d/%m/%Y %H:%M')
+        fecha_gen = cotizacion.fecha_generacion.strftime('%d/%m/%Y')
         canvas.drawRightString(550, 755, f"Fecha generación: {fecha_gen}")
+        fecha_mod = cotizacion.fecha_modificacion.strftime('%d/%m/%Y')
+        canvas.drawRightString(550, 745, f"Fecha modificación: {fecha_mod}")
         
         y_pos = 690
-        canvas.setFont("Helvetica-Bold", 11)
+        canvas.setFont("Helvetica-Bold", 10)
         canvas.drawString(60, y_pos, f"Cotización: {cotizacion.nombre}")
         y_pos -= 15
         canvas.setFont("Helvetica", 10)
         canvas.drawString(60, y_pos, f"Cliente: {datos.get('cliente', 'N/A')}")
+        y_pos -= 15
+        canvas.drawString(60, y_pos, f"Dirección del Proyecto: {datos.get('direccion_proyecto', 'N/A')}")
+        y_pos -= 15
+        canvas.drawString(60, y_pos, f"Ingeniero Encargado: {datos.get('ingeniero_encargado', 'N/A')}")
         canvas.restoreState()
 
     # --- PROCESAMIENTO DE DATOS ---
@@ -969,7 +972,7 @@ def detalle_cotizacion(request, pk):
     table.setStyle(TableStyle(t_style))
     elements.append(table)
 
-    doc.build(elements, onFirstPage=membrete, onLaterPages=membrete)
+    doc.build(elements, onFirstPage=membrete, onLaterPages=membrete, canvasmaker=NumberedCanvas)
 
     buffer.seek(0)
     response = HttpResponse(buffer, content_type='application/pdf')
