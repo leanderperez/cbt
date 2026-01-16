@@ -22,6 +22,7 @@ from django.views.generic import (
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth.decorators import login_required
+from django.utils.text import slugify
 
 # Terceros
 from formtools.wizard.views import SessionWizardView
@@ -611,8 +612,7 @@ class CorridaWizard(SessionWizardView):
             data.update(d)
 
         # 1. Generación del nombre de la Corrida
-        # Extrae el nombre del proyecto para el nombre de la instancia (y lo quita de 'data')
-        original_name = data.pop('nombre_proyecto', 'sin nombre') 
+        nombre = data.pop('nombre_proyecto', 'sin nombre') 
         
         # --- Estructura para el JSONField 'datos' ---
         datos_finales = {
@@ -631,31 +631,40 @@ class CorridaWizard(SessionWizardView):
         # 3. Iterar sobre los datos restantes para clasificar y convertir
         for key, value in data.items():
             try:
-                # Convierte el valor a entero.
                 num_value = int(value) 
             except (TypeError, ValueError):
-                # Ignora si no es un número válido
                 continue 
 
-            # Si el valor es mayor que cero, clasifica y guarda
             if num_value > 0:
                 if key in codigos_equipos:
-                    # El campo corresponde a un equipo
                     datos_finales["equipos"][key] = num_value
                 elif key in codigos_tuberias:
-                    # El campo corresponde a una tubería
                     datos_finales["tuberias"][key] = num_value
 
-        # 4. Finaliza el guardado
-        date_str = datetime.now().strftime("%y%m%d")
-        snake_case_name = to_snake_case(original_name) 
-        final_name = f"CORR-{date_str}-{snake_case_name}"
+        # 4. Finaliza el guardado con correlativo anual reiniciable
+        with transaction.atomic():
+            ahora = datetime.now()
+            año_actual = ahora.strftime("%Y")
+            
+            # Calculamos el número correlativo contando registros de este año
+            # Nota: Se asume que el modelo tiene un campo de fecha 'created_at' o similar.
+            # Si no lo tiene, filtramos por el campo 'correlativo' que contenga el año.
+            conteo_año = Corrida.objects.filter(correlativo__contains=f"-{año_actual}-").count()
+            nuevo_numero = conteo_año + 1
+            
+            # Formateamos el nombre (snake_case)
+            nombre_slug = slugify(nombre).replace('-', '_')
+            
+            # Construimos el string: CORR-2024-GS-I-001-nombre_proyecto
+            correlativo_final = f"CORR-{año_actual}-GS-I-{nuevo_numero:03d}-{nombre_slug}"
 
-        # Guarda la Corrida
-        # NOTA: Los datos a guardar son 'datos_finales'
-        Corrida.objects.create(nombre=final_name, datos=datos_finales)
-        print(f"Corrida '{final_name}' creada con datos: {datos_finales}")
-        
+            # Creamos el objeto con todos los datos
+            Corrida.objects.create(
+                nombre=nombre, 
+                datos=datos_finales,
+                correlativo=correlativo_final
+            )
+
         return redirect('corrida-list')
 
 class CorridaListView(ListView):

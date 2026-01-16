@@ -11,7 +11,8 @@
     <table id="obraTable" class="obra-table">
         <thead>
             <tr>
-                <th>Código</th>
+                <th>Correlativo</th>
+                <th>Proyecto</th>
                 <th>Descripción</th>
                 <th>Acciones</th>
                 
@@ -20,6 +21,7 @@
         <tbody>
             {% for corrida in corridas %}
             <tr class="glass-row">
+                <td>{{ corrida.correlativo }}</td>
                 <td>{{ corrida.nombre }}</td>
                 <td>{{ corrida.datos.descripcion}}</td>
                 <td>
