@@ -11,6 +11,7 @@
     <table id="personalTable" class="obra-table">
         <thead>
             <tr>
+                <th>RIF</th>
                 <th>Centro de Servicio</th>
                 <th>Responsable</th>
                 <th>Teléfono</th>
@@ -20,6 +21,7 @@
         <tbody>
             {% for p in personal %}
             <tr>
+                <td>{{ p.rif }}</td>
                 <td>{{ p.empresa }}</td>
                 <td>{{ p.nombre }}</td>
                 <td>{{ p.telefono }}</td>

@@ -122,7 +122,7 @@
         {% csrf_token %}
         <div class="tarea-flex">
             <div class="user-details">
-                <h2 class="title">Crear Tarea para la Fase: {{ fase.nombre }}</h2>
+                <h3 class="title">Crear Tarea para la Fase: {{ fase.nombre }}</h3>
                 <div class="input-box">
                     <span class="details">Nombre de la Tarea</span>
                     {{ form.nombre }}
@@ -145,7 +145,7 @@
             </div>
 
             <div class="user-details">
-                <h2>Requerimientos de Materiales</h2>
+                <h3>Requerimientos de Materiales</h3>
                 <p>Introduce la cantidad requerida para cada material.</p>
                 <div class="materials-table-container">
                     <table id="materialsTable" class="display">
@@ -154,7 +154,7 @@
                                 <th><input type="text" placeholder="Código" /></th>
                                 <th><input type="text" placeholder="Material" /></th>
                                 <th>Unidad</th>
-                                <th>Cantidad Requerida</th>
+                                <th>Cantidad</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -196,7 +196,7 @@
             "language": {
                 "url": "https://cdn.datatables.net/plug-ins/1.11.5/i18n/es-ES.json"
             },
-            "scrollY": "54vh",
+            "scrollY": "48vh",
             "scrollCollapse": true,
             "paging": false, 
             "deferRender": true,

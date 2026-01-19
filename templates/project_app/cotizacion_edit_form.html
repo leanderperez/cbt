@@ -36,6 +36,15 @@
         min-width: 340px;
         max-width: 600px;
     }
+        .familia-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 10px;
+            max-height: 250px;
+            overflow-y: auto;
+            padding-right: 6px; /* espacio para scrollbar */
+        }
     
     .materials-table-container {
         flex: 1 1 55%;
@@ -64,12 +73,25 @@
     background: transparent;
     }
 
+        .familia-grid::-webkit-scrollbar {
+            width: 10px;
+            height: 8px;
+            background: transparent;
+        }
+
     .materials-table-container::-webkit-scrollbar-thumb {
         background: rgba(131, 131, 131, 0.2);
         border-radius: 6px;
         border: 2px solid transparent;
         background-clip: padding-box;
     }
+
+        .familia-grid::-webkit-scrollbar-thumb {
+            background: rgba(131, 131, 131, 0.2);
+            border-radius: 6px;
+            border: 2px solid transparent;
+            background-clip: padding-box;
+        }
 
     .btn-container {
         margin-top: 10px;
@@ -123,17 +145,28 @@
         <div class="tarea-flex">
             <div class="user-details">
                 <h2>Editar Cotización</h2>
-                <p><strong>Correlativo Actual:</strong> {{ cotizacion.correlativo }}</p>
-                <p><small>(Se generará una nueva revisión al guardar)</small></p>
+                <p><strong>Correlativo Actual:</strong></p>
+                <p>{{ cotizacion.correlativo }}</p>
                 <hr>
                 <br>
                 <div class="input-box">
                     <span class="details">Nombre del Proyecto</span>
                     {{ form.nombre }}
                 </div>
-                <div class="input-box">
-                    <p><strong>Cliente:</strong> {{ cotizacion.datos.cliente }}</p>
-                    <p><strong>Ingeniero:</strong> {{ cotizacion.datos.ingeniero_encargado }}</p>
+
+                <h4 style="margin-top: 20px; font-size: 1em; border-bottom: 1px solid rgba(255,255,255,0.2);">% Utilidad por Categoría</h4>
+                    <div class="familia-grid">
+                    {% for familia in familias %}
+                    <div class="input-box" style="margin-bottom: 3px;">
+                        <span class="details" style="font-size: 0.75em; color: #ccc;">{{ familia|upper }} (%)</span>
+                        <input type="number" 
+                            name="utilidad-{{ familia }}" 
+                            value="30" 
+                            step="1" 
+                            min="0" 
+                            style="width: 100%; padding: 5px; border-radius: 4px; border: 1px solid #555; background: rgba(0,0,0,0.2); color: white;">
+                    </div>
+                    {% endfor %}
                 </div>
             </div>
 
@@ -187,7 +220,7 @@
             "language": {
                 "url": "https://cdn.datatables.net/plug-ins/1.11.5/i18n/es-ES.json"
             },
-            "scrollY": "54vh",
+            "scrollY": "50vh",
             "scrollCollapse": true,
             "paging": false, 
             "deferRender": true,

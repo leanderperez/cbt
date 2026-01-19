@@ -991,53 +991,44 @@ def detalle_cotizacion(request, pk):
 
 class CotizacionUpdateView(UpdateView):
     model = Cotizacion
-    fields = ['nombre'] # Solo permitimos editar el nombre base, los materiales van por el POST
+    fields = ['nombre']
     template_name = 'project_app/cotizacion_edit_form.html'
     context_object_name = 'cotizacion'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         cotizacion = self.object
-        # Obtenemos los materiales del JSONField 'datos'
-        materiales_en_cotizacion = cotizacion.datos.get('materiales', {})
         
-        # Necesitamos pasar todos los materiales disponibles para agregarlos
+        # 1. Obtener los códigos de los materiales que YA están en la cotización
+        materiales_actuales_dict = cotizacion.datos.get('materiales', {})
+        codigos_en_uso = materiales_actuales_dict.keys()
+        
+        # 2. Filtrar familias solo de esos materiales específicos
+        familias_en_uso = Material.objects.filter(
+            codigo__in=codigos_en_uso
+        ).values_list('familia', flat=True).distinct()
+        
+        context['familias'] = sorted(list(filter(None, familias_en_uso)))
         context['todos_los_materiales'] = Material.objects.all().order_by('nombre')
-        
-        # Mapeo de materiales actuales para facilitar el acceso en el template
-        context['materiales_actuales'] = materiales_en_cotizacion
+        context['materiales_actuales'] = materiales_actuales_dict
         return context
 
     def form_valid(self, form):
-        # No modificamos la cotización original; creamos una nueva como revisión.
         original = self.get_object()
-
-        # Nombre final (puede ser modificado en el formulario)
         nuevo_nombre = form.cleaned_data.get('nombre', original.nombre)
 
-        # Determinar la base del correlativo (sin sufijo _rev_N)
-        m = re.match(r'^(.*?)(?:_rev_(\d+))?$', original.correlativo)
-        base_correlativo = m.group(1) if m else original.correlativo
-
-        # Buscar revisiones existentes que comiencen con la misma base y calcular siguiente número
-        correlativos_existentes = Cotizacion.objects.filter(correlativo__startswith=base_correlativo).values_list('correlativo', flat=True)
-        max_rev = 0
-        for c in correlativos_existentes:
-            mm = re.search(r'_rev_(\d+)$', c)
-            if mm:
+        # Lógica de utilidades dinámicas por familia desde el POST
+        utilidades_por_familia = {}
+        for key, value in self.request.POST.items():
+            if key.startswith('utilidad-'):
+                familia_nome = key.replace('utilidad-', '')
                 try:
-                    rn = int(mm.group(1))
-                    if rn > max_rev:
-                        max_rev = rn
+                    utilidades_por_familia[familia_nome] = float(value) / 100
                 except ValueError:
-                    continue
+                    utilidades_por_familia[familia_nome] = 0.30
 
-        siguiente_rev = max_rev + 1
-        nuevo_correlativo = f"{base_correlativo}_rev_{siguiente_rev}"
-
-        # Procesar materiales enviados por POST (misma lógica que antes)
+        # Procesar nuevos materiales y asignar su utilidad correspondiente
         nuevos_materiales = {}
-        utilidad = 0.30
         for key, value in self.request.POST.items():
             if key.startswith('material-quantity-'):
                 try:
@@ -1045,22 +1036,38 @@ class CotizacionUpdateView(UpdateView):
                     cantidad = float(value) if value else 0
                     if cantidad > 0:
                         mat_obj = get_object_or_404(Material, codigo=codigo_mat)
+                        # Se aplica la utilidad capturada del formulario para su familia
+                        utilidad_aplicar = utilidades_por_familia.get(mat_obj.familia, 0.30)
+                        
                         nuevos_materiales[codigo_mat] = {
                             'cantidad': cantidad,
-                            'costo_unitario': float(mat_obj.costo_unitario) * (1 + utilidad)
+                            'costo_unitario': float(mat_obj.costo_unitario) * (1 + utilidad_aplicar)
                         }
                 except (ValueError, Material.DoesNotExist):
                     continue
 
-        datos_actualizados = original.datos.copy()
-        datos_actualizados['materiales'] = nuevos_materiales
+        # Lógica de creación de revisión (mantenida de tu código original)
+        m = re.match(r'^(.*?)(?:_rev_(\d+))?$', original.correlativo)
+        base_correlativo = m.group(1) if m else original.correlativo
+        correlativos_existentes = Cotizacion.objects.filter(correlativo__startswith=base_correlativo).values_list('correlativo', flat=True)
+        max_rev = 0
+        for c in correlativos_existentes:
+            mm = re.search(r'_rev_(\d+)$', c)
+            if mm:
+                try:
+                    max_rev = max(max_rev, int(mm.group(1)))
+                except ValueError: continue
 
-        # Crear una nueva cotización dejando la original intacta
+        nuevo_correlativo = f"{base_correlativo}_rev_{max_rev + 1}"
+
         Cotizacion.objects.create(
             corrida=original.corrida,
             nombre=nuevo_nombre,
             correlativo=nuevo_correlativo,
-            datos=datos_actualizados
+            datos={'cliente': original.datos.get('cliente'), 
+                   'ingeniero_encargado': original.datos.get('ingeniero_encargado'),
+                   'direccion_proyecto': original.datos.get('direccion_proyecto'),
+                   'descripcion': original.datos.get('descripcion'),
+                   'materiales': nuevos_materiales}
         )
-
         return redirect('cotizacion-list')

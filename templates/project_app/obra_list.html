@@ -11,10 +11,9 @@
     <table id="obraTable" class="obra-table">
         <thead>
             <tr>
-                <th>Nombre</th>
+                <th>Proyecto</th>
                 <th>Descripción</th>
-                <th>Presupuesto Inicial</th>
-                <th>Presupuesto Ejecutado</th>
+                <th>Ejecutado</th>
                 <th>Avance Total</th>
                 <th>Acciones</th>
             </tr>
@@ -24,7 +23,6 @@
             <tr class="glass-row">
                 <td>{{ obra.nombre }}</td>
                 <td>{{ obra.descripcion }}</td>
-                <td>${{ obra.presupuesto_inicial|floatformat:2 }}</td>
                 <td>${{ obra.get_presupuesto_ejecutado|floatformat:2 }}</td>
                 <td>{{ obra.porcentaje_avance|floatformat:2 }}%</td>
                 <td>

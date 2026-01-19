@@ -2,6 +2,27 @@
 {% load static %}
 {% block title %}Detalles de la Obra: {{ obra.nombre }}{% endblock %}
 
+{% block extra_css %}
+<style>
+    .phases-scroll-container {
+        max-height: 60vh;
+        overflow-y: auto;
+        padding-right: 8px;
+    }
+    .phases-scroll-container::-webkit-scrollbar {
+        width: 10px;
+        height: 8px;
+        background: transparent;
+    }
+    .phases-scroll-container::-webkit-scrollbar-thumb {
+        background: rgba(131, 131, 131, 0.2);
+        border-radius: 6px;
+        border: 2px solid transparent;
+        background-clip: padding-box;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container-glass">
     <div class="card-glass" onclick="toggleProjectDetails()">
@@ -61,6 +82,7 @@
         {% endfor %}
     </div>
 </div>
+
 
 <div id="faseModal" class="modal">
     <div class="modal-content">
