@@ -11,7 +11,8 @@
     <table id="obraTable" class="obra-table">
         <thead>
             <tr>
-                <th>Código</th>
+                <th>Correlativo</th>
+                <th>Proyecto</th>
                 <th>Acciones</th>
                 
             </tr>
@@ -19,9 +20,11 @@
         <tbody>
             {% for cotizacion in cotizaciones %}
             <tr class="glass-row">
+                <td>{{ cotizacion.correlativo }}</td>
                 <td>{{ cotizacion.nombre }}</td>
                 <td>
-                    <a href="{% url 'detalle_cotizacion' cotizacion.pk %}" class="obra-link" target="_blank">Detalles</a>
+                    <a href="{% url 'detalle_cotizacion' cotizacion.pk %}" class="obra-link" target="_blank">PDF</a> |
+                    <a href="{% url 'cotizacion-edit' cotizacion.pk %}" class="obra-link">Editar</a>
                 </td>
             </tr>
             {% endfor %}

@@ -589,16 +589,6 @@ TEMPLATES = {
     "3": "project_app/corrida3.html",
 }
 
-def to_snake_case(name):
-    """Convierte una cadena a formato snake_case (e.g., 'Mi Proyecto' -> 'mi_proyecto')."""
-    # 1. Reemplazar cualquier cosa que no sea letra o número por un espacio
-    s1 = re.sub(r'[^a-zA-Z0-9]', ' ', name)
-    # 2. Convertir a Mayúsculas
-    s2 = s1.upper()
-    # 3. Reemplazar grupos de espacios por un solo guion bajo y limpiar guiones iniciales/finales
-    s3 = re.sub(r'\s+', '_', s2).strip('_')
-    return s3
-
 class CorridaWizard(SessionWizardView):
     def get_template_names(self):
         return [TEMPLATES[self.steps.current]]
@@ -736,7 +726,8 @@ def obtener_costos_materiales(materiales_dict):
 @require_http_methods(["GET"])
 def CotizacionCreateView(request, corrida_id):
     """
-    Toma una Corrida por su ID, aplica las reglas y genera una Cotizacion.
+    Toma una Corrida por su ID, aplica las reglas y genera una Cotizacion
+    con un correlativo anual reiniciable.
     """
     try:
         corrida = get_object_or_404(Corrida, id=corrida_id)
@@ -746,8 +737,6 @@ def CotizacionCreateView(request, corrida_id):
     # 1. Obtener los datos de la Corrida
     datos_corrida = corrida.datos
     
-    # Inicializar el total de materiales con las tuberías (que son materiales)
-    # **IMPORTANTE: Mantenemos el resultado como Decimal hasta el final.**
     materiales_totales = defaultdict(Decimal, {
         k: Decimal(str(v)) for k, v in datos_corrida.get('tuberias', {}).items()
     })
@@ -765,57 +754,69 @@ def CotizacionCreateView(request, corrida_id):
     # 4. Obtener Costos Unitarios
     costos_unitarios = obtener_costos_materiales(materiales_requeridos_con_decimales)
     
+    utilidad = 0.30  # 30% de utilidad
     materiales_finales = {}
-    
-    # 5. Reestructurar el JSON final y calcular totales (opcional)
     for codigo, cantidad_dec in materiales_requeridos_con_decimales.items():
-        costo_unitario = costos_unitarios.get(codigo, Decimal('0.00')) # Usa 0 si no se encuentra el material
-
-        # Convertir Decimal a float para el JSON final que se guarda/retorna
+        costo_unitario = costos_unitarios.get(codigo, Decimal('0.00'))
         materiales_finales[codigo] = {
             'cantidad': float(cantidad_dec),
-            'costo_unitario': float(costo_unitario)
+            'costo_unitario': float(costo_unitario)*(1 + utilidad)
         }
 
-    # 6. Preparar el JSON de salida y la Cotización
-    # El JSON de la Cotización debe ser solo de materiales
+    # 5. Preparar el JSON de salida
     datos_cotizacion = {
         'cliente': datos_corrida.get('cliente', ''),
         'direccion_proyecto': datos_corrida.get('direccion_proyecto', ''),
         'descripcion': datos_corrida.get('descripcion', ''),
         'ingeniero_encargado': datos_corrida.get('ingeniero_encargado', ''),
         'materiales': materiales_finales
-        }
-    
-    # ... (Generar el nombre de la cotización - se mantiene igual) ...
-    fecha_str = datetime.now().strftime("%y%m%d")
-    nombre_base = corrida.nombre.replace('CORR-', '')
-    partes = nombre_base.split('-', 1)
-    if len(partes) > 1 and partes[0].isdigit() and len(partes[0]) == 6:
-        sufijo_nombre = partes[1]
-    else:
-        sufijo_nombre = nombre_base
-    nombre_cotizacion = f"COT-{fecha_str}-{sufijo_nombre}"
+    }
 
     try:
-        # 7. Guardar la Cotización
-        cotizacion, created = Cotizacion.objects.update_or_create(
-            corrida=corrida,
-            defaults={
-                'nombre': nombre_cotizacion,
-                'datos': datos_cotizacion,
-            }
-        )
-        
-        # 8. Redireccionar a la lista de cotizaciones
-        return redirect('cotizacion-list')
+        with transaction.atomic():
+            # 1. Intentamos obtener una cotización existente para esta corrida
+            cotizacion_existente = Cotizacion.objects.filter(corrida=corrida).first()
 
+            if cotizacion_existente:
+                # Si ya existe, mantenemos su correlativo
+                correlativo_final = cotizacion_existente.correlativo
+            else:
+                # 2. Si es nueva, generamos el correlativo siguiendo la lógica anual
+                ahora = datetime.now()
+                año_actual = ahora.strftime("%Y")
+                
+                ultimo_ref = Cotizacion.objects.filter(
+                    correlativo__contains=f"-{año_actual}-"
+                ).order_by('-correlativo').first()
+
+                if ultimo_ref and ultimo_ref.correlativo:
+                    try:
+                        partes = ultimo_ref.correlativo.split('-')
+                        nuevo_numero = int(partes[4]) + 1
+                    except (IndexError, ValueError):
+                        nuevo_numero = Cotizacion.objects.filter(correlativo__contains=f"-{año_actual}-").count() + 1
+                else:
+                    nuevo_numero = 1
+                
+                nombre_slug = slugify(corrida.nombre).replace('-', '_')
+                correlativo_final = f"COT-{año_actual}-GS-I-{nuevo_numero:03d}-{nombre_slug}"
+
+            # 3. Guardamos
+            cotizacion, created = Cotizacion.objects.update_or_create(
+                corrida=corrida,
+                defaults={
+                    'nombre': corrida.nombre,
+                    'correlativo': correlativo_final,
+                    'datos': datos_cotizacion,
+                }
+            )
+        
+        return redirect('cotizacion-list')
+    
     except Exception as e:
         return JsonResponse({
             "status": "error",
-            "message": f"Error al generar o guardar la Cotización: {e}",
-            "nombre_propuesto": nombre_cotizacion,
-            "datos_generados": datos_cotizacion
+            "message": f"Error al generar la Cotización: {e}"
         }, status=500)
     
 class CotizacionListView(ListView):
@@ -987,3 +988,79 @@ def detalle_cotizacion(request, pk):
     response = HttpResponse(buffer, content_type='application/pdf')
     response['Content-Disposition'] = f'inline; filename="Cotizacion_{cotizacion.id}.pdf"'
     return response
+
+class CotizacionUpdateView(UpdateView):
+    model = Cotizacion
+    fields = ['nombre'] # Solo permitimos editar el nombre base, los materiales van por el POST
+    template_name = 'project_app/cotizacion_edit_form.html'
+    context_object_name = 'cotizacion'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        cotizacion = self.object
+        # Obtenemos los materiales del JSONField 'datos'
+        materiales_en_cotizacion = cotizacion.datos.get('materiales', {})
+        
+        # Necesitamos pasar todos los materiales disponibles para agregarlos
+        context['todos_los_materiales'] = Material.objects.all().order_by('nombre')
+        
+        # Mapeo de materiales actuales para facilitar el acceso en el template
+        context['materiales_actuales'] = materiales_en_cotizacion
+        return context
+
+    def form_valid(self, form):
+        # No modificamos la cotización original; creamos una nueva como revisión.
+        original = self.get_object()
+
+        # Nombre final (puede ser modificado en el formulario)
+        nuevo_nombre = form.cleaned_data.get('nombre', original.nombre)
+
+        # Determinar la base del correlativo (sin sufijo _rev_N)
+        m = re.match(r'^(.*?)(?:_rev_(\d+))?$', original.correlativo)
+        base_correlativo = m.group(1) if m else original.correlativo
+
+        # Buscar revisiones existentes que comiencen con la misma base y calcular siguiente número
+        correlativos_existentes = Cotizacion.objects.filter(correlativo__startswith=base_correlativo).values_list('correlativo', flat=True)
+        max_rev = 0
+        for c in correlativos_existentes:
+            mm = re.search(r'_rev_(\d+)$', c)
+            if mm:
+                try:
+                    rn = int(mm.group(1))
+                    if rn > max_rev:
+                        max_rev = rn
+                except ValueError:
+                    continue
+
+        siguiente_rev = max_rev + 1
+        nuevo_correlativo = f"{base_correlativo}_rev_{siguiente_rev}"
+
+        # Procesar materiales enviados por POST (misma lógica que antes)
+        nuevos_materiales = {}
+        utilidad = 0.30
+        for key, value in self.request.POST.items():
+            if key.startswith('material-quantity-'):
+                try:
+                    codigo_mat = key.replace('material-quantity-', '')
+                    cantidad = float(value) if value else 0
+                    if cantidad > 0:
+                        mat_obj = get_object_or_404(Material, codigo=codigo_mat)
+                        nuevos_materiales[codigo_mat] = {
+                            'cantidad': cantidad,
+                            'costo_unitario': float(mat_obj.costo_unitario) * (1 + utilidad)
+                        }
+                except (ValueError, Material.DoesNotExist):
+                    continue
+
+        datos_actualizados = original.datos.copy()
+        datos_actualizados['materiales'] = nuevos_materiales
+
+        # Crear una nueva cotización dejando la original intacta
+        Cotizacion.objects.create(
+            corrida=original.corrida,
+            nombre=nuevo_nombre,
+            correlativo=nuevo_correlativo,
+            datos=datos_actualizados
+        )
+
+        return redirect('cotizacion-list')

@@ -261,12 +261,12 @@ class ReglaMaterialMaterial(models.Model):
 
 class Cotizacion(models.Model):
     correlativo = models.CharField(max_length=100, unique=True)
-    corrida = models.OneToOneField(
+    corrida = models.ForeignKey(
         'Corrida', 
-        on_delete=models.CASCADE, 
+        on_delete=models.CASCADE,
         verbose_name="Corrida Origen"
     )
-    nombre = models.CharField(max_length=255, unique=True, verbose_name="Nombre de la Cotización")
+    nombre = models.CharField(max_length=255, verbose_name="Nombre de la Cotización")
     datos = JSONField()
     fecha_generacion = models.DateTimeField(auto_now_add=True)
     fecha_modificacion = models.DateTimeField(auto_now=True)
