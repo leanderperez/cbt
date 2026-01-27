@@ -1,38 +1,40 @@
-{% extends 'base.html' %}
-
-{% block title %}Gestión de Reportes GEEI{% endblock %}
+{% extends 'servicio/base.html' %}
+{% load static %}
+{% block title %}Lista de Reportes{% endblock %}
 
 {% block content %}
-<div class="table-responsive">
-    <table id="datatable" class="display">
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
+
+<div class="datatable-container">
+    <table id="obraTable" class="obra-table">
         <thead>
             <tr>
                 <th><input type="text" placeholder="Referencia" /></th>
-                <th><input type="text" placeholder="Fecha" /></th>
-                <th><input type="text" placeholder="Sucursal" /></th>
-                <th><input type="text" placeholder="Clasificación" /></th>
-                <th><input type="text" placeholder="Equipo" /></th>
-                <th><input type="text" placeholder="Reporte" /></th>
-                <th><input type="text" placeholder="Falla" /></th>
-                <th><input type="text" placeholder="Encargado" /></th>
-                <th><input type="text" placeholder="Coordinador" /></th>
-                <th><input type="text" placeholder="Estatus" /></th>
-                <th><input type="text" placeholder="Urgencia" /></th>
-                <th><input type="text" placeholder="Observaciones" /></th>
+                <th>Fecha</th>
+                <th>Cliente</th>
+                <th>Sucursal</th>
+                <th>Clasificación</th>
+                <th>Equipo</th>
+                <th>Reporte</th>
+                <th>Falla</th>
+                <th>Estatus</th>
+                <th>Urgencia</th>
+                <th>Observaciones</th>
             </tr>
         </thead>
         <tbody>
             {% for reporte in reportes %}
-                <tr>
+                <tr class="glass-row">
                     <td>{{ reporte.referencia }}</td>
                     <td><a href="{% url 'modificar_reporte' reporte.id %}">{{ reporte.fecha }}</a></td>
+                    <td>{{ reporte.cliente }}</td>
                     <td>{{ reporte.sucursal }}</td>
                     <td>{{ reporte.clasificacion }}</td>
                     <td>{{ reporte.equipo }}</td>
                     <td>{{ reporte.reporte }}</td>
                     <td>{{ reporte.falla }}</td>
-                    <td>{{ reporte.encargado }}</td>
-                    <td>{{ reporte.coordinador }}</td>
                     <td>
                         {% if reporte.estatus == True %}
                             Cerrado
@@ -45,82 +47,37 @@
                 </tr>
             {% endfor %}
         </tbody>
-        <tfoot>
-            <tr>
-                <th>Referencia</th>
-                <th>Fecha</th>
-                <th>Sucursal</th>
-                <th>Clasificación</th>
-                <th>Equipo</th>
-                <th>Reporte</th>
-                <th>Falla</th>
-                <th>Encargado</th>
-                <th>Coordinador</th>
-                <th>Estatus</th>
-                <th>Urgencia</th>
-                <th>Observaciones</th>
-            </tr>
-        </tfoot>
     </table>
 </div>
+<div style="margin-left: 15px;">
+    <a href="{% url 'obra-create' %}" class="btn">Iniciar Nueva Obra</a>
+</div>
+{% endblock %}
 
-    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
-    <script src="https://cdn.datatables.net/2.2.2/js/dataTables.js"></script>
-    <script src="https://cdn.datatables.net/buttons/3.2.1/js/dataTables.buttons.js"></script>
-    <script src="https://cdn.datatables.net/buttons/3.2.1/js/buttons.dataTables.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
-    <script src="https://cdn.datatables.net/buttons/3.2.1/js/buttons.html5.min.js"></script>
-    <script src="https://cdn.datatables.net/buttons/3.2.1/js/buttons.print.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
 
-    <script>
-        $(document).ready(function() {
-            var table = $('#datatable').DataTable({
-                paging: false,
-                scrollCollapse: true,
-                scrollY: '60vh',
-                scrollX: true,
-                layout: {
-                    topStart : 'search',
-                    bottomStart: 'pageLength',
-                    bottomEnd: 'paging',
-                    topEnd: {
-                        buttons: ['excel', 'print']
-                    },
-                    language: {
-                        url: "https://cdn.datatables.net/plug-ins/1.10.19/i18n/Spanish.json",
-                    }
-                },
-                columnDefs: [
-                    {
-                        targets: [1],
-                        render: function(data) {
-                            if (data) {
-                                var $enlace = $(data);
-                                var fechaTexto = $enlace.text();
-                                var fechaFormateada = moment(fechaTexto, "MMM DD, YYYY").format('YYYY/MM/DD');
-                                $enlace.text(fechaFormateada);
-                                return $enlace[0].outerHTML;
-                            } else {
-                                return '';
-                            }
-                        }
-                    }]
-            });
-    
-            table.columns().every(function() {
-                var that = this;
-    
-                $('input', this.header()).on('keyup change', function() {
-                    if (that.search() !== this.value) {
-                        that
-                            .search(this.value)
-                            .draw();
-                    }
-                });
+<script>
+    $(document).ready(function() {
+        var table = $('#obraTable').DataTable({
+            "language": {
+                "url": "https://cdn.datatables.net/plug-ins/1.11.5/i18n/es-ES.json"
+            },
+            "scrollY": "55vh",
+            "scrollCollapse": true,
+            "paging": false, 
+            "info": false,
+            "deferRender": true
+        });
+
+        table.columns().every(function() {
+            var that = this;
+
+            $('input', this.header()).on('keyup change', function() {
+                if (that.search() !== this.value) {
+                    that
+                        .search(this.value)
+                        .draw();
+                }
             });
         });
-    </script>
-{% endblock %}
+    });
+</script>

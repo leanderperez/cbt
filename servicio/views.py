@@ -57,4 +57,15 @@ def modificar_reporte(request, pk):
             return redirect('datatable')
     else:
         form = ReporteAdminForm(instance=reporte)
-    return render(request, 'app/formulario_admin.html', {'form': form, 'objeto': form})
+    return render(request, 'servicio/reporte_form.html', {'form': form, 'objeto': form})
+
+@login_required
+def datatable(request):
+    user = request.user
+    if user.groups.filter(name='Supervisores').exists():
+        sucursal = user.perfil.sucursal
+        reportes = Reporte.objects.filter(sucursal=sucursal, estatus=False)
+    else:
+        reportes = Reporte.objects.all()
+    contexto = {'reportes': reportes}
+    return render(request, 'servicio/datatable.html', contexto)
