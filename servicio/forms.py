@@ -2,6 +2,8 @@ from django import forms
 from django.contrib.auth.models import User
 from django.forms import inlineformset_factory
 from .models import (Reporte)
+from app.models import Equipo
+
 
 
 class ReporteAdminForm(forms.ModelForm):
@@ -9,6 +11,12 @@ class ReporteAdminForm(forms.ModelForm):
         queryset=User.objects.all(),
         required=False,
         label="Ingeniero Encargado"
+    )
+
+    equipo = forms.ModelChoiceField(
+        queryset=Equipo.objects.all(),
+        required=False,
+        label="Equipo"
     )
     
     class Meta:

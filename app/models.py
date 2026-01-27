@@ -183,7 +183,7 @@ class Equipo(models.Model):
     mfa = models.DecimalField(max_digits=5, decimal_places=2, verbose_name="mcc (A)")
 
     def __str__(self):
-        return self.nombre
+        return self.modelo
 
 class RequerimientoMaterial(models.Model):
     tarea = models.ForeignKey(Tarea, on_delete=models.CASCADE, verbose_name="Tarea")

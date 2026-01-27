@@ -8,7 +8,7 @@
 <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
 
 <div class="datatable-container">
-    <table id="obraTable" class="obra-table">
+    <table id="reporteTable" class="obra-table">
         <thead>
             <tr>
                 <th><input type="text" placeholder="Referencia" /></th>
@@ -28,7 +28,7 @@
             {% for reporte in reportes %}
                 <tr class="glass-row">
                     <td>{{ reporte.referencia }}</td>
-                    <td><a href="{% url 'modificar_reporte' reporte.id %}">{{ reporte.fecha }}</a></td>
+                    <td><a href="{% url 'modificar_reporte' reporte.id %}">{{ reporte.fecha|date:'Y/m/d' }}</a></td>
                     <td>{{ reporte.cliente }}</td>
                     <td>{{ reporte.sucursal }}</td>
                     <td>{{ reporte.clasificacion }}</td>
@@ -52,12 +52,10 @@
 <div style="margin-left: 15px;">
     <a href="{% url 'crear_reporte' %}" class="btn">Crear Reporte</a>
 </div>
-{% endblock %}
-
 
 <script>
     $(document).ready(function() {
-        var table = $('#obraTable').DataTable({
+        var table = $('#reporteTable').DataTable({
             "language": {
                 "url": "https://cdn.datatables.net/plug-ins/1.11.5/i18n/es-ES.json"
             },
@@ -81,3 +79,6 @@
         });
     });
 </script>
+{% endblock content %}
+
+

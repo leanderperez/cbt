@@ -11,7 +11,17 @@
         <div class="form-scroll">
             <form method="post">
             {% csrf_token %}
-            {{ form.as_p }}
+
+            <div class="user-details">
+              {% for field in form.visible_fields %}
+                <div class="input-box">
+                  <span class="details">{{ field.label }}</span>
+                  {{ field }}
+                  {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+                  {% for error in field.errors %}<div class="error">{{ error }}</div>{% endfor %}
+                </div>
+              {% endfor %}
+            </div>
 
             <div class="button">
               <input type="submit" value="Enviar">
