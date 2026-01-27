@@ -7,4 +7,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', CustomLoginView.as_view(), name='login'),
     path('proyectos/', include('app.urls')),
+    path('servicio/', include('servicio.urls'))
 ]

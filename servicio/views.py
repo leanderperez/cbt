@@ -7,19 +7,9 @@ from django.urls import reverse_lazy
 
 from .models import Reporte
 
-from .forms import (ReporteForm, ReporteAdminForm)
+from .forms import (ReporteAdminForm)
 
 
-
-class CustomLoginView(LoginView):
-  template_name = 'app/login.html'
-  next_page = reverse_lazy('crear_reporte')
-  form_class = forms.CustomAuthenticationForm
-
-  def dispatch(self, request, *args, **kwargs):
-    if self.request.user.is_authenticated:
-      return redirect('crear_reporte')
-    return super().dispatch(request, *args, **kwargs)
 
 def is_coordinador(user):
     return user.groups.filter(name='Coordinadores').exists()
@@ -31,10 +21,10 @@ def acceso_denegado(request):
 def crear_reporte(request):
     if is_coordinador(request.user):
         FormClass = ReporteAdminForm
-        template = 'app/formulario_admin.html'
+        template = 'servicio/freporte_form.html'
     else:
-        FormClass = ReporteForm
-        template = 'app/formulario.html'
+        FormClass = ReporteAdminForm
+        template = 'servicio/reporte_form.html'
 
     if request.method == 'POST':
         form = FormClass(request.POST, request.FILES)
@@ -49,7 +39,7 @@ def crear_reporte(request):
     return render(request, template, {'form': form})
 
 @login_required
-@user_passes_test(is_coordinador, login_url='/acceso-denegado/')
+#@user_passes_test(is_coordinador, login_url='/acceso-denegado/')
 def modificar_reporte(request, pk):
     reporte = Reporte.objects.get(pk=pk)
     if request.method == 'POST':

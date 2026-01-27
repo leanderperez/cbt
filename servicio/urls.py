@@ -1,4 +1,9 @@
 from django.urls import path
 from django.contrib.auth.views import LogoutView
-from .views import (
-)
+from .views import (crear_reporte, modificar_reporte, acceso_denegado)
+
+urlpatterns = [
+    path('crear-reporte/', crear_reporte, name='crear_reporte'),
+    path('modificar-reporte/<int:pk>/', modificar_reporte, name='modificar_reporte'),
+    path('acceso-denegado/', acceso_denegado, name='acceso_denegado'),
+]

@@ -11,7 +11,6 @@ class Reporte(models.Model):
     equipo = models.CharField(max_length=50)
     reporte = models.CharField(max_length=75)
     falla = models.CharField(max_length=50)
-    coordinador = models.CharField(max_length=50)
     estatus = models.BooleanField(default=False)
     urgencia = models.CharField(max_length=50, null=True)
     

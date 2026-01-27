@@ -1,0 +1,56 @@
+<nav class="navbar navbar-expand-lg navbar-dark">
+  <div class="container-fluid d-flex align-items-center justify-content-between">
+    <a class="navbar-brand" href="{% url 'obra-list' %}">CBT</a>
+    <ul class="navbar-nav flex-row flex-nowrap align-items-center" style="gap: 1.5rem;">
+
+      
+      <li class="nav-item">
+        <form id="logout-form" class="logout-form" action="{% url 'logout' %}" method="post" style="display: inline;">
+          {% csrf_token %}
+          <button type="submit" class="nav-link btn btn-link logout-button">Cerrar Sesión</button>
+        </form>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+<script>
+  // Script para manejar los desplegables
+  document.addEventListener('DOMContentLoaded', function() {
+      // Función genérica para inicializar un desplegable
+      function initializeDropdown(toggleId, menuId) {
+          const toggleItem = document.getElementById(toggleId);
+          const menu = document.getElementById(menuId);
+
+          if (!toggleItem || !menu) return; // Salir si los elementos no existen
+
+          // Función para alternar la visibilidad
+          toggleItem.addEventListener('click', function(e) {
+              // Evita la navegación del <a> si es clic en el contenedor o el enlace
+              if (e.target.closest('.dropdown-toggle-custom')) {
+                  e.preventDefault();
+              }
+              // Alternar la clase 'open' para mostrar/ocultar
+              menu.classList.toggle('open');
+          });
+
+          // Cerrar el menú si se hace clic fuera de él
+          document.addEventListener('click', function(e) {
+              // Si el clic no fue dentro del contenedor del desplegable (li) 
+              // y el menú está abierto, ciérralo.
+              if (!toggleItem.contains(e.target) && menu.classList.contains('open')) {
+                  menu.classList.remove('open');
+              }
+          });
+      }
+
+      // Inicializar el desplegable de Cotizaciones
+      initializeDropdown('cotizacionesDropdownToggle', 'cotizacionesDropdownMenu');
+
+      // Inicializar el desplegable de Materiales
+      initializeDropdown('materialDropdownToggle', 'materialDropdownMenu');
+
+      // Inicializar el desplegable de Herramientas 
+      initializeDropdown('herramientasDropdownToggle', 'herramientasDropdownMenu');
+  });
+</script>

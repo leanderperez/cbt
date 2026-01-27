@@ -1,0 +1,24 @@
+{% extends 'servicio/base.html' %}
+{% load static %}
+{% block title %}Gestion de Reportes CBT{% endblock %}
+
+
+{% block content %}
+  <div class="container">
+    <h3>Gestion de Reportes CBT</h3>
+    <p>Formulario para el registro de reportes</p>
+    <div class="content">
+        <div class="form-scroll">
+            <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+
+            <div class="button">
+              <input type="submit" value="Enviar">
+            </div>
+
+            </form>
+        </div>
+    </div>
+  </div>
+{% endblock %}

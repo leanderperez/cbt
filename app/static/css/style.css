@@ -400,6 +400,30 @@ form .category label .dot {
     border-color: #b3b3b3;
 }
 
+/* ========================================================================= */
+/* =========== Contenedor de formulario con altura fija y scroll =========== */
+/* ========================================================================= */
+.form-scroll {
+    max-height: 65vh; /* altura predefinida; ajustar según necesidad */
+    overflow-y: auto;
+    padding-right: 8px; /* espacio para el scrollbar interior */
+}
+
+/* Estilos opcionales para scrollbar en WebKit */
+.form-scroll::-webkit-scrollbar {
+    width: 8px;
+}
+.form-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+.form-scroll::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 4px;
+}
+.form-scroll::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
 form input[type="radio"] {
     display: none;
 }

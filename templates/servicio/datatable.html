@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+
+{% block title %}Gestión de Reportes GEEI{% endblock %}
+
+{% block content %}
+<div class="table-responsive">
+    <table id="datatable" class="display">
+        <thead>
+            <tr>
+                <th><input type="text" placeholder="Referencia" /></th>
+                <th><input type="text" placeholder="Fecha" /></th>
+                <th><input type="text" placeholder="Sucursal" /></th>
+                <th><input type="text" placeholder="Clasificación" /></th>
+                <th><input type="text" placeholder="Equipo" /></th>
+                <th><input type="text" placeholder="Reporte" /></th>
+                <th><input type="text" placeholder="Falla" /></th>
+                <th><input type="text" placeholder="Encargado" /></th>
+                <th><input type="text" placeholder="Coordinador" /></th>
+                <th><input type="text" placeholder="Estatus" /></th>
+                <th><input type="text" placeholder="Urgencia" /></th>
+                <th><input type="text" placeholder="Observaciones" /></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for reporte in reportes %}
+                <tr>
+                    <td>{{ reporte.referencia }}</td>
+                    <td><a href="{% url 'modificar_reporte' reporte.id %}">{{ reporte.fecha }}</a></td>
+                    <td>{{ reporte.sucursal }}</td>
+                    <td>{{ reporte.clasificacion }}</td>
+                    <td>{{ reporte.equipo }}</td>
+                    <td>{{ reporte.reporte }}</td>
+                    <td>{{ reporte.falla }}</td>
+                    <td>{{ reporte.encargado }}</td>
+                    <td>{{ reporte.coordinador }}</td>
+                    <td>
+                        {% if reporte.estatus == True %}
+                            Cerrado
+                        {% else %}
+                            Abierto
+                        {% endif %}
+                    </td>
+                    <td>{{ reporte.urgencia }}</td>
+                    <td>{{ reporte.observaciones }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <th>Referencia</th>
+                <th>Fecha</th>
+                <th>Sucursal</th>
+                <th>Clasificación</th>
+                <th>Equipo</th>
+                <th>Reporte</th>
+                <th>Falla</th>
+                <th>Encargado</th>
+                <th>Coordinador</th>
+                <th>Estatus</th>
+                <th>Urgencia</th>
+                <th>Observaciones</th>
+            </tr>
+        </tfoot>
+    </table>
+</div>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <script src="https://cdn.datatables.net/2.2.2/js/dataTables.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.2.1/js/dataTables.buttons.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.2.1/js/buttons.dataTables.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.2.1/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.2.1/js/buttons.print.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            var table = $('#datatable').DataTable({
+                paging: false,
+                scrollCollapse: true,
+                scrollY: '60vh',
+                scrollX: true,
+                layout: {
+                    topStart : 'search',
+                    bottomStart: 'pageLength',
+                    bottomEnd: 'paging',
+                    topEnd: {
+                        buttons: ['excel', 'print']
+                    },
+                    language: {
+                        url: "https://cdn.datatables.net/plug-ins/1.10.19/i18n/Spanish.json",
+                    }
+                },
+                columnDefs: [
+                    {
+                        targets: [1],
+                        render: function(data) {
+                            if (data) {
+                                var $enlace = $(data);
+                                var fechaTexto = $enlace.text();
+                                var fechaFormateada = moment(fechaTexto, "MMM DD, YYYY").format('YYYY/MM/DD');
+                                $enlace.text(fechaFormateada);
+                                return $enlace[0].outerHTML;
+                            } else {
+                                return '';
+                            }
+                        }
+                    }]
+            });
+    
+            table.columns().every(function() {
+                var that = this;
+    
+                $('input', this.header()).on('keyup change', function() {
+                    if (that.search() !== this.value) {
+                        that
+                            .search(this.value)
+                            .draw();
+                    }
+                });
+            });
+        });
+    </script>
+{% endblock %}
