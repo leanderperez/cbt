@@ -8,9 +8,19 @@ class Reporte(models.Model):
     cliente = models.CharField(max_length=100)
     sucursal = models.CharField(max_length=50)
     clasificacion = models.CharField(max_length=50)
-    equipo = models.CharField(max_length=50)
+    equipo = models.ForeignKey('app.Equipo', on_delete=models.SET_NULL, blank=True, null=True)
     reporte = models.CharField(max_length=75)
-    falla = models.CharField(max_length=50)
+    FALLA_CHOICES = [
+        ("No Enciende", "No Enciende"),
+        ("No Enfría", "No Enfría"),
+        ("Hace Ruido", "Hace Ruido"),
+        ("Fuga de Gas", "Fuga de Gas"),
+        ("No Arranca Compresor", "No Arranca Compresor"),
+        ("Error Electrónico", "Error Electrónico"),
+        ("Mantenimiento", "Mantenimiento"),
+        ("Otro", "Otro"),
+    ]
+    falla = models.CharField(max_length=50, choices=FALLA_CHOICES)
     estatus = models.BooleanField(default=False)
     urgencia = models.CharField(max_length=50, null=True)
     

@@ -28,7 +28,7 @@
             {% for reporte in reportes %}
                 <tr class="glass-row">
                     <td>{{ reporte.referencia }}</td>
-                    <td><a href="{% url 'modificar_reporte' reporte.id %}">{{ reporte.fecha|date:'Y/m/d' }}</a></td>
+                    <td><a href="{% url 'modificar_reporte' reporte.id %}" class="obra-link">{{ reporte.fecha|date:'Y/m/d' }}</a></td>
                     <td>{{ reporte.cliente }}</td>
                     <td>{{ reporte.sucursal }}</td>
                     <td>{{ reporte.clasificacion }}</td>
