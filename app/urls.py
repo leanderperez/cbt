@@ -6,7 +6,7 @@ from .views import (
     MaterialListView, MaterialCreateView, PersonalCreateView, 
     PersonalListView, CorridaWizard, ObraWizard, CorridaListView, CotizacionListView, CotizacionUpdateView,
     CotizacionCreateView, gantt_data_view, gantt_chart_view, detalle_cotizacion,
-    calculadora_tornilleria, calculadora_velumoide,
+    calculadora_tornilleria, calculadora_velumoide, generar_obra_desde_cotizacion,
     FORMS, FASES_WIZARD_FORMS
 )
 
@@ -51,5 +51,6 @@ urlpatterns = [
     path('cotizacion/editar/<int:pk>/', CotizacionUpdateView.as_view(), name='cotizacion-edit'),
     path('cotizaciones/', CotizacionListView.as_view(), name='cotizacion-list'),
     path('cotizacion/<int:pk>/pdf/', detalle_cotizacion, name='detalle_cotizacion'),
+    path('cotizacion/<int:cotizacion_id>/generar-obra/', generar_obra_desde_cotizacion, name='generar_obra'),
 
 ]

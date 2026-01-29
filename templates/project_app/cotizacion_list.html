@@ -26,7 +26,8 @@
                 <td>{{ cotizacion.datos.descripcion }}</td>
                 <td>
                     <a href="{% url 'detalle_cotizacion' cotizacion.pk %}" class="obra-link" target="_blank">PDF</a> |
-                    <a href="{% url 'cotizacion-edit' cotizacion.pk %}" class="obra-link">Editar</a>
+                    <a href="{% url 'cotizacion-edit' cotizacion.pk %}" class="obra-link">Editar</a> |
+                    <a href="{% url 'generar_obra' cotizacion.pk %}" class="obra-link">Generar Obra</a>
                 </td>
             </tr>
             {% endfor %}
