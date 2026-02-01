@@ -1,9 +1,11 @@
-import datetime
 import json
 import re
+import datetime
 from datetime import datetime
+from datetime import timedelta
 from decimal import Decimal
 from collections import defaultdict
+
 
 # Django
 from django.conf import settings
@@ -12,7 +14,9 @@ from django.db import transaction
 from django.db.models import F
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth import get_user_model
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.views.generic import (
     ListView,
     CreateView,
@@ -1071,252 +1075,250 @@ class CotizacionUpdateView(UpdateView):
                    'materiales': nuevos_materiales}
         )
         return redirect('cotizacion-list')
-    
+
+
+User = get_user_model()
+@transaction.atomic
 def generar_obra_desde_cotizacion(request, cotizacion_id):
+    # 1. Obtener la cotización y sus datos
     cotizacion = get_object_or_404(Cotizacion, id=cotizacion_id)
+    datos = cotizacion.datos
+    materiales_json = datos.get('materiales', {})
     
-    # Extraemos los datos del JSON de la cotización
-    # ASUMIMOS que 'datos' tiene esta estructura o similar. Ajusta 'items' según tu JSON real.
-    datos_cotizacion = cotizacion.datos 
-    lista_materiales = datos_cotizacion.get('materiales', []) 
-    
-    # Datos generales para la Obra
-    nombre_obra = datos_cotizacion.get('nombre_proyecto', cotizacion.nombre)
-    direccion_obra = datos_cotizacion.get('direccion', 'Dirección no especificada')
-    descripcion_obra = datos_cotizacion.get('descripcion', '')
-    
-    # Intentar obtener el ingeniero. Asumimos que viene el ID o el username en el JSON.
-    # Si no, se asigna el usuario actual o se deja en None.
-    ingeniero_id = datos_cotizacion.get('ingeniero_encargado_id')
-    ingeniero = None
-    if ingeniero_id:
-        ingeniero = User.objects.filter(id=ingeniero_id).first()
-    
-    # Calcular Presupuesto Inicial (Suma de costos de materiales en la cotización)
-    presupuesto_inicial = Decimal('0.00')
-    for item in lista_materiales:
-        costo = Decimal(str(item.get('costo_total', 0)))
-        presupuesto_inicial += costo
+    # 2. Buscar al ingeniero encargado (Asumiendo que el string coincide con username o first_name)
+    # Nota: En producción, es mejor usar IDs, pero aquí buscamos por nombre según el JSON
+    nombre_ingeniero = datos.get('ingeniero_encargado', '')
+    ingeniero = User.objects.filter(username__icontains=nombre_ingeniero).first()
+    if not ingeniero:
+        # Fallback: intentar buscar por nombre
+        ingeniero = User.objects.filter(first_name__icontains=nombre_ingeniero).first()
 
-    # Definición de Fechas
-    fecha_inicio = date.today()
-    
-    # Lógica de tiempos según requerimientos:
-    # 1. Izaje: Día 1 (Duración 1 día)
-    # 2. Anclaje: Inicia Día 1, Duración 5 días.
-    # 3. Tuberías: Inicia "al tercer día a partir de esa fecha" (T0 + 3 días).
-    # 4. Fase Mecánica Total: 15 días.
-    # 5. Eléctrica: Inicia al terminar mecánica (T0 + 15), Duración 5 días.
-    # 6. Ductería: Inicia al terminar mecánica (T0 + 15), Duración 5 días (Paralelo a eléctrica).
-    # 7. Arranque: Inicia al terminar eléctrica/ductería (T0 + 15 + 5), Duración 3 días.
-
-    # Calculamos fecha final estimada de la obra completa
-    # (Mecánica 15 días + Eléctrica 5 días + Arranque 3 días = ~23 días)
-    fecha_fin_estimada_obra = fecha_inicio + timedelta(days=23)
-
-    try:
-        with transaction.atomic():
-            # 1. Crear la Obra
-            obra = Obra.objects.create(
-                nombre=nombre_obra,
-                descripcion=descripcion_obra,
-                direccion=direccion_obra,
-                ingeniero_encargado=ingeniero,
-                fecha_inicio=fecha_inicio,
-                fecha_fin_estimada=fecha_fin_estimada_obra,
-                presupuesto_inicial=presupuesto_inicial
-            )
-
-            # --- PREPARACIÓN DE BUCKETS DE MATERIALES ---
-            # Agrupamos los materiales del JSON por familia para asignarlos luego
-            materiales_clasificados = {
-                'izaje': [],
-                'mecanica_tuberia': [], # Tuberias, Valvulas, Tornilleria
-                'mecanica_anclaje': [],
-                'mecanica_drenaje': [],
-                'electricidad': [],
-                'ducteria': [],
-                'arranque': []
+    # 3. Configuración de Mapeo (Lógica de Negocio)
+    # Estructura: Fase -> Tarea -> Lista de Familias que activan esta tarea
+    MAPEO_LOGICO = {
+        'TRANSPORTE': {
+            'tareas': {
+                'Izaje': ['IZAJE']
             }
+        },
+        'MECANICA': {
+            'tareas': {
+                'Instalación de Anclajes': ['ANCLAJE',],
+                'Instalación de Tuberías': ['TUBERIA', 'TUBERIAS', 'TORNILLERIA', 'VALVULAS'],
+                'Instalación de Drenajes': ['DRENAJE'],
+            }
+        },
+        'ELECTRICIDAD': {
+            'tareas': {
+                'Instalación Eléctrica': ['ELECTRICIDAD']
+            }
+        },
+        'VENTILACION': {
+            'tareas': {
+                'Instalación de Ductos': ['DUCTERIA']
+            }
+        },
+        'ARRANQUE': {
+            'tareas': {
+                'Pruebas y Arranque': ['REFRIGERANTE']
+            }
+        }
+    }
 
-            for item in lista_materiales:
-                familia = item.get('familia', '').lower()
-                codigo = item.get('codigo')
-                cantidad = Decimal(str(item.get('cantidad', 0)))
-                
-                # Buscamos el objeto Material en la BD para vincularlo
-                material_obj = Material.objects.filter(codigo=codigo).first()
-                if not material_obj:
-                    # Si el material no existe en BD, lo saltamos o creamos un log
-                    continue
-                
-                pack = {'material': material_obj, 'cantidad': cantidad}
+    # 4. Procesamiento de Materiales y Cálculo de Presupuesto Inicial
+    presupuesto_total_obra = Decimal('0.00')
+    
+    # Diccionario temporal para agrupar materiales por tarea antes de crear objetos DB
+    # Estructura: {'NombreFase': {'NombreTarea': [List of (MaterialObj, cantidad, costo_total)]}}
+    planificacion = {} 
+    
+    codigos_materiales = list(materiales_json.keys())
+    db_materiales = Material.objects.filter(codigo__in=codigos_materiales)
+    material_map = {m.codigo: m for m in db_materiales}
 
-                # Lógica de clasificación por Familia
-                if 'izaje' in familia:
-                    materiales_clasificados['izaje'].append(pack)
-                elif 'electricidad' in familia or 'eléctricidad' in familia:
-                    materiales_clasificados['electricidad'].append(pack)
-                elif 'ducteria' in familia or 'ducterÃ­a' in familia: # Manejo de tildes
-                    materiales_clasificados['ducteria'].append(pack)
-                elif 'arranque' in familia:
-                    materiales_clasificados['arranque'].append(pack)
-                
-                # Desglose Fase Mecánica
-                elif 'anclaje' in familia:
-                    materiales_clasificados['mecanica_anclaje'].append(pack)
-                elif 'drenaje' in familia:
-                    materiales_clasificados['mecanica_drenaje'].append(pack)
-                elif any(x in familia for x in ['tuberia', 'tuberias', 'tubería', 'valvula', 'válvula', 'tornilleria']):
-                    materiales_clasificados['mecanica_tuberia'].append(pack)
-                else:
-                    # Si no coincide con ninguna, lo asignamos por defecto a tubería o creamos una categoría "Otros"
-                    # Por ahora lo pondremos en tubería para no perder el costo
-                    materiales_clasificados['mecanica_tuberia'].append(pack)
+    for codigo, info in materiales_json.items():
+        if codigo not in material_map:
+            # Opción: Saltar o lanzar error. Aquí saltamos con advertencia en consola.
+            print(f"Advertencia: Material {codigo} no encontrado en Base de Datos.")
+            continue
 
-            # ==========================================
-            # CREACIÓN DE FASES Y TAREAS
-            # ==========================================
+        material = material_map[codigo]
+        cantidad = Decimal(str(info['cantidad']))
+        costo_unitario = Decimal(str(info['costo_unitario']))
+        costo_total_item = cantidad * costo_unitario
+        
+        presupuesto_total_obra += costo_total_item
+        familia_upper = material.familia.upper()
 
-            # ------------------------------------------
-            # FASE 1: TRANSPORTE (Familia Izaje)
-            # ------------------------------------------
-            fase_transporte = Fase.objects.create(
-                nombre="Fase Transporte",
-                obra=obra,
-                presupuesto_asignado=0 # Se puede calcular sumando los materiales asignados
-            )
+        # Determinar a qué fase y tarea pertenece este material
+        asignado = False
+        for fase_key, fase_data in MAPEO_LOGICO.items():
+            for tarea_key, familias_validas in fase_data['tareas'].items():
+                if familia_upper in familias_validas:
+                    # Inicializar estructuras si no existen
+                    if fase_key not in planificacion:
+                        planificacion[fase_key] = {}
+                    if tarea_key not in planificacion[fase_key]:
+                        planificacion[fase_key][tarea_key] = []
+                    
+                    # Agregar requerimiento a la memoria
+                    planificacion[fase_key][tarea_key].append({
+                        'material': material,
+                        'cantidad': cantidad,
+                        'costo': costo_total_item
+                    })
+                    asignado = True
+                    break # Sale del loop de tareas
+            if asignado:
+                break # Sale del loop de fases
+
+    # 5. Definición de Fechas (Línea de Tiempo)
+    fecha_inicio_proyecto = timezone.now().date()
+    
+    # Duraciones y lógica específica
+    duracion_fase_mecanica = 15
+    inicio_tuberias_offset = 3 # Días después del inicio de mecánica
+    
+    # Calculamos fechas base
+    # Transporte (Izaje)
+    fecha_inicio_izaje = fecha_inicio_proyecto
+    fecha_fin_izaje = fecha_inicio_izaje + timedelta(days=1)
+    
+    # Mecánica
+    fecha_inicio_mecanica = fecha_inicio_proyecto # Asumimos inicia con el proyecto (o día 1 si es secuencial estricto post-izaje)
+    fecha_fin_mecanica = fecha_inicio_mecanica + timedelta(days=duracion_fase_mecanica)
+    
+    # Eléctrica y Ventilación (Paralelas después de mecánica)
+    fecha_inicio_paralelas = fecha_fin_mecanica
+    fecha_fin_paralelas = fecha_inicio_paralelas + timedelta(days=5)
+    
+    # Arranque (Al final de todo)
+    fecha_inicio_arranque = fecha_fin_paralelas
+    fecha_fin_arranque = fecha_inicio_arranque + timedelta(days=3)
+    
+    fecha_fin_obra = fecha_fin_arranque
+
+    # 6. Creación del Objeto Obra
+    obra = Obra.objects.create(
+        nombre=cotizacion.nombre, # Según requerimiento
+        descripcion=datos.get('descripcion', ''),
+        direccion=datos.get('direccion_proyecto', ''),
+        ingeniero_encargado=ingeniero,
+        fecha_inicio=fecha_inicio_proyecto,
+        fecha_fin_estimada=fecha_fin_obra,
+        presupuesto_inicial=presupuesto_total_obra,
+        # centro_servicio se deja null o se asigna lógica personalizada
+    )
+
+    # 7. Creación de Fases, Tareas y Asignación de Materiales
+    
+    # --- FASE TRANSPORTE ---
+    if 'TRANSPORTE' in planificacion:
+        data_fase = planificacion['TRANSPORTE']
+        # Calcular presupuesto de la fase
+        presupuesto_fase = sum(sum(item['costo'] for item in items) for items in data_fase.values())
+        
+        fase_obj = Fase.objects.create(
+            nombre="Transporte",
+            obra=obra,
+            presupuesto_asignado=presupuesto_fase
+        )
+        
+        if 'Izaje' in data_fase:
+            crear_tarea_y_reqs(fase_obj, "Izaje", fecha_inicio_izaje, fecha_fin_izaje, data_fase['Izaje'])
+
+    # --- FASE MECÁNICA ---
+    if 'MECANICA' in planificacion:
+        data_fase = planificacion['MECANICA']
+        presupuesto_fase = sum(sum(item['costo'] for item in items) for items in data_fase.values())
+        
+        fase_obj = Fase.objects.create(
+            nombre="Mecánica",
+            obra=obra,
+            presupuesto_asignado=presupuesto_fase
+        )
+        
+        # Tarea Anclajes (5 días desde inicio)
+        if 'Instalación de Anclajes' in data_fase:
+            f_fin_anc = fecha_inicio_mecanica + timedelta(days=5)
+            crear_tarea_y_reqs(fase_obj, "Instalación de Anclajes", fecha_inicio_mecanica, f_fin_anc, data_fase['Instalación de Anclajes'])
             
-            tarea_izaje = Tarea.objects.create(
-                nombre="Izaje",
-                fase=fase_transporte,
-                fecha_inicio=fecha_inicio,
-                fecha_fin_estimada=fecha_inicio + timedelta(days=1), # Dura 1 día
-                descripcion="Movimiento e izaje de equipos mayores."
-            )
-            _asignar_materiales(tarea_izaje, materiales_clasificados['izaje'])
+        # Tarea Tuberías (Inicia día 3, termina con la fase)
+        if 'Instalación de Tuberías' in data_fase:
+            f_ini_tub = fecha_inicio_mecanica + timedelta(days=inicio_tuberias_offset)
+            crear_tarea_y_reqs(fase_obj, "Instalación de Tuberías", f_ini_tub, fecha_fin_mecanica, data_fase['Instalación de Tuberías'])
 
-            # ------------------------------------------
-            # FASE 2: MECÁNICA (15 Días total)
-            # ------------------------------------------
-            fase_mecanica = Fase.objects.create(
-                nombre="Fase Mecánica",
-                obra=obra,
-                presupuesto_asignado=0
-            )
-            fecha_fin_mecanica = fecha_inicio + timedelta(days=15)
+        # Tarea Drenajes (Asumiremos sincronizada con Tuberías)
+        if 'Instalación de Drenajes' in data_fase:
+            f_ini_tub = fecha_inicio_mecanica + timedelta(days=inicio_tuberias_offset)
+            crear_tarea_y_reqs(fase_obj, "Instalación de Drenajes", f_ini_tub, fecha_fin_mecanica, data_fase['Instalación de Drenajes'])
 
-            # Tarea: Instalación de Anclajes (Inicia día 0, dura 5 días)
-            tarea_anclaje = Tarea.objects.create(
-                nombre="Instalación de Anclajes",
-                fase=fase_mecanica,
-                fecha_inicio=fecha_inicio,
-                fecha_fin_estimada=fecha_inicio + timedelta(days=5),
-                descripcion="Fijación de soportes y anclajes."
-            )
-            _asignar_materiales(tarea_anclaje, materiales_clasificados['mecanica_anclaje'])
+    # --- FASE ELECTRICIDAD ---
+    if 'ELECTRICIDAD' in planificacion:
+        data_fase = planificacion['ELECTRICIDAD']
+        presupuesto_fase = sum(sum(item['costo'] for item in items) for items in data_fase.values())
+        
+        fase_obj = Fase.objects.create(
+            nombre="Electricidad",
+            obra=obra,
+            presupuesto_asignado=presupuesto_fase
+        )
+        
+        if 'Instalación Eléctrica' in data_fase:
+            crear_tarea_y_reqs(fase_obj, "Instalación Eléctrica", fecha_inicio_paralelas, fecha_fin_paralelas, data_fase['Instalación Eléctrica'])
 
-            # Tarea: Instalación de Tuberías (Inicia día 3, hasta fin de fase)
-            # Familias: Tubería, Válvulas, Tornillería
-            tarea_tuberias = Tarea.objects.create(
-                nombre="Instalación de Tuberías",
-                fase=fase_mecanica,
-                fecha_inicio=fecha_inicio + timedelta(days=3),
-                fecha_fin_estimada=fecha_fin_mecanica,
-                descripcion="Instalación de tuberías, valvulería y accesorios."
-            )
-            _asignar_materiales(tarea_tuberias, materiales_clasificados['mecanica_tuberia'])
+    # --- FASE VENTILACIÓN ---
+    if 'VENTILACION' in planificacion:
+        data_fase = planificacion['VENTILACION']
+        presupuesto_fase = sum(sum(item['costo'] for item in items) for items in data_fase.values())
+        
+        fase_obj = Fase.objects.create(
+            nombre="Ventilación",
+            obra=obra,
+            presupuesto_asignado=presupuesto_fase
+        )
+        
+        if 'Instalación de Ductos' in data_fase:
+            crear_tarea_y_reqs(fase_obj, "Instalación de Ductos", fecha_inicio_paralelas, fecha_fin_paralelas, data_fase['Instalación de Ductos'])
 
-            # Tarea: Instalación de Drenajes
-            # Asumiremos fechas similares a tuberías
-            tarea_drenajes = Tarea.objects.create(
-                nombre="Instalación de Drenajes",
-                fase=fase_mecanica,
-                fecha_inicio=fecha_inicio + timedelta(days=3),
-                fecha_fin_estimada=fecha_fin_mecanica,
-                descripcion="Instalación de sistema de drenaje."
-            )
-            _asignar_materiales(tarea_drenajes, materiales_clasificados['mecanica_drenaje'])
+    # --- FASE ARRANQUE (Siempre se crea según requerimiento lógico, aunque no tenga materiales directos en el JSON usualmente) ---
+    # Si hay materiales asignables (ej. Gas Refrigerante podría ir aqui o en mecánica), ajustar lógica.
+    # Aquí creamos la fase y tarea vacía para agendar tiempos.
+    fase_arranque = Fase.objects.create(nombre="Arranque", obra=obra, presupuesto_asignado=0)
+    Tarea.objects.create(
+        nombre="Arranque del Sistema",
+        fase=fase_arranque,
+        descripcion="Puesta en marcha y pruebas",
+        fecha_inicio=fecha_inicio_arranque,
+        fecha_fin_estimada=fecha_fin_arranque
+    )
 
+    return JsonResponse({
+        "status": "success", 
+        "message": f"Obra '{obra.nombre}' generada exitosamente con ID {obra.id}",
+        "obra_id": obra.id
+    })
 
-            # ------------------------------------------
-            # FASE 3: ELECTRICIDAD (Inicia al terminar mecánica)
-            # ------------------------------------------
-            fecha_inicio_elec = fecha_fin_mecanica
-            fase_electrica = Fase.objects.create(
-                nombre="Fase Electricidad",
-                obra=obra,
-                presupuesto_asignado=0
-            )
-            
-            tarea_elec = Tarea.objects.create(
-                nombre="Instalación Eléctrica",
-                fase=fase_electrica,
-                fecha_inicio=fecha_inicio_elec,
-                fecha_fin_estimada=fecha_inicio_elec + timedelta(days=5), # Dura 5 días
-                descripcion="Conexiones de fuerza y control."
-            )
-            _asignar_materiales(tarea_elec, materiales_clasificados['electricidad'])
-
-
-            # ------------------------------------------
-            # FASE 4: VENTILACIÓN (Inicia al terminar mecánica, paralelo a eléctrica)
-            # ------------------------------------------
-            fase_ventilacion = Fase.objects.create(
-                nombre="Fase Ventilación",
-                obra=obra,
-                presupuesto_asignado=0
-            )
-            
-            tarea_ductos = Tarea.objects.create(
-                nombre="Instalación de Ductos",
-                fase=fase_ventilacion,
-                fecha_inicio=fecha_inicio_elec, # Misma fecha que eléctrica
-                fecha_fin_estimada=fecha_inicio_elec + timedelta(days=5), # Dura 5 días
-                descripcion="Instalación de ductería y difusores."
-            )
-            _asignar_materiales(tarea_ductos, materiales_clasificados['ducteria'])
-
-
-            # ------------------------------------------
-            # FASE 5: ARRANQUE (Al finalizar elec/vent)
-            # ------------------------------------------
-            fecha_inicio_arranque = fecha_inicio_elec + timedelta(days=5)
-            fase_arranque = Fase.objects.create(
-                nombre="Fase Arranque",
-                obra=obra,
-                presupuesto_asignado=0
-            )
-
-            tarea_arranque = Tarea.objects.create(
-                nombre="Arranque y Puesta en Marcha",
-                fase=fase_arranque,
-                fecha_inicio=fecha_inicio_arranque,
-                fecha_fin_estimada=fecha_inicio_arranque + timedelta(days=3), # Dura 3 días
-                descripcion="Pruebas de presión, vacío y arranque de equipos."
-            )
-            # [COMENTARIO PARA EDITAR] Aquí se definen los materiales de arranque. 
-            # Actualmente busca familia 'Arranque'.
-            _asignar_materiales(tarea_arranque, materiales_clasificados['arranque'])
-
-            # (Opcional) Actualizar presupuestos asignados a las fases sumando sus tareas
-            # Esto depende de si quieres guardar ese dato estático o calcularlo dinámicamente
-            
-        messages.success(request, f"La obra '{obra.nombre}' se ha generado exitosamente.")
-        return redirect('obra_list')
-
-    except Exception as e:
-        messages.error(request, f"Error al generar la obra: {str(e)}")
-        # En producción, loguear el error completo
-        return redirect('obra_list') # O volver a la cotización
-
-def _asignar_materiales(tarea, lista_items):
+def crear_tarea_y_reqs(fase_obj, nombre_tarea, f_inicio, f_fin, items_materiales):
     """
-    Función auxiliar para crear los RequerimientoMaterial
+    Función auxiliar para crear tarea y sus requerimientos de material en lote
     """
-    for item in lista_items:
-        RequerimientoMaterial.objects.create(
+    tarea = Tarea.objects.create(
+        nombre=nombre_tarea,
+        fase=fase_obj,
+        descripcion=f"Generado automáticamente desde cotización para {nombre_tarea}",
+        fecha_inicio=f_inicio,
+        fecha_fin_estimada=f_fin
+    )
+    
+    requerimientos = []
+    for item in items_materiales:
+        requerimientos.append(RequerimientoMaterial(
             tarea=tarea,
             material=item['material'],
             cantidad_requerida=item['cantidad']
-        )
+        ))
+    
+    # Bulk create para mejor rendimiento
+    if requerimientos:
+        RequerimientoMaterial.objects.bulk_create(requerimientos)

@@ -38,7 +38,7 @@ class FaseAdmin(admin.ModelAdmin):
 
 @admin.register(Tarea)
 class TareaAdmin(admin.ModelAdmin):
-    list_display = ('nombre', 'fase', 'fecha_inicio', 'fecha_fin_estimada', 'costo_mano_de_obra', 'porcentaje_avance')
+    list_display = ('nombre', 'fase', 'fecha_inicio', 'fecha_fin_estimada', 'porcentaje_avance')
     list_filter = ('fase',)
     search_fields = ('nombre',)
     inlines = [RequerimientoMaterialInline]

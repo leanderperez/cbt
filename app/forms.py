@@ -64,7 +64,7 @@ class TareaForm(forms.ModelForm):
         model = Tarea
         fields = [
             'nombre', 'descripcion', 'fecha_inicio',
-            'fecha_fin_estimada', 'costo_mano_de_obra'
+            'fecha_fin_estimada'
         ]
         widgets = {
             'fecha_inicio': forms.DateInput (
@@ -78,7 +78,7 @@ class TareaForm(forms.ModelForm):
 class TareaUpdateProgressForm(forms.ModelForm):
     class Meta:
         model = Tarea
-        fields = ['nombre', 'descripcion', 'costo_mano_de_obra']
+        fields = ['nombre', 'descripcion']
 
 class RequerimientoMaterialForm(forms.ModelForm):
     class Meta:

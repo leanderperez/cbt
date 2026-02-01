@@ -112,11 +112,6 @@ class Tarea(models.Model):
     descripcion = models.TextField(blank=True, verbose_name="Descripción")
     fecha_inicio = models.DateField(verbose_name="Fecha de Inicio")
     fecha_fin_estimada = models.DateField(verbose_name="Fecha Fin Estimada")
-    costo_mano_de_obra = models.DecimalField(
-        max_digits=10, decimal_places=2,
-        null=True, blank=True,
-        verbose_name="Costo de Mano de Obra (Tarea)"
-    )
 
     def __str__(self):
         return f"{self.nombre} - {self.fase.nombre}"
@@ -125,8 +120,7 @@ class Tarea(models.Model):
     def costo_ejecutado(self):
         # Suma los costos de las asignaciones de materiales y mano de obra
         costo_material = sum(medicion.costo_total for medicion in self.medicionmaterial_set.all())
-        costo_mano_de_obra_propio = self.costo_mano_de_obra if self.costo_mano_de_obra is not None else 0
-        return costo_material + costo_mano_de_obra_propio
+        return costo_material
 
     @property
     def porcentaje_avance(self):

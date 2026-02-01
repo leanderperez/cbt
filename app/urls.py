@@ -5,8 +5,8 @@ from .views import (
     FaseCreateView, TareaCreateView, TareaUpdateView, ObraMedicionesView,
     MaterialListView, MaterialCreateView, PersonalCreateView, 
     PersonalListView, CorridaWizard, ObraWizard, CorridaListView, CotizacionListView, CotizacionUpdateView,
-    CotizacionCreateView, gantt_data_view, gantt_chart_view, detalle_cotizacion,
-    calculadora_tornilleria, calculadora_velumoide, generar_obra_desde_cotizacion,
+    CotizacionCreateView, gantt_data_view, gantt_chart_view, detalle_cotizacion, generar_obra_desde_cotizacion,
+    calculadora_tornilleria, calculadora_velumoide,
     FORMS, FASES_WIZARD_FORMS
 )
 
